@@ -13,26 +13,42 @@ export default function Products() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(true);
+const [page, setPage] = useState(1);
+const [hasMore, setHasMore] = useState(true);
+const PAGE_SIZE = 12;
+const [selectedCategories, setSelectedCategories] = useState([]);
 
-  useEffect(() => {
-    const initPage = async () => {
-      try {
-        const [prodRes, cartRes] = await Promise.all([
-          getProducts(1),
-          getCart()
-        ]);
 
-        setProducts(prodRes.data.items || []);
-        setCartCount(cartRes.data?.length || 0);
-      } catch (err) {
-        console.error("Error loading page data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+useEffect(() => {
+  loadProducts(1, true);
+  loadCart();
+}, []);
 
-    initPage();
-  }, []);
+const loadCart = async () => {
+  const cartRes = await getCart();
+  setCartCount(cartRes.data?.length || 0);
+};
+
+const loadProducts = async (pageNo, reset = false) => {
+  try {
+    setLoading(true);
+    const res = await getProducts(pageNo);
+
+    const items = res.data.items || [];
+
+    setProducts(prev =>
+      reset ? items : [...prev, ...items]
+    );
+
+    setHasMore(items.length === PAGE_SIZE);
+    setPage(pageNo);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleAddToCart = async (variantId) => {
     try {
@@ -51,10 +67,38 @@ export default function Products() {
     }
   };
 
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchQuery.toLowerCase())
+ const categories = Array.from(
+  new Map(
+    products.map(p => [
+      p.categoryId,
+      { categoryId: p.categoryId, categoryName: p.categoryName }
+    ])
+  ).values()
+);
+const toggleCategory = (categoryId) => {
+  setSelectedCategories(prev =>
+    prev.includes(categoryId)
+      ? prev.filter(id => id !== categoryId)
+      : [...prev, categoryId]
   );
+};
+const clearFilters = () => {
+  setSelectedCategories([]);
+  setSearchQuery("");
+};
+
+
+const filteredProducts = products.filter(product => {
+  const matchesSearch =
+    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.categoryName.toLowerCase().includes(searchQuery.toLowerCase());
+
+  const matchesCategory =
+    selectedCategories.length === 0 ||
+    selectedCategories.includes(product.categoryId);
+
+  return matchesSearch && matchesCategory;
+});
 
   if (loading) {
     return (
@@ -166,29 +210,38 @@ export default function Products() {
                 <SlidersHorizontal size={18} className="text-teal-600" />
                 <h3 className="text-sm font-bold text-gray-900">FILTERS</h3>
               </div>
-              <button className="text-xs font-bold text-teal-600 hover:text-teal-700 transition-colors">
-                CLEAR
-              </button>
+              <button
+  onClick={clearFilters}
+  className="text-xs font-bold text-teal-600 hover:text-teal-700 transition-colors"
+>
+  CLEAR
+</button>
+
             </div>
 
             {/* Categories */}
-            <div className="mb-6 pb-6 border-b border-gray-100">
-              <h4 className="text-xs font-bold text-gray-900 mb-4 uppercase tracking-wide">Categories</h4>
-              <div className="space-y-3">
-                <label className="flex items-center text-sm text-gray-700 hover:text-teal-700 cursor-pointer group transition-colors">
-                  <input type="checkbox" className="mr-3 w-4 h-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500" />
-                  <span className="group-hover:translate-x-0.5 transition-transform">Medical Supplies</span>
-                </label>
-                <label className="flex items-center text-sm text-gray-700 hover:text-teal-700 cursor-pointer group transition-colors">
-                  <input type="checkbox" className="mr-3 w-4 h-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500" />
-                  <span className="group-hover:translate-x-0.5 transition-transform">Industrial Products</span>
-                </label>
-                <label className="flex items-center text-sm text-gray-700 hover:text-teal-700 cursor-pointer group transition-colors">
-                  <input type="checkbox" className="mr-3 w-4 h-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500" />
-                  <span className="group-hover:translate-x-0.5 transition-transform">Safety Equipment</span>
-                </label>
-              </div>
-            </div>
+           <div className="mb-6 pb-6 border-b border-gray-100">
+  <h4 className="text-xs font-bold text-gray-900 mb-4 uppercase tracking-wide">
+    Categories
+  </h4>
+
+  {categories.map(cat => (
+    <label
+      key={cat.categoryId}
+      className="flex items-center text-sm text-gray-700 cursor-pointer hover:text-teal-700"
+    >
+      <input
+        type="checkbox"
+        checked={selectedCategories.includes(cat.categoryId)}
+        onChange={() => toggleCategory(cat.categoryId)}
+        className="mr-3 w-4 h-4 rounded border-gray-300 text-teal-600"
+      />
+      <span>{cat.categoryName}</span>
+    </label>
+
+  ))}
+</div>
+
 
             {/* Brand */}
             <div className="mb-6 pb-6 border-b border-gray-100">
@@ -290,6 +343,17 @@ export default function Products() {
           )}
         </main>
       </div>
+      {hasMore && (
+  <div className="flex justify-center mt-10">
+    <button
+      onClick={() => loadProducts(page + 1)}
+      className="px-8 py-3 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-700 transition"
+    >
+      Load More Products
+    </button>
+  </div>
+)}
+
 
       {/* Footer */}
       <footer className="bg-gradient-to-br from-teal-700 to-teal-900 text-white py-10 mt-20">

@@ -48,12 +48,7 @@ export default function ProductCard({ product, onAddToCart }) {
           {product.name}
         </h3>
 
-        {/* RATING */}
-        <div className="flex items-center gap-1 text-sm">
-          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-          <span className="font-medium">4.3</span>
-          <span className="text-slate-400">(1.2k)</span>
-        </div>
+       
 
         {/* PRICE */}
         <div className="flex items-center gap-2">
@@ -68,21 +63,7 @@ export default function ProductCard({ product, onAddToCart }) {
           </span>
         </div>
 
-        {/* ACTION */}
-        <button
-          disabled={stock <= 0}
-          onClick={() => onAddToCart(product)}
-          className={`mt-3 flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition
-            ${
-              stock > 0
-                ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                : "bg-slate-300 text-slate-500 cursor-not-allowed"
-            }
-          `}
-        >
-          <ShoppingCart className="h-4 w-4" />
-          {stock > 0 ? "Add to Cart" : "Out of Stock"}
-        </button>
+        
 
       </div>
     </div>
