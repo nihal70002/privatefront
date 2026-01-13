@@ -1,0 +1,11 @@
+import api from "./axios";
+
+export const getAddresses = () => api.get("/addresses");
+
+export const addAddress = (data) => api.post("/addresses", data);
+
+export const deleteAddress = (id) =>
+  api.delete(`/addresses/${id}`);
+
+export const setDefaultAddress = (id) =>
+  api.put(`/addresses/${id}/default`);
