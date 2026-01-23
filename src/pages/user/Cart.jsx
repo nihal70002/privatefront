@@ -42,6 +42,33 @@ export default function Cart() {
     }
   };
 
+  // ================= UPDATE QUANTITY =================
+const handleQuantityChange = async (productVariantId, newQty) => {
+  if (newQty < 1) return;
+
+  // 1️⃣ Update UI immediately (NO reload)
+  setCart(prev =>
+    prev.map(item =>
+      item.productVariantId === productVariantId
+        ? { ...item, quantity: newQty }
+        : item
+    )
+  );
+
+  // 2️⃣ Sync with backend
+  try {
+    await api.put("/cart/update", {
+      productVariantId,
+      quantity: newQty
+    });
+  } catch (err) {
+    alert("Update failed, reverting");
+    loadCart(); // fallback only if error
+  }
+};
+
+
+
   // ================= CHECKOUT (TEMP) =================
  const handleCheckout = async () => {
   setPlacingOrder(true);
@@ -176,7 +203,29 @@ export default function Cart() {
                         <span className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-teal-700 bg-clip-text text-transparent">
                           ₹{item.price}
                         </span>
-                        <span className="text-gray-400 font-medium">× {item.quantity}</span>
+                        <div className="flex items-center gap-3">
+  <button
+    onClick={() =>
+      handleQuantityChange(item.productVariantId, item.quantity - 1)
+    }
+    disabled={item.quantity === 1}
+    className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 font-bold disabled:opacity-50"
+  >
+    −
+  </button>
+
+  <span className="font-semibold">{item.quantity}</span>
+
+  <button
+    onClick={() =>
+      handleQuantityChange(item.productVariantId, item.quantity + 1)
+    }
+    className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 font-bold"
+  >
+    +
+  </button>
+</div>
+
                       </div>
 
                       <button

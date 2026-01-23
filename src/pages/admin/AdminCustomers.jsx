@@ -3,7 +3,7 @@ import api from "../../api/axios";
 import {
   Users, ShoppingBag, IndianRupee, Mail, Search,
   ChevronRight, UserCircle, Loader2, Package, TrendingUp, BarChart3,
-  Plus, X, Lock, Building, Phone
+  Plus, X, Lock, Building, Phone, ArrowLeft, Eye
 } from "lucide-react";
 
 /* ================= MODERN STATUS BADGE ================= */
@@ -29,16 +29,15 @@ export default function AdminCustomers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
-  
-  // New States for User Creation
+  const [salesExecutives, setSalesExecutives] = useState([]);
+
+  // Modal States
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showDetailView, setShowDetailView] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const [formData, setFormData] = useState({
-    name: "",
-    companyName: "",
-    email: "",
-    phoneNumber: "",
-    password: ""
+    name: "", companyName: "", email: "", phoneNumber: "", password: "", salesExecutiveId: ""
   });
 
   useEffect(() => { loadCustomers(); }, []);
@@ -53,65 +52,66 @@ export default function AdminCustomers() {
 
   const handleUserSelect = async (userId) => {
     setDetailLoading(true);
+    setShowDetailView(true);
     try {
       const userRes = await api.get(`/admin/users/${userId}/details`);
       setSelectedUser(userRes.data);
     } catch {
       alert("Failed to load customer data");
+      setShowDetailView(false);
     } finally {
       setDetailLoading(false);
     }
   };
 
-  // Create User Handler
+  useEffect(() => {
+    if (showAddModal) loadSalesExecutives();
+  }, [showAddModal]);
+
+  const loadSalesExecutives = async () => {
+    try {
+      const res = await api.get("/admin/sales-executives");
+      setSalesExecutives(res.data);
+    } catch (err) { console.error("Failed to load sales executives"); }
+  };
+
   const handleCreateUser = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      // Matches backend schema from image_a8528e.png
-      await api.post("/admin/create-user", formData);
-      alert("User Created Successfully!");
+      await api.post("/admin/customers", {
+        ...formData,
+        salesExecutiveId: Number(formData.salesExecutiveId)
+      });
+      alert("Customer Created Successfully!");
       setShowAddModal(false);
-      setFormData({ name: "", companyName: "", email: "", phoneNumber: "", password: "" });
-      loadCustomers(); // Refresh list
+      setFormData({ name: "", companyName: "", email: "", phoneNumber: "", password: "", salesExecutiveId: "" });
+      loadCustomers();
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to create user");
+      alert(err.response?.data?.message || "Failed to create customer");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  /* ================= LOGIC: CALCULATE STATS & INSIGHTS FROM HISTORY ================= */
+  /* ================= CALCULATION LOGIC ================= */
   const { derivedStats, groupedProducts } = useMemo(() => {
-    if (!selectedUser?.orderHistory) return { 
-      derivedStats: { total: 0, count: 0, avg: 0 }, 
-      groupedProducts: [] 
-    };
-    
+    if (!selectedUser?.orderHistory) return { derivedStats: { total: 0, count: 0, avg: 0 }, groupedProducts: [] };
     const total = selectedUser.orderHistory.reduce((sum, order) => sum + Number(order.totalAmount), 0);
     const count = selectedUser.orderHistory.length;
     const avg = count > 0 ? total / count : 0;
-
     const productMap = {};
     selectedUser.orderHistory.forEach(order => {
       if (order.items && Array.isArray(order.items)) {
         order.items.forEach(item => {
           const name = item.productName || item.name;
-          if (!productMap[name]) {
-            productMap[name] = { productName: name, quantityBought: 0, revenue: 0 };
-          }
+          if (!productMap[name]) productMap[name] = { productName: name, quantityBought: 0, revenue: 0 };
           productMap[name].quantityBought += Number(item.quantity);
           productMap[name].revenue += (Number(item.price) * Number(item.quantity));
         });
       }
     });
-
-    const sortedProducts = Object.values(productMap).sort((a, b) => b.revenue - a.revenue);
-
-    return { 
-      derivedStats: { total, count, avg }, 
-      groupedProducts: sortedProducts 
-    };
+    return { derivedStats: { total, count, avg }, groupedProducts: Object.values(productMap).sort((a, b) => b.revenue - a.revenue) };
   }, [selectedUser]);
 
   const filteredCustomers = customers.filter(c =>
@@ -120,301 +120,201 @@ export default function AdminCustomers() {
   );
 
   if (loading) return (
-    <div className="h-screen w-full flex items-center justify-center bg-white">
+    <div className="h-screen w-full flex items-center justify-center bg-[#FAFBFC]">
       <Loader2 className="animate-spin text-indigo-600" size={40} />
     </div>
   );
 
   return (
-    <div className="flex h-screen bg-[#F8FAFC] font-sans antialiased text-slate-900 relative">
-      
-      {/* SIDEBAR */}
-      <aside className="w-80 bg-white border-r border-slate-200 flex flex-col relative">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-indigo-600 rounded-lg text-white">
-                <Users size={20} />
-              </div>
-              <h2 className="text-xl font-bold tracking-tight">Customers</h2>
-            </div>
-            {/* Add User Button inside Sidebar Header */}
-            <button 
-              onClick={() => setShowAddModal(true)}
-              className="p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white transition-all"
-              title="Add New User"
-            >
-              <Plus size={20} />
-            </button>
+    <div style={{ zoom: "85%" }} className="min-h-screen bg-[#FAFBFC] p-8 font-sans antialiased text-slate-900">
+      <div className="max-w-7xl mx-auto space-y-6">
+        
+        {/* HEADER */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-black text-slate-800 tracking-tight">Customers</h1>
+            <p className="text-slate-500 font-medium">Manage your client directory and purchase insights.</p>
           </div>
-          <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              placeholder="Search customers..."
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm transition-all focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none"
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center justify-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95"
+          >
+            <Plus size={20} />
+            Create Customer
+          </button>
+        </div>
+
+        {/* SEARCH BAR */}
+        <div className="relative max-w-md">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+          <input
+            placeholder="Search by name, email or company..."
+            className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-[1.5rem] text-sm font-medium focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all shadow-sm"
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        {/* MAIN TABLE */}
+        <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-slate-50/50 border-b border-slate-100">
+                <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-slate-400">Customer Identity</th>
+                <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-slate-400">Company</th>
+                <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-slate-400">Contact</th>
+                <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-slate-400 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {filteredCustomers.map((c) => (
+                <tr key={c.userId} className="hover:bg-slate-50/80 transition-colors group">
+                  <td className="px-8 py-5">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-sm border border-indigo-100">
+                        {c.name?.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-800">{c.name}</p>
+                        <p className="text-xs text-slate-400 font-medium">{c.email}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-8 py-5 text-sm font-semibold text-slate-600">{c.companyName || "—"}</td>
+                  <td className="px-8 py-5 text-sm font-medium text-slate-500">{c.phoneNumber || "N/A"}</td>
+                  <td className="px-8 py-5 text-right">
+                    <button 
+                      onClick={() => handleUserSelect(c.userId)}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs hover:bg-indigo-600 hover:text-white transition-all"
+                    >
+                      <Eye size={14} /> View Details
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* DETAIL OVERLAY VIEW */}
+      {showDetailView && (
+        <div className="fixed inset-0 z-[100] bg-[#FAFBFC] overflow-y-auto animate-in slide-in-from-right duration-300">
+          <div className="max-w-5xl mx-auto p-8 space-y-8">
+            {/* Back Nav */}
+            <button 
+              onClick={() => setShowDetailView(false)}
+              className="flex items-center gap-2 text-slate-400 hover:text-indigo-600 font-bold transition-colors"
+            >
+              <ArrowLeft size={20} /> Back to Directory
+            </button>
+
+            {detailLoading ? (
+               <div className="h-96 flex items-center justify-center"><Loader2 className="animate-spin text-indigo-600" size={40} /></div>
+            ) : selectedUser && (
+              <div className="space-y-8 animate-in fade-in duration-500">
+                {/* Profile Header */}
+                <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm flex flex-wrap justify-between items-center gap-6">
+                  <div className="flex items-center gap-8">
+                    <div className="w-28 h-28 bg-gradient-to-tr from-indigo-600 to-indigo-400 rounded-[2.5rem] flex items-center justify-center text-white shadow-2xl shadow-indigo-200">
+                      <UserCircle size={60} strokeWidth={1} />
+                    </div>
+                    <div>
+                      <h2 className="text-4xl font-black text-slate-800">{selectedUser.name}</h2>
+                      <div className="flex gap-4 mt-3">
+                        <span className="flex items-center gap-2 text-sm font-bold text-slate-400 bg-slate-50 px-4 py-1.5 rounded-full"><Mail size={14}/> {selectedUser.email}</span>
+                        <span className="flex items-center gap-2 text-sm font-bold text-slate-400 bg-slate-50 px-4 py-1.5 rounded-full"><Building size={14}/> {selectedUser.companyName}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right bg-indigo-600 p-8 rounded-[2.5rem] text-white shadow-xl shadow-indigo-100">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-70">Total Lifetime Value</p>
+                    <p className="text-4xl font-black">₹{derivedStats.total.toLocaleString()}</p>
+                  </div>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 flex items-center gap-6">
+                    <div className="p-5 bg-blue-50 rounded-[1.8rem] text-blue-600"><ShoppingBag size={30}/></div>
+                    <div><p className="text-3xl font-black">{derivedStats.count}</p><p className="text-xs font-bold text-slate-400 uppercase">Total Orders</p></div>
+                  </div>
+                  <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 flex items-center gap-6">
+                    <div className="p-5 bg-emerald-50 rounded-[1.8rem] text-emerald-600"><IndianRupee size={30}/></div>
+                    <div><p className="text-3xl font-black">₹{derivedStats.avg.toFixed(0)}</p><p className="text-xs font-bold text-slate-400 uppercase">Average Order</p></div>
+                  </div>
+                </div>
+
+                {/* Insights & History */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                   <div className="lg:col-span-1 bg-white p-8 rounded-[3rem] border border-slate-100 h-fit">
+                      <h3 className="font-black text-lg mb-6 flex items-center gap-2"><BarChart3 size={20} className="text-purple-600"/> Top Items</h3>
+                      <div className="space-y-4">
+                        {groupedProducts.slice(0, 5).map((p, i) => (
+                          <div key={i} className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl">
+                             <div className="min-w-0 flex-1 pr-2">
+                               <p className="font-bold text-slate-800 text-sm truncate">{p.productName}</p>
+                               <p className="text-[10px] font-bold text-slate-400 uppercase">{p.quantityBought} Units</p>
+                             </div>
+                             <p className="font-black text-indigo-600 text-sm whitespace-nowrap">₹{p.revenue.toLocaleString()}</p>
+                          </div>
+                        ))}
+                      </div>
+                   </div>
+
+                   <div className="lg:col-span-2 bg-white rounded-[3rem] border border-slate-100 overflow-hidden">
+                      <div className="p-8 border-b border-slate-50 flex justify-between items-center">
+                        <h3 className="font-black text-lg">Order History</h3>
+                        <StatusBadge status="All Records" />
+                      </div>
+                      <table className="w-full">
+                        <thead className="bg-slate-50/50 text-[10px] font-black uppercase text-slate-400">
+                          <tr><th className="px-8 py-4">Order ID</th><th className="px-8 py-4">Status</th><th className="px-8 py-4 text-right">Amount</th></tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                          {selectedUser.orderHistory?.map(o => (
+                            <tr key={o.orderId} className="hover:bg-slate-50">
+                              <td className="px-8 py-5 font-bold text-sm text-slate-600">#ORD-{o.orderId}</td>
+                              <td className="px-8 py-5"><StatusBadge status={o.status} /></td>
+                              <td className="px-8 py-5 text-right font-black text-slate-900">₹{Number(o.totalAmount).toLocaleString()}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                   </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-        <nav className="flex-1 overflow-y-auto px-3 space-y-1">
-          {filteredCustomers.map(c => (
-            <button
-              key={c.userId}
-              onClick={() => handleUserSelect(c.userId)}
-              className={`w-full p-4 rounded-xl flex items-center gap-4 transition-all duration-200
-                ${selectedUser?.userId === c.userId ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100" : "hover:bg-indigo-50 text-slate-600"}`}
-            >
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs
-                ${selectedUser?.userId === c.userId ? "bg-white/20" : "bg-slate-100 text-indigo-600"}`}>
-                {c.name?.charAt(0)}
-              </div>
-              <div className="text-left flex-1">
-                <p className="font-bold text-sm truncate">{c.name}</p>
-                <p className={`text-[11px] truncate ${selectedUser?.userId === c.userId ? "text-indigo-100" : "text-slate-400"}`}>
-                  {c.email}
-                </p>
-              </div>
-              <ChevronRight size={14} className={selectedUser?.userId === c.userId ? "text-white" : "text-slate-300"} />
-            </button>
-          ))}
-        </nav>
-      </aside>
-
-      {/* MAIN VIEW */}
-      <main className="flex-1 overflow-y-auto p-8 relative">
-        {detailLoading && (
-          <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px] flex items-center justify-center z-50">
-            <Loader2 className="animate-spin text-indigo-600" size={32} />
-          </div>
-        )}
-
-        {!selectedUser ? (
-          <div className="h-full flex flex-col items-center justify-center text-slate-300">
-            <UserCircle size={80} strokeWidth={1} />
-            <p className="text-lg font-medium mt-4">Select a customer profile</p>
-          </div>
-        ) : (
-          <div className="max-w-5xl mx-auto space-y-6 pb-12">
-            
-            {/* HEADER CARD */}
-            <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-wrap justify-between items-center gap-6">
-              <div className="flex items-center gap-6">
-                <div className="w-20 h-20 bg-gradient-to-tr from-indigo-600 to-indigo-400 rounded-[2rem] flex items-center justify-center text-white shadow-xl shadow-indigo-100">
-                  <UserCircle size={44} />
-                </div>
-                <div>
-                  <h1 className="text-3xl font-black tracking-tight">{selectedUser.name}</h1>
-                  <p className="text-slate-500 text-sm flex items-center gap-2 mt-1">
-                    <Mail size={14} /> {selectedUser.email}
-                  </p>
-                </div>
-              </div>
-              <div className="bg-indigo-50 px-8 py-5 rounded-[2rem] border border-indigo-100 text-right">
-                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Lifetime Value</p>
-                <p className="text-4xl font-black text-indigo-700">₹{derivedStats.total.toLocaleString()}</p>
-              </div>
-            </div>
-
-            {/* QUICK STATS */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <StatCard 
-                icon={<ShoppingBag className="text-blue-600" />} 
-                label="Total Orders" 
-                value={derivedStats.count} 
-                color="bg-blue-50"
-              />
-              <StatCard 
-                icon={<IndianRupee className="text-emerald-600" />} 
-                label="Average Order Value" 
-                value={`₹${derivedStats.avg.toFixed(0)}`} 
-                color="bg-emerald-50"
-              />
-            </div>
-
-            {/* PURCHASE INSIGHTS */}
-            <section className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-8">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="p-2 bg-purple-50 rounded-xl text-purple-600">
-                  <BarChart3 size={20} />
-                </div>
-                <h2 className="text-xl font-bold">Purchase Insights</h2>
-              </div>
-
-              {groupedProducts.length === 0 ? (
-                <div className="text-center py-12 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-                  <p className="text-slate-400 font-medium text-sm">No items found in order history</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {groupedProducts.map((p, i) => (
-                    <div key={i} className="flex justify-between items-center bg-slate-50 p-5 rounded-3xl hover:bg-white hover:shadow-md hover:border-indigo-100 border border-transparent transition-all group">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center font-black text-indigo-600 border border-slate-100 group-hover:bg-indigo-600 group-hover:text-white transition-colors shadow-sm">
-                          {p.quantityBought}
-                        </div>
-                        <div>
-                          <p className="font-bold text-slate-800 leading-tight">{p.productName}</p>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase mt-0.5 tracking-wider">Total Units Bought</p>
-                        </div>
-                      </div>
-                      <p className="text-lg font-black text-indigo-600">₹{p.revenue.toLocaleString()}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
-
-            {/* HISTORY TABLE */}
-            <section className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
-              <div className="px-8 py-6 border-b border-slate-50 flex justify-between items-center">
-                <h3 className="font-bold text-lg">Order History</h3>
-                <span className="text-[10px] font-bold bg-slate-100 px-3 py-1 rounded-full text-slate-500 uppercase tracking-tighter">
-                  {selectedUser.orderHistory?.length || 0} Total Records
-                </span>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead className="bg-slate-50/50 text-[11px] uppercase tracking-widest text-slate-400 font-black">
-                    <tr>
-                      <th className="px-8 py-5">Order ID</th>
-                      <th className="px-8 py-5">Status</th>
-                      <th className="px-8 py-5 text-right">Total Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {selectedUser.orderHistory?.map((o) => (
-                      <tr key={o.orderId} className="hover:bg-indigo-50/30 transition-colors group">
-                        <td className="px-8 py-6">
-                          <span className="font-bold text-slate-700 group-hover:text-indigo-600">#ORD-{o.orderId}</span>
-                        </td>
-                        <td className="px-8 py-6">
-                          <StatusBadge status={o.status} />
-                        </td>
-                        <td className="px-8 py-6 text-right font-black text-slate-900">
-                          ₹{Number(o.totalAmount).toLocaleString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          </div>
-        )}
-      </main>
+      )}
 
       {/* CREATE USER MODAL */}
       {showAddModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="bg-indigo-600 p-8 text-white flex justify-between items-center">
-              <div>
-                <h3 className="text-2xl font-black tracking-tight">Create Customer</h3>
-                <p className="text-indigo-100 text-xs mt-1">Add a new profile to the directory</p>
-              </div>
-              <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-white/10 rounded-xl transition-colors">
-                <X size={24} />
-              </button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+          <div className="bg-white w-full max-w-md rounded-[3rem] overflow-hidden animate-in zoom-in-95">
+            <div className="bg-indigo-600 p-10 text-white flex justify-between items-center">
+              <div><h3 className="text-2xl font-black">New Customer</h3><p className="opacity-70 text-xs">Add a new account to the system</p></div>
+              <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-white/10 rounded-xl"><X size={24}/></button>
             </div>
-            
-            <form onSubmit={handleCreateUser} className="p-8 space-y-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase ml-2 tracking-widest">Full Name</label>
-                <div className="relative">
-                  <UserCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-                  <input 
-                    required 
-                    placeholder="Enter name" 
-                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                    value={formData.name}
-                    onChange={e => setFormData({...formData, name: e.target.value})}
-                  />
-                </div>
-              </div>
-
+            <form onSubmit={handleCreateUser} className="p-10 space-y-4">
+              <input required placeholder="Full Name" className="w-full px-5 py-4 bg-slate-50 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase ml-2 tracking-widest">Company</label>
-                  <div className="relative">
-                    <Building className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-                    <input 
-                      required 
-                      placeholder="Name" 
-                      className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                      value={formData.companyName}
-                      onChange={e => setFormData({...formData, companyName: e.target.value})}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase ml-2 tracking-widest">Phone</label>
-                  <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-                    <input 
-                      required 
-                      placeholder="Number" 
-                      className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                      value={formData.phoneNumber}
-                      onChange={e => setFormData({...formData, phoneNumber: e.target.value})}
-                    />
-                  </div>
-                </div>
+                <input required placeholder="Company" className="w-full px-5 py-4 bg-slate-50 rounded-2xl text-sm font-bold outline-none" value={formData.companyName} onChange={e => setFormData({...formData, companyName: e.target.value})} />
+                <input required placeholder="Phone" className="w-full px-5 py-4 bg-slate-50 rounded-2xl text-sm font-bold outline-none" value={formData.phoneNumber} onChange={e => setFormData({...formData, phoneNumber: e.target.value})} />
               </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase ml-2 tracking-widest">Email Address</label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-                  <input 
-                    required 
-                    type="email" 
-                    placeholder="example@mail.com" 
-                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                    value={formData.email}
-                    onChange={e => setFormData({...formData, email: e.target.value})}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1 pb-4">
-                <label className="text-[10px] font-bold text-slate-400 uppercase ml-2 tracking-widest">Access Password</label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-                  <input 
-                    required 
-                    type="password" 
-                    placeholder="••••••••" 
-                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                    value={formData.password}
-                    onChange={e => setFormData({...formData, password: e.target.value})}
-                  />
-                </div>
-              </div>
-
-              <button 
-                disabled={isSubmitting}
-                className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 active:scale-95 transition-all flex items-center justify-center gap-2"
-              >
-                {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
-                Create Profile
+              <input required type="email" placeholder="Email Address" className="w-full px-5 py-4 bg-slate-50 rounded-2xl text-sm font-bold outline-none" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+              <input required type="password" placeholder="Password" className="w-full px-5 py-4 bg-slate-50 rounded-2xl text-sm font-bold outline-none" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
+              <select required className="w-full px-5 py-4 bg-slate-50 rounded-2xl text-sm font-bold outline-none appearance-none" value={formData.salesExecutiveId} onChange={e => setFormData({...formData, salesExecutiveId: e.target.value})} >
+                <option value="">Assign Sales Executive</option>
+                {salesExecutives.map(se => <option key={se.id} value={se.id}>{se.name}</option>)}
+              </select>
+              <button disabled={isSubmitting} className="w-full bg-indigo-600 text-white py-5 rounded-[1.8rem] font-black shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all">
+                {isSubmitting ? "Creating..." : "Create Profile"}
               </button>
             </form>
           </div>
         </div>
       )}
-
-    </div>
-  );
-}
-
-function StatCard({ icon, label, value, color }) {
-  return (
-    <div className="bg-white p-7 rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center gap-6">
-      <div className={`p-5 ${color} rounded-[1.5rem]`}>{icon}</div>
-      <div>
-        <p className="text-3xl font-black text-slate-800">{value}</p>
-        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
-      </div>
     </div>
   );
 }

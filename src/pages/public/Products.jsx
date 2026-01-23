@@ -4,6 +4,7 @@ import { getProducts } from "../../api/products.api";
 import { addToCartApi, getCart } from "../../api/cart.api";
 import ProductCard from "../../components/products/ProductCard";
 import { ShoppingCart, User, Package, Search, ChevronRight, Filter, SlidersHorizontal } from "lucide-react";
+import api from "../../api/axios";
 
 export default function Products() {
   const navigate = useNavigate();
@@ -17,6 +18,8 @@ const [page, setPage] = useState(1);
 const [hasMore, setHasMore] = useState(true);
 const PAGE_SIZE = 12;
 const [selectedCategories, setSelectedCategories] = useState([]);
+const [brands, setBrands] = useState([]);
+const [selectedBrand, setSelectedBrand] = useState(null);
 
 
 useEffect(() => {
@@ -48,6 +51,19 @@ const loadProducts = async (pageNo, reset = false) => {
     setLoading(false);
   }
 };
+useEffect(() => {
+  const loadFilters = async () => {
+    try {
+      const res = await api.get("/brands");
+      setBrands(res.data || []);
+    } catch (err) {
+      console.error("Failed to load brands", err);
+    }
+  };
+
+  loadFilters();
+}, []);
+
 
 
   const handleAddToCart = async (variantId) => {
@@ -87,18 +103,23 @@ const clearFilters = () => {
   setSearchQuery("");
 };
 
-
 const filteredProducts = products.filter(product => {
   const matchesSearch =
     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.categoryName.toLowerCase().includes(searchQuery.toLowerCase());
+    product.categoryName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (product.brandName &&
+      product.brandName.toLowerCase().includes(searchQuery.toLowerCase()));
 
   const matchesCategory =
     selectedCategories.length === 0 ||
     selectedCategories.includes(product.categoryId);
 
-  return matchesSearch && matchesCategory;
+  const matchesBrand =
+    !selectedBrand || product.brandId === selectedBrand;
+
+  return matchesSearch && matchesCategory && matchesBrand;
 });
+
 
   if (loading) {
     return (
@@ -112,9 +133,11 @@ const filteredProducts = products.filter(product => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-white">
+
       {/* NAVBAR */}
-      <nav className="sticky top-0 z-50 bg-white shadow-md border-b border-teal-100">
+      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+
         <div className="flex items-center justify-between px-6 py-3 max-w-screen-2xl mx-auto">
           {/* LOGO */}
           <div 
@@ -129,7 +152,7 @@ const filteredProducts = products.filter(product => {
           </div>
 
          {/* SEARCH BAR */}
-<div className="flex-1 max-w-2xl mx-8">
+<div className="w-[320px] ml-auto mr-6">
   <div className="relative">
     <Search
       className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
@@ -142,7 +165,7 @@ const filteredProducts = products.filter(product => {
       onChange={(e) => setSearchQuery(e.target.value)}
       className="
         w-full pl-12 pr-4 py-2.5 text-sm
-        bg-slate-100
+        bg-slate-50
         border border-slate-300
         rounded-lg
         focus:outline-none
@@ -159,7 +182,7 @@ const filteredProducts = products.filter(product => {
           <div className="flex items-center gap-6">
             <button
               onClick={() => navigate("/orders")}
-              className="flex flex-col items-center gap-1 text-xs font-bold text-gray-700 hover:text-teal-600 transition-colors group"
+              className="flex flex-col items-center gap-1 text-xs font-bold text-gray-500 hover:text-teal-600 transition-colors group"
             >
               <Package size={22} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
               <span>Orders</span>
@@ -167,7 +190,7 @@ const filteredProducts = products.filter(product => {
 
             <button
               onClick={() => navigate("/profile")}
-              className="flex flex-col items-center gap-1 text-xs font-bold text-gray-700 hover:text-teal-600 transition-colors group"
+              className="flex flex-col items-center gap-1 text-xs font-bold text-gray-500 hover:text-teal-600 transition-colors group"
             >
               <User size={22} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
               <span>Profile</span>
@@ -175,7 +198,7 @@ const filteredProducts = products.filter(product => {
 
             <button
               onClick={() => navigate("/cart")}
-              className="relative flex flex-col items-center gap-1 text-xs font-bold text-gray-700 hover:text-teal-600 transition-colors group"
+              className="relative flex flex-col items-center gap-1 text-xs font-bold text-gray-500 hover:text-teal-600 transition-colors group"
             >
               <ShoppingCart size={22} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
               <span>Bag</span>
@@ -201,10 +224,13 @@ const filteredProducts = products.filter(product => {
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="flex max-w-screen-2xl mx-auto gap-6 px-6 py-6">
+      <div className="flex w-full px-4 py-6">
+
+
         {/* SIDEBAR FILTERS */}
         {showFilters && (
-          <aside className="w-64 bg-white rounded-xl shadow-sm border border-gray-200 p-5 h-fit sticky top-24">
+          <aside className="w-64 bg-white border-r border-gray-200 p-4 sticky top-24">
+
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal size={18} className="text-teal-600" />
@@ -221,9 +247,10 @@ const filteredProducts = products.filter(product => {
 
             {/* Categories */}
            <div className="mb-6 pb-6 border-b border-gray-100">
-  <h4 className="text-xs font-bold text-gray-900 mb-4 uppercase tracking-wide">
-    Categories
-  </h4>
+ <h4 className="text-sm font-bold text-gray-900 mb-3">
+  CATEGORIES
+</h4>
+
 
   {categories.map(cat => (
     <label
@@ -242,39 +269,40 @@ const filteredProducts = products.filter(product => {
   ))}
 </div>
 
+<div className="mb-6">
+  <h4 className="text-sm font-bold text-gray-900 mb-3">BRAND</h4>
 
-            {/* Brand */}
-            <div className="mb-6 pb-6 border-b border-gray-100">
-              <h4 className="text-xs font-bold text-gray-900 mb-4 uppercase tracking-wide">Brand</h4>
-              <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
-                <input
-                  type="text"
-                  placeholder="Search brands..."
-                  className="w-full pl-9 pr-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500 transition-colors"
-                />
-              </div>
-              <div className="space-y-3 max-h-52 overflow-y-auto custom-scrollbar">
-                <label className="flex items-center text-sm text-gray-700 hover:text-teal-700 cursor-pointer group">
-                  <input type="checkbox" className="mr-3 w-4 h-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500" />
-                  <span className="group-hover:translate-x-0.5 transition-transform">Denver <span className="text-gray-400 text-xs">(32)</span></span>
-                </label>
-                <label className="flex items-center text-sm text-gray-700 hover:text-teal-700 cursor-pointer group">
-                  <input type="checkbox" className="mr-3 w-4 h-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500" />
-                  <span className="group-hover:translate-x-0.5 transition-transform">Wild Stone <span className="text-gray-400 text-xs">(15)</span></span>
-                </label>
-                <label className="flex items-center text-sm text-gray-700 hover:text-teal-700 cursor-pointer group">
-                  <input type="checkbox" className="mr-3 w-4 h-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500" />
-                  <span className="group-hover:translate-x-0.5 transition-transform">OSCAR <span className="text-gray-400 text-xs">(13)</span></span>
-                </label>
-              </div>
-            </div>
+
+  <div className="space-y-2">
+    {brands.map((brand) => (
+      <label
+        key={brand.brandId}
+        className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer"
+      >
+        <input
+          type="checkbox"
+          checked={selectedBrand === brand.brandId}
+          onChange={() =>
+            setSelectedBrand(
+              selectedBrand === brand.brandId ? null : brand.brandId
+            )
+          }
+          className="accent-indigo-600"
+        />
+        {brand.brandName}
+      </label>
+    ))}
+  </div>
+</div>
+
+            
 
             {/* Price */}
             <div className="mb-4">
               <h4 className="text-xs font-bold text-gray-900 mb-4 uppercase tracking-wide">Price Range</h4>
               <div className="space-y-3">
-                <label className="flex items-center text-sm text-gray-700 hover:text-teal-700 cursor-pointer group">
+                <label className="flex items-center gap-2 text-sm text-gray-800 cursor-pointer hover:text-black">
+
                   <input type="checkbox" className="mr-3 w-4 h-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500" />
                   <span className="group-hover:translate-x-0.5 transition-transform">Under ₹500</span>
                 </label>
@@ -292,17 +320,13 @@ const filteredProducts = products.filter(product => {
         )}
 
         {/* PRODUCTS SECTION */}
-        <main className="flex-1">
+        <main className="flex-1 pl-6">
+
           {/* Header Bar */}
-          <div className="flex items-center justify-between mb-6 bg-white rounded-xl shadow-sm border border-gray-200 px-5 py-4">
+          <div className="flex items-cnter justify-between mb-4 px-2 py-2 border-b border-gray-200">
+
             <div className="flex items-center gap-4">
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 px-4 py-2 bg-teal-50 text-teal-700 rounded-lg font-semibold text-sm hover:bg-teal-100 transition-colors"
-              >
-                <Filter size={16} />
-                <span>{showFilters ? 'Hide' : 'Show'} Filters</span>
-              </button>
+              
               
               <div className="h-6 w-px bg-gray-300"></div>
               
@@ -311,16 +335,7 @@ const filteredProducts = products.filter(product => {
               </h1>
             </div>
 
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-600 font-medium">Sort by:</span>
-              <select className="px-4 py-2 border-2 border-gray-200 rounded-lg text-sm font-semibold text-gray-900 focus:outline-none focus:border-teal-500 cursor-pointer transition-colors">
-                <option>Recommended</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
-                <option>Newest First</option>
-                <option>Popularity</option>
-              </select>
-            </div>
+           
           </div>
 
           {/* Products Grid */}

@@ -1,80 +1,145 @@
-import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { getOrderDetails } from "../../api/orders.api";
-import StatusBadge from "../../components/common/StatusBadge";
+import { ArrowLeft } from "lucide-react";
 
 export default function OrderDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadOrder();
-  }, []);
+    getOrderDetails(id)
+      .then(res => setOrder(res.data))
+      .catch(() => setOrder(null))
+      .finally(() => setLoading(false));
+  }, [id]);
 
-  const loadOrder = async () => {
-    try {
-      setLoading(true);
-      const res = await getOrderDetails(id);
-      setOrder(res.data);
-    } catch (err) {
-      console.error("Order load failed", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  /* -------------------- STATES -------------------- */
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-teal-600 border-t-transparent" />
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-500 text-lg">Loading order details...</p>
       </div>
     );
   }
 
-  if (!order) return null;
-
-  return (
-    <div className="max-w-5xl mx-auto px-4 py-10">
-      <button
-        onClick={() => navigate(-1)}
-        className="text-teal-600 font-semibold mb-6"
-      >
-        ← Back to Orders
-      </button>
-
-      <div className="bg-white rounded-xl shadow border p-6 mb-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">
-            Order #{order.orderId}
-          </h2>
-          <StatusBadge status={order.status} />
-        </div>
-
-        <p className="text-gray-500 mt-1">
-          {new Date(order.orderDate).toLocaleString()}
-        </p>
+  if (!order) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-red-500 text-lg">Order not found</p>
       </div>
+    );
+  }
 
-      <div className="bg-white rounded-xl shadow border p-6">
-        <h3 className="font-bold mb-4">Items</h3>
+  /* -------------------- UI -------------------- */
+  return (
+    <div className="min-h-screen bg-gray-50 px-4 py-8">
+      <div className="max-w-5xl mx-auto">
 
-        {order.items.map((item, idx) => (
-          <div
-            key={idx}
-            className="flex justify-between border-b py-3"
-          >
-            <span>{item.productName}</span>
-            <span>
-              ₹{item.unitPrice} × {item.quantity}
+        {/* Back */}
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-gray-600 hover:text-black mb-6"
+        >
+          <ArrowLeft size={18} />
+          Back to orders
+        </button>
+
+        {/* Order Summary */}
+        <div className="bg-white rounded-2xl shadow-md p-6 mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-2xl font-bold">
+              Order #{order.orderId}
+            </h1>
+
+            <span
+              className={`px-4 py-1 rounded-full text-sm font-semibold
+              ${
+                order.status.includes("Pending")
+                  ? "bg-yellow-100 text-yellow-700"
+                  : order.status.includes("Delivered")
+                  ? "bg-green-100 text-green-700"
+                  : "bg-gray-100 text-gray-700"
+              }`}
+            >
+              {order.status}
             </span>
           </div>
-        ))}
 
-        <div className="flex justify-between font-bold text-lg pt-4">
-          <span>Total</span>
-          <span>₹{order.totalAmount.toFixed(2)}</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div>
+              <p className="text-gray-500">Order Date</p>
+              <p className="font-semibold">
+                {new Date(order.orderDate).toLocaleDateString()}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-gray-500">Delivered Date</p>
+              <p className="font-semibold">
+                {order.deliveredDate
+                  ? new Date(order.deliveredDate).toLocaleDateString()
+                  : "Not delivered yet"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-gray-500">Total Amount</p>
+              <p className="font-bold text-lg text-teal-600">
+                ₹{order.totalAmount}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Ordered Items */}
+        <div className="bg-white rounded-2xl shadow-md p-6">
+          <h2 className="text-xl font-bold mb-4">Ordered Items</h2>
+
+          <div className="divide-y">
+            {order.items.map(item => (
+              <div
+                key={item.productId}
+                className="flex items-center gap-4 py-4"
+              >
+                {/* Product Image */}
+                <img
+                  src={item.imageUrl}
+                  alt={item.productName}
+                  className="w-20 h-20 object-cover rounded-xl border"
+                  onError={(e) => {
+                    e.target.src = "/placeholder.png";
+                  }}
+                />
+
+                {/* Product Info */}
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-800">
+                    {item.productName}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Qty: {item.quantity} × ₹{item.unitPrice}
+                  </p>
+                </div>
+
+                {/* Price */}
+                <p className="font-bold text-gray-800">
+                  ₹{item.subtotal}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Grand Total */}
+          <div className="flex justify-between items-center border-t pt-4 mt-4">
+            <p className="text-lg font-semibold">Grand Total</p>
+            <p className="text-2xl font-bold text-teal-600">
+              ₹{order.totalAmount}
+            </p>
+          </div>
         </div>
       </div>
     </div>

@@ -68,7 +68,7 @@ export default function AdminReports() {
   );
 
   return (
-    <div className="p-8 bg-[#F8FAFC] min-h-screen space-y-8 font-sans antialiased">
+    <div style={{ zoom: "85%" }}  className="p-8 bg-[#F8FAFC] min-h-screen space-y-8 font-sans antialiased">
       
       {/* HEADER */}
       <div className="flex justify-between items-end">

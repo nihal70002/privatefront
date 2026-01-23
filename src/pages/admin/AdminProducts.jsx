@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api/axios";
+import { useNavigate } from "react-router-dom"; // Add this
 import {
   Plus, X, Trash2, ChevronDown, ChevronUp,
-  Upload, Loader2, Edit3
+  Upload, Loader2, Edit3, Search, Filter, Package,
+  AlertTriangle // Add this
 } from "lucide-react";
 
 /* ================= CONSTANTS ================= */
@@ -10,6 +12,7 @@ const DEFAULT_VARIANT = { size: "M", price: 100, stock: 0 };
 const EMPTY_FORM = {
   name: "",
   categoryId: "",
+  brandId: "",
   description: "",
   imageUrl: "",
   variants: [{ ...DEFAULT_VARIANT }]
@@ -18,15 +21,23 @@ const EMPTY_FORM = {
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [filter, setFilter] = useState("ALL");
+  const [selectedCatFilter, setSelectedCatFilter] = useState("ALL");
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [showCatModal, setShowCatModal] = useState(false);
+  const [showBrandModal, setShowBrandModal] = useState(false);
+  
   const [expandedRow, setExpandedRow] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [newCategory, setNewCategory] = useState("");
+  const [newBrand, setNewBrand] = useState("");
   const [imageUploading, setImageUploading] = useState(false);
-const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [togglingId, setTogglingId] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -34,18 +45,35 @@ const [deleteTarget, setDeleteTarget] = useState(null);
 
   const loadData = async () => {
     try {
-      const [p, c] = await Promise.all([
+      const [p, c, b] = await Promise.all([
         api.get("/admin/products"),
-        api.get("/categories/admin")
+        api.get("/categories/admin"),
+        api.get("/brands")
       ]);
       setProducts(p.data || []);
       setCategories(c.data || []);
+      setBrands(b.data || []);
     } catch (err) {
       console.error("Failed to fetch data", err);
     }
   };
 
   /* ================= HANDLERS ================= */
+
+  const handleToggleActive = async (productId) => {
+    setTogglingId(productId);
+    try {
+      // Endpoint matched to your Swagger UI: PUT /api/admin/products/{productId}/toggle
+      await api.put(`/admin/products/${productId}/toggle`);
+      setProducts(prev => prev.map(p => 
+        p.productId === productId ? { ...p, isActive: !p.isActive } : p
+      ));
+    } catch (err) {
+      alert("Failed to update status");
+    } finally {
+      setTogglingId(null);
+    }
+  };
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -66,34 +94,19 @@ const [deleteTarget, setDeleteTarget] = useState(null);
   };
 
   const addCategory = async () => {
-  if (!newCategory.trim()) {
-    alert("Category name required");
-    return;
-  }
+    if (!newCategory.trim()) return alert("Name required");
+    try {
+      await api.post("/categories", { name: newCategory.trim() });
+      setNewCategory(""); setShowCatModal(false); loadData();
+    } catch { alert("Failed to add category"); }
+  };
 
-  try {
-    await api.post("/categories", {
-      name: newCategory.trim()
-    });
-
-    setNewCategory("");
-    setShowCatModal(false);
-    loadData(); // reload categories
-  } catch (err) {
-    alert("Failed to add category");
-  }
-};
-
-
-
-  
-
-  // --- NEW: EDIT MODE TRIGGER ---
   const openEditModal = (product) => {
     setEditingId(product.productId);
     setForm({
       name: product.name,
-      categoryId: product.categoryId.toString(), // Select expects string
+      categoryId: product.categoryId.toString(),
+      brandId: product.brandId?.toString() || "",
       description: product.description || "",
       imageUrl: product.imageUrl || "",
       variants: product.variants.map(v => ({ ...v }))
@@ -101,209 +114,170 @@ const [deleteTarget, setDeleteTarget] = useState(null);
     setShowModal(true);
   };
 
-
-  const confirmDeleteProduct = (product) => {
-  setDeleteTarget(product);
-};
-
-const deleteProduct = async () => {
-  if (!deleteTarget) return;
-
-  try {
-    await api.delete(`/admin/products/${deleteTarget.productId}`);
-    setDeleteTarget(null);
-    loadData();
-  } catch {
-    alert("Failed to delete product");
-  }
-};
-
-
-
   const saveProduct = async () => {
-    if (!form.name || !form.categoryId) return alert("Name & Category required");
-    if (!form.variants.length) return alert("At least one variant required");
-
-    const payload = {
-      ...form,
-      categoryId: Number(form.categoryId)
-    };
-
+    if (!form.name || !form.categoryId || !form.brandId) return alert("All fields are required");
+    const payload = { ...form, categoryId: Number(form.categoryId), brandId: Number(form.brandId) };
     try {
       if (editingId) {
-  // 1️⃣ update product basic info
-  await api.put(`/admin/products/${editingId}`, {
-    name: form.name,
-    categoryId: Number(form.categoryId),
-    description: form.description,
-    imageUrl: form.imageUrl
-  });
+        await api.put(`/admin/products/${editingId}`, payload);
+        for (const v of form.variants) {
+          if(v.variantId) await api.put(`/admin/products/variant/${v.variantId}`, v);
+        }
+      } else {
+        await api.post("/admin/products", payload);
+      }
+      closeModal(); loadData();
+    } catch { alert("Error saving product"); }
+  };
 
-  // 2️⃣ update variants separately
-  for (const v of form.variants) {
-    await api.put(`/admin/products/variant/${v.variantId}`, {
-      size: v.size,
-      price: v.price,
-      stock: v.stock
-    });
-  }
-
-} else {
-  // CREATE product (this API already accepts variants)
-  await api.post("/admin/products", payload);
-}
-
-      closeModal();
-      loadData();
-    } catch (err) {
-      alert("Error saving product. Check if product name is unique or API is reachable.");
-    }
+  const deleteProduct = async () => {
+    if (!deleteTarget) return;
+    try {
+      await api.delete(`/admin/products/${deleteTarget.productId}`);
+      setDeleteTarget(null); loadData();
+    } catch { alert("Failed to delete"); }
   };
 
   const closeModal = () => {
-    setShowModal(false);
-    setEditingId(null);
-    setForm(EMPTY_FORM);
+    setShowModal(false); setEditingId(null); setForm(EMPTY_FORM);
   };
 
   const filteredProducts = products.filter(p => {
-    if (filter === "ACTIVE") return p.isActive;
-    if (filter === "INACTIVE") return !p.isActive;
-    return true;
+    const matchesStatus = filter === "ALL" ? true : (filter === "ACTIVE" ? p.isActive : !p.isActive);
+    const matchesCategory = selectedCatFilter === "ALL" ? true : p.categoryId.toString() === selectedCatFilter;
+    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesStatus && matchesCategory && matchesSearch;
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div style={{ zoom: "85%" }} className="min-h-screen bg-[#F8FAFC] p-10 font-sans antialiased text-slate-900">
+      <div className="max-w-[1700px] mx-auto space-y-4">
         
         {/* HEADER */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-black text-slate-800">Admin Inventory</h1>
-          <div className="flex gap-3">
-            <button onClick={() => setShowCatModal(true)} className="bg-white border-2 border-slate-200 px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-slate-50 transition">
-              <Plus size={18} /> Category
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 rounded-xl text-blue-600">
+              <Package size={28} />
+            </div>
+            <h1 className="text-2xl font-black text-slate-800 tracking-tight">Inventory Cloud</h1>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => setShowCatModal(true)} className="bg-white border border-slate-200 px-4 py-2 rounded-xl text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition shadow-sm">
+              + CATEGORY
             </button>
-            <button onClick={() => setShowModal(true)} className="bg-indigo-600 text-white px-6 py-2 rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition flex items-center gap-2">
-              <Plus size={18} /> Add Product
+            <button onClick={() => setShowBrandModal(true)} className="bg-white border border-slate-200 px-4 py-2 rounded-xl text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition shadow-sm">
+              + BRAND
             </button>
+            {/* LOW STOCK ALERT BUTTON */}
+<button 
+  onClick={() => navigate("/admin/low-stock")}
+  className="flex items-center gap-2 bg-rose-50 border border-rose-100 px-4 py-2 rounded-xl text-[11px] font-black text-rose-600 hover:bg-rose-100 transition shadow-sm animate-pulse"
+>
+  <AlertTriangle size={14} />
+  LOW STOCK
+</button>
+
+<button onClick={() => setShowModal(true)} className="bg-blue-600 text-white px-5 py-2 rounded-xl text-[11px] font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition">
+  + ADD PRODUCT
+</button>
           </div>
         </div>
 
-        {/* FILTERS */}
-        <div className="flex gap-2 mb-6">
-          {["ALL", "ACTIVE", "INACTIVE"].map(f => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-6 py-2 rounded-xl font-bold text-sm transition-all
-                ${filter === f ? "bg-indigo-600 text-white shadow-md" : "bg-white border text-slate-600"}`}
-            >
-              {f}
-            </button>
-          ))}
+        {/* SEARCH & FILTERS - Matching Screenshot Style */}
+        <div className="backdrop-blur-md bg-white/80 p-3 rounded-2xl shadow-sm border border-white/50 flex flex-col md:flex-row justify-between gap-4">
+          <div className="flex gap-2 bg-slate-100 p-1 rounded-xl">
+            {["ALL", "ACTIVE", "INACTIVE"].map(f => (
+              <button key={f} onClick={() => setFilter(f)} className={`px-5 py-1.5 rounded-lg text-xs font-black tracking-widest transition-all ${filter === f ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}>
+                {f}
+              </button>
+              
+            ))}
+          </div>
+          
+
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+              <select value={selectedCatFilter} onChange={(e) => setSelectedCatFilter(e.target.value)} className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-[11px] font-bold text-slate-600 outline-none shadow-sm cursor-pointer appearance-none min-w-[150px]">
+                <option value="ALL">All Categories</option>
+                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            <div className="relative group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={16} />
+              <input placeholder="Search products..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-64 pl-10 pr-4 py-2 bg-white border border-slate-200 text-xs text-slate-700 rounded-xl outline-none shadow-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all" />
+            </div>
+          </div>
         </div>
 
         {/* PRODUCT TABLE */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-slate-50 border-b">
-              <tr>
-                <th className="p-4 text-left text-xs font-bold text-slate-500 uppercase">Product Details</th>
-                <th className="p-4 text-center text-xs font-bold text-slate-500 uppercase">Status</th>
-                <th className="p-4 text-right text-xs font-bold text-slate-500 uppercase">Actions</th>
+        <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-slate-50/50 border-b border-slate-100 text-xs font-black text-slate-400 uppercase tracking-widest">
+                <th className="px-8 py-3">Product Details</th>
+                <th className="px-6 py-3 text-center">Visibility</th>
+                <th className="px-8 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-50">
               {filteredProducts.map(p => (
                 <React.Fragment key={p.productId}>
-                  <tr className="border-b last:border-0 hover:bg-slate-50/50 transition">
-                    <td className="p-4">
-                      <div className="flex items-center gap-4">
-                        <img 
-                          src={p.imageUrl || "https://via.placeholder.com/80?text=No+Image"} 
-                          className="w-12 h-12 rounded-lg object-cover bg-slate-100" 
-                        />
+                  <tr className="group hover:bg-slate-50/80 transition-all">
+                    <td className="px-8 py-3">
+                      <div className="flex items-center gap-5">
+                        <div className="relative">
+                          <img src={p.imageUrl || "https://via.placeholder.com/150"} className="w-12 h-12 rounded-2xl object-cover bg-slate-100 border border-slate-100 shadow-sm" />
+                          <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${p.isActive ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                        </div>
                         <div>
-                          <p className="font-bold text-slate-800">{p.name}</p>
-                          <p className="text-xs text-slate-400">{p.categoryName}</p>
+                          <p className="font-bold text-slate-800 text-sm leading-tight group-hover:text-blue-600 transition-colors">{p.name}</p>
+                          <p className="text-xs font-bold text-blue-500 uppercase tracking-tighter mt-1">{p.categoryName || 'General'}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="p-4 text-center">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black ${p.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-                        {p.isActive ? "ACTIVE" : "INACTIVE"}
-                      </span>
-                    </td>
-                    <td className="p-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button onClick={() => openEditModal(p)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition">
-                          <Edit3 size={18} />
-                        </button>
-
-
-                        
-                        <button
-  onClick={() => confirmDeleteProduct(p)}
-
-  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
-  title="Delete product"
->
-  <Trash2 size={18} />
-</button>
-{deleteTarget && (
-  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
-      <h3 className="text-lg font-bold text-slate-800 mb-2">
-        Delete Product
-      </h3>
-      <p className="text-sm text-slate-600 mb-6">
-        Are you sure you want to delete
-        <span className="font-bold"> {deleteTarget.name}</span>?
-        <br />This action cannot be undone.
-      </p>
-
-      <div className="flex gap-3">
-        <button
-          onClick={deleteProduct}
-          className="flex-1 bg-red-600 text-white py-2 rounded-xl font-bold hover:bg-red-700 transition"
-        >
-          Yes, Delete
-        </button>
-        <button
-          onClick={() => setDeleteTarget(null)}
-          className="flex-1 border border-slate-200 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-50 transition"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
+                    <td className="px-8 py-3">
+                      <div className="flex justify-center items-center gap-4">
+                        <span className={`text-[11px] font-black uppercase tracking-tighter w-12 text-right ${p.isActive ? "text-emerald-500" : "text-slate-300"}`}>
+                          {p.isActive ? "Active" : "Hidden"}
+                        </span>
+                        {/* THE TOGGLE BUTTON */}
                         <button 
-                          onClick={() => setExpandedRow(expandedRow === p.productId ? null : p.productId)}
-                          className={`p-2 rounded-lg transition ${expandedRow === p.productId ? "bg-slate-100 text-slate-800" : "text-slate-400"}`}
+                          disabled={togglingId === p.productId}
+                          onClick={() => handleToggleActive(p.productId)}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 focus:outline-none ${p.isActive ? 'bg-emerald-500 shadow-lg shadow-emerald-100' : 'bg-slate-200'}`}
                         >
+                          <span className="sr-only">Toggle Active</span>
+                          {togglingId === p.productId ? (
+                            <Loader2 size={12} className="animate-spin mx-auto text-white" />
+                          ) : (
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-all duration-300 shadow-sm ${p.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                    <td className="px-8 py-3 text-right">
+                      <div className="flex justify-end gap-2">
+                        <button onClick={() => openEditModal(p)} className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"><Edit3 size={18} /></button>
+                        <button onClick={() => setDeleteTarget(p)} className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"><Trash2 size={18} /></button>
+                        <button onClick={() => setExpandedRow(expandedRow === p.productId ? null : p.productId)} className={`p-2.5 rounded-xl transition-all ${expandedRow === p.productId ? "bg-slate-100 text-slate-900" : "text-slate-300"}`}>
                           {expandedRow === p.productId ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                         </button>
                       </div>
                     </td>
                   </tr>
-
-                  {/* VARIANT DETAILS (Left Quantity & Sizes) */}
                   {expandedRow === p.productId && (
                     <tr className="bg-slate-50/50">
-                      <td colSpan={3} className="p-4 border-b">
-                        <div className="flex flex-wrap gap-3">
-                          {p.variants.map((v, i) => (
-                            <div key={i} className="bg-white border border-slate-200 rounded-xl p-3 min-w-[120px] shadow-sm">
-                              <div className="flex justify-between items-start mb-1">
-                                <span className="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">Size {v.size}</span>
-                                <span className="text-indigo-600 font-bold text-sm">₹{v.price}</span>
+                      <td colSpan={3} className="px-12 py-6 border-l-4 border-blue-500">
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                          {p.variants?.map((v, i) => (
+                            <div key={i} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+                              <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Size {v.size}</p>
+                              <p className="text-blue-600 font-black text-sm mb-2">₹{v.price}</p>
+                              <div className="flex items-center gap-2">
+                                <div className={`w-1.5 h-1.5 rounded-full ${v.stock < 10 ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`} />
+                                <p className="text-xs font-bold text-slate-600">Stock: {v.stock}</p>
                               </div>
-                              <p className="text-xs text-slate-500 mt-2">
-                                Stock Left: <span className={`font-bold ${v.stock < 5 ? 'text-red-500' : 'text-slate-800'}`}>{v.stock}</span>
-                              </p>
                             </div>
                           ))}
                         </div>
@@ -314,217 +288,161 @@ const deleteProduct = async () => {
               ))}
             </tbody>
           </table>
+          {filteredProducts.length === 0 && (
+            <div className="py-20 text-center">
+              <div className="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search className="text-slate-300" size={30} />
+              </div>
+              <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">No matching inventory</p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* MODALS (Category and Product as defined in your prompt) */}
-      {/* ... Add Category Modal Code from original snippet ... */}
-      
-      {/* PRODUCT MODAL (Handles both Add & Edit) */}
+      {/* DELETE MODAL */}
+      {deleteTarget && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[110] p-4">
+          <div className="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl">
+            <h3 className="text-xl font-black text-slate-800 mb-2">Delete Product?</h3>
+            <p className="text-sm text-slate-500 mb-8">This will remove <span className="font-bold text-slate-800">{deleteTarget.name}</span> permanently. This action cannot be undone.</p>
+            <div className="flex gap-3">
+              <button onClick={deleteProduct} className="flex-1 bg-rose-500 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-rose-600 transition shadow-lg shadow-rose-100">Delete Product</button>
+              <button onClick={() => setDeleteTarget(null)} className="flex-1 bg-slate-100 text-slate-500 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* BRAND & CATEGORY MODALS */}
+      {(showCatModal || showBrandModal) && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[110] p-4">
+          <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-sm shadow-2xl">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">{showCatModal ? "Add Category" : "Add Brand"}</h3>
+              <button onClick={() => {setShowCatModal(false); setShowBrandModal(false);}} className="p-2 hover:bg-slate-50 rounded-full transition"><X size={20}/></button>
+            </div>
+            <input
+              type="text"
+              placeholder={showCatModal ? "Category Name" : "Brand Name"}
+              value={showCatModal ? newCategory : newBrand}
+              onChange={(e) => showCatModal ? setNewCategory(e.target.value) : setNewBrand(e.target.value)}
+              className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl p-4 mb-6 focus:bg-white focus:border-blue-500 outline-none transition-all font-bold text-sm"
+            />
+            <button
+              onClick={showCatModal ? addCategory : async () => {
+                if (!newBrand.trim()) return alert("Brand name required");
+                try {
+                  await api.post("/brands", { brandName: newBrand.trim() });
+                  setNewBrand(""); setShowBrandModal(false); loadData();
+                } catch { alert("Failed to add brand"); }
+              }}
+              className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-600 transition shadow-xl"
+            >
+              Add Item
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ADD/EDIT PRODUCT MODAL */}
       {showModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-            <div className="p-6 border-b flex justify-between items-center bg-white sticky top-0">
-              <h2 className="text-xl font-black text-slate-800">
-                {editingId ? "Edit Product Details" : "Create New Product"}
-              </h2>
-              <button onClick={closeModal} className="p-2 hover:bg-slate-100 rounded-full transition"><X /></button>
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[110] p-4">
+          <div className="bg-white w-full max-w-3xl rounded-[3rem] shadow-2xl overflow-hidden max-h-[95vh] flex flex-col border border-white/20">
+            <div className="p-8 border-b flex justify-between items-center bg-white sticky top-0 z-10">
+              <div>
+                <h2 className="text-3xl font-black text-slate-800 tracking-tighter">
+                  {editingId ? "Update Product" : "Initialize Stock"}
+                </h2>
+                <p className="text-xs font-bold text-blue-500 uppercase tracking-widest">Global Inventory Control</p>
+              </div>
+              <button onClick={closeModal} className="p-3 hover:bg-slate-50 rounded-full transition-all border border-slate-100"><X /></button>
             </div>
 
-            <div className="p-6 overflow-y-auto">
-              {/* Image Upload UI - Keep as per your current working version */}
-              <div className="border-2 border-dashed border-slate-200 rounded-2xl p-6 mb-6 text-center hover:border-indigo-400 transition cursor-pointer relative">
-                 {imageUploading && <div className="absolute inset-0 bg-white/80 flex items-center justify-center"><Loader2 className="animate-spin text-indigo-600" /></div>}
-                 {form.imageUrl ? (
-                   <img src={form.imageUrl} className="h-40 mx-auto rounded-lg mb-2 object-contain" />
-                 ) : <Upload className="mx-auto text-slate-300 mb-2" size={32} />}
-                 <label className="cursor-pointer block">
-                    <span className="text-sm font-bold text-indigo-600">Click to upload product image</span>
-                    <input type="file" className="hidden" onChange={handleImageUpload} />
-                 </label>
+            <div className="p-8 overflow-y-auto space-y-8">
+              <div className="flex flex-col md:flex-row gap-8 items-start">
+                <div className="w-full md:w-1/3">
+                  <div className="aspect-square border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center relative overflow-hidden bg-slate-50 hover:border-blue-400 transition-all cursor-pointer group">
+                    {imageUploading && <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" /></div>}
+                    {form.imageUrl ? (
+                      <img src={form.imageUrl} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                    ) : (
+                      <div className="text-center p-4">
+                        <Upload className="mx-auto text-slate-300 mb-3" size={32} />
+                        <span className="text-xs font-black text-blue-600 uppercase tracking-widest">Upload Image</span>
+                      </div>
+                    )}
+                    <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleImageUpload} />
+                  </div>
+                </div>
+
+                <div className="w-full md:w-2/3 space-y-4">
+                  <div>
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Product Name</label>
+                    <input className="w-full bg-slate-50 border-none p-3 rounded-xl focus:bg-white focus:ring-2 ring-blue-500/10 outline-none transition-all font-bold" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Category</label>
+                      <select className="w-full bg-slate-50 border-none p-3 rounded-xl focus:bg-white outline-none font-bold appearance-none cursor-pointer" value={form.categoryId} onChange={e => setForm({ ...form, categoryId: e.target.value })}>
+                        <option value="">Select</option>
+                        {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Brand Identity</label>
+                      <select className="w-full bg-slate-50 border-none p-3 rounded-xl focus:bg-white outline-none font-bold appearance-none cursor-pointer" value={form.brandId} onChange={e => setForm({ ...form, brandId: e.target.value })}>
+                        <option value="">Select</option>
+                        {brands.map(b => <option key={b.brandId} value={b.brandId}>{b.brandName}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div className="mb-4">
-  <label className="text-xs font-bold text-slate-500 ml-1">
-    PRODUCT DESCRIPTION
-  </label>
-  <textarea
-    rows="3"
-    className="w-full border-2 border-slate-100 p-3 rounded-xl focus:border-indigo-500 outline-none transition resize-none"
-    placeholder="Enter product description"
-    value={form.description}
-    onChange={(e) =>
-      setForm({ ...form, description: e.target.value })
-    }
-  />
-</div>
-
-                <div>
-                  <label className="text-xs font-bold text-slate-500 ml-1">PRODUCT NAME</label>
-                  <input className="w-full border-2 border-slate-100 p-3 rounded-xl focus:border-indigo-500 outline-none transition" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-slate-500 ml-1">CATEGORY</label>
-                  <select className="w-full border-2 border-slate-100 p-3 rounded-xl focus:border-indigo-500 outline-none transition" value={form.categoryId} onChange={e => setForm({ ...form, categoryId: e.target.value })}>
-                    <option value="">Select Category</option>
-                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
-                </div>
+              <div>
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Nomenclature/Description</label>
+                <textarea rows="3" className="w-full bg-slate-50 border-none p-4 rounded-2xl focus:bg-white outline-none transition-all font-medium text-base" placeholder="Summarize product attributes..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
               </div>
 
-              <div className="mb-6">
-                <div className="flex justify-between items-center mb-3">
-                  <label className="text-xs font-bold text-slate-500 ml-1">VARIANTS & INVENTORY</label>
-                  <button onClick={() => setForm({ ...form, variants: [...form.variants, { ...DEFAULT_VARIANT }] })} className="text-indigo-600 font-bold text-xs flex items-center gap-1 hover:underline">
-                    <Plus size={14} /> Add Variant
-                  </button>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-[13px] font-black text-slate-900 uppercase tracking-[0.2em]">Sku Configurations</h4>
+                  <button onClick={() => setForm({ ...form, variants: [...form.variants, { ...DEFAULT_VARIANT }] })} className="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-xs font-black hover:bg-blue-600 hover:text-white transition-all">+ CONFIG</button>
                 </div>
-
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {form.variants.map((v, i) => (
-                    <div key={i} className="flex gap-3 items-end bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                      <div className="flex-1">
-                        <label className="text-[10px] font-bold text-slate-400">SIZE</label>
-                        <select className="w-full border-none bg-white p-2 rounded-lg text-sm" value={v.size} onChange={e => {
-                          const vs = [...form.variants]; vs[i].size = e.target.value; setForm({ ...form, variants: vs });
-                        }}>
-                          <option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option>
-                        </select>
-                      </div>
-                      <div className="flex-1">
-                        <label className="text-[10px] font-bold text-slate-400">PRICE (₹)</label>
-                        <input
-  type="number"
-  className="w-full border-none bg-white p-2 rounded-lg text-sm"
-  value={v.price}
-  onChange={e => {
-    const vs = [...form.variants];
-    vs[i].price = e.target.value;
-    setForm({ ...form, variants: vs });
-  }}
-  onBlur={e => {
-    const vs = [...form.variants];
-    vs[i].price = Number(e.target.value);
-    setForm({ ...form, variants: vs });
-  }}
-/>
-
-                      </div>
-                      <div className="flex-1">
-                        <label className="text-[10px] font-bold text-slate-400">STOCK QTY</label>
-                       <input
-  type="number"
-  className="w-full border-none bg-white p-2 rounded-lg text-sm"
-  value={v.stock}
-  onChange={e => {
-    const vs = [...form.variants];
-    vs[i].stock = e.target.value;
-    setForm({ ...form, variants: vs });
-  }}
-  onBlur={e => {
-    const vs = [...form.variants];
-    vs[i].stock = Number(e.target.value);
-    setForm({ ...form, variants: vs });
-  }}
-/>
-
-                      </div>
-                      <button onClick={() => setForm({ ...form, variants: form.variants.filter((_, idx) => idx !== i) })} className="p-2 text-red-400 hover:bg-red-50 rounded-lg">
-                        <Trash2 size={18} />
-                      </button>
+                    <div key={i} className="flex gap-2 items-center bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
+                      <select className="bg-white border-none rounded-lg text-xs font-bold p-1.5 w-16" value={v.size} onChange={e => {
+                        const vs = [...form.variants]; vs[i].size = e.target.value; setForm({ ...form, variants: vs });
+                      }}>
+                        <option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option>
+                      </select>
+                      <input type="number" placeholder="Price" className="bg-white border-none rounded-lg text-xs font-bold p-1.5 w-full" value={v.price} onChange={e => {
+                        const vs = [...form.variants]; vs[i].price = e.target.value; setForm({ ...form, variants: vs });
+                      }} onBlur={e => {
+                        const vs = [...form.variants]; vs[i].price = Number(e.target.value); setForm({ ...form, variants: vs });
+                      }} />
+                      <input type="number" placeholder="Stock" className="bg-white border-none rounded-lg text-xs font-bold p-1.5 w-24" value={v.stock} onChange={e => {
+                        const vs = [...form.variants]; vs[i].stock = e.target.value; setForm({ ...form, variants: vs });
+                      }} onBlur={e => {
+                        const vs = [...form.variants]; vs[i].stock = Number(e.target.value); setForm({ ...form, variants: vs });
+                      }} />
+                      <button onClick={() => setForm({ ...form, variants: form.variants.filter((_, idx) => idx !== i) })} className="p-1.5 text-rose-400 hover:bg-rose-50 rounded-lg"><Trash2 size={14}/></button>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
-{showCatModal && (
-  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
-      <h3 className="text-lg font-bold text-slate-800 mb-4">
-        Add Category
-      </h3>
 
-      <input
-        type="text"
-        placeholder="Category name"
-        value={newCategory}
-        onChange={(e) => setNewCategory(e.target.value)}
-        className="w-full border-2 border-slate-200 rounded-xl p-3 mb-4 focus:border-indigo-500 outline-none"
-      />
-
-      <div className="flex gap-3">
-        <button
-          onClick={addCategory}
-          className="flex-1 bg-indigo-600 text-white py-2 rounded-xl font-bold hover:bg-indigo-700 transition"
-        >
-          Add
-        </button>
-
-        <button
-          onClick={() => setShowCatModal(false)}
-          className="flex-1 border border-slate-200 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-50 transition"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
-            <div className="p-6 border-t bg-slate-50 flex gap-3">
-              <button onClick={saveProduct} className="flex-1 bg-indigo-600 text-white py-3 rounded-2xl font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition">
-                {editingId ? "Update Product" : "Save Product"}
+            <div className="p-8 border-t bg-slate-50 flex gap-4">
+              <button onClick={saveProduct} className="flex-1 bg-slate-900 text-white py-4 rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-blue-600 transition shadow-xl shadow-slate-200">
+                {editingId ? "Save Changes" : "Create Product"}
               </button>
-              <button onClick={closeModal} className="px-6 border-2 border-slate-200 py-3 rounded-2xl font-bold text-slate-500 hover:bg-white transition">
-                Cancel
-              </button>
+              <button onClick={closeModal} className="px-8 border-2 border-slate-200 py-4 rounded-[1.5rem] font-black text-xs text-slate-400 uppercase tracking-widest hover:bg-white transition">Cancel</button>
             </div>
           </div>
         </div>
       )}
-      {showCatModal && (
-  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-bold text-slate-800">
-          Add Category
-        </h3>
-        <button
-          onClick={() => setShowCatModal(false)}
-          className="p-2 hover:bg-slate-100 rounded-full"
-        >
-          <X size={18} />
-        </button>
-      </div>
-
-      <input
-        type="text"
-        placeholder="Category name"
-        value={newCategory}
-        onChange={(e) => setNewCategory(e.target.value)}
-        className="w-full border-2 border-slate-200 rounded-xl p-3 mb-4 focus:border-indigo-500 outline-none"
-      />
-
-      <div className="flex gap-3">
-        <button
-          onClick={addCategory}
-          className="flex-1 bg-indigo-600 text-white py-2 rounded-xl font-bold hover:bg-indigo-700 transition"
-        >
-          Add
-        </button>
-
-        <button
-          onClick={() => setShowCatModal(false)}
-          className="flex-1 border border-slate-200 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-50 transition"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
     </div>
   );
 }

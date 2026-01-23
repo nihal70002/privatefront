@@ -156,7 +156,8 @@ export default function MyOrders() {
                       </td>
                       <td className="px-6 py-4 text-center">
                         <button
-                          onClick={() => navigate(`/profile/orders/${order.orderId}`)}
+                          onClick={() => navigate(`/orders/${order.orderId}`)}
+
                           className="inline-flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-teal-700 transition-all hover:scale-105 shadow-md"
                         >
                           <Eye size={16} />
@@ -203,7 +204,8 @@ export default function MyOrders() {
                       </p>
                     </div>
                     <button
-                      onClick={() => navigate(`/profile/orders/${order.orderId}`)}
+                      onClick={() => navigate(`/orders/${order.orderId}`)}
+
                       className="flex items-center gap-2 bg-teal-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-teal-700 transition-all"
                     >
                       <Eye size={16} />

@@ -14,3 +14,9 @@
   width: 133.3333%;
   height: 133.3333%;
 }
+.zoom-80 {
+  zoom: 0.8; /* Works in Chrome, Edge, Safari */
+  -moz-transform: scale(0.8); /* Support for Firefox */
+  -moz-transform-origin: top left;
+  width: 125%; /* Offsets the scale so it still fills the screen */
+}
