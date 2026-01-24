@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, ShoppingCart, Users, TrendingUp, Calendar } from "lucide-react";
+import { ChevronLeft, ShoppingCart, Users, TrendingUp, Calendar, BadgeCheck } from "lucide-react";
 import api from "../../api/axios";
 
 export default function SalesExecutiveDetails() {
@@ -13,9 +13,7 @@ export default function SalesExecutiveDetails() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await api.get(
-          `/admin/sales-executives/${id}/performance`
-        );
+        const res = await api.get(`/admin/sales-executives/${id}/performance`);
         setPerformance(res.data);
       } catch (err) {
         console.error("Failed to load sales executive performance", err);
@@ -23,22 +21,21 @@ export default function SalesExecutiveDetails() {
         setLoading(false);
       }
     };
-
     load();
   }, [id]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAFBFC] flex items-center justify-center">
-        <div className="text-slate-600 font-semibold">Loading...</div>
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+        <div className="animate-spin h-6 w-6 border-2 border-indigo-600 border-t-transparent rounded-full" />
       </div>
     );
   }
 
   if (!performance) {
     return (
-      <div className="min-h-screen bg-[#FAFBFC] flex items-center justify-center">
-        <div className="text-red-600 font-semibold">Failed to load data</div>
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+        <div className="text-red-500 text-sm font-medium">Failed to load executive data</div>
       </div>
     );
   }
@@ -52,178 +49,116 @@ export default function SalesExecutiveDetails() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFBFC]">
-      <div className="max-w-7xl mx-auto p-8 lg:p-12 space-y-8">
-        
-        {/* BACK BUTTON */}
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-slate-600 hover:text-slate-900 font-medium transition-colors"
-        >
-          <ArrowLeft size={20} />
-          <span>Back</span>
-        </button>
+    // Reduced top padding (pt-4) to move content to the very top
+    <div className="min-h-screen bg-[#F8FAFC] px-6 pt-4 pb-10 font-sans antialiased text-slate-900">
+      <div className="max-w-7xl mx-auto space-y-4">
 
-        {/* HEADER CARD */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">
-                {performance.name}
-              </h1>
-              <p className="text-slate-500 font-medium">
-                Sales Executive ID: {performance.salesExecutiveId}
-              </p>
+        {/* COMPACT NAV & HEADER */}
+        <div className="space-y-3">
+          <button
+            onClick={() => navigate(-1)}
+            className="group flex items-center gap-1.5 text-slate-400 hover:text-indigo-600 transition-colors"
+          >
+            <ChevronLeft size={16} />
+            <span className="text-[11px] font-bold uppercase tracking-widest">Back to Directory</span>
+          </button>
+
+          <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 rounded-lg bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-100 text-white">
+                <Users size={20} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-lg font-bold tracking-tight">{performance.name}</h1>
+                  <BadgeCheck size={16} className="text-blue-500" />
+                </div>
+                <p className="text-[11px] text-slate-400 font-medium uppercase tracking-tighter">
+                  Executive ID: #{performance.salesExecutiveId}
+                </p>
+              </div>
             </div>
-            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-md">
-              <Users size={32} className="text-white" />
+            
+            {/* Quick Summary Value */}
+            <div className="hidden md:block text-right">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Total Value</p>
+              <p className="text-xl font-black text-indigo-600">₹{(performance.totalOrderValue ?? 0).toLocaleString()}</p>
             </div>
           </div>
         </div>
 
-        {/* ORDER STATS GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-          <StatCard
-            label="Pending Orders"
-            value={performance.pendingOrders}
-            icon={<ShoppingCart size={20} />}
-            theme="amber"
-            onClick={() => goToOrders("pending")}
-          />
-          <StatCard
-            label="Accepted Orders"
-            value={performance.acceptedOrders}
-            icon={<ShoppingCart size={20} />}
-            theme="emerald"
-            onClick={() => goToOrders("accepted")}
-          />
-          <StatCard
-            label="Rejected Orders"
-            value={performance.rejectedOrders}
-            icon={<ShoppingCart size={20} />}
-            theme="rose"
-            onClick={() => goToOrders("rejected")}
-          />
-          <StatCard
-            label="Total Orders"
-            value={performance.totalOrders}
-            icon={<ShoppingCart size={20} />}
-            theme="indigo"
-            onClick={() => goToOrders("all")}
-          />
+        {/* PRIMARY STATS GRID - Tighter Gaps */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <StatCard label="Pending" value={performance.pendingOrders} icon={<ShoppingCart size={14} />} theme="amber" onClick={() => goToOrders("pending")} />
+          <StatCard label="Accepted" value={performance.acceptedOrders} icon={<ShoppingCart size={14} />} theme="emerald" onClick={() => goToOrders("accepted")} />
+          <StatCard label="Rejected" value={performance.rejectedOrders} icon={<ShoppingCart size={14} />} theme="rose" onClick={() => goToOrders("rejected")} />
+          <StatCard label="Total Orders" value={performance.totalOrders} icon={<ShoppingCart size={14} />} theme="indigo" onClick={() => goToOrders("all")} />
         </div>
 
-        {/* BOTTOM ROW */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
-          {/* TOTAL CUSTOMERS */}
-          <StatCard
-            label="Total Customers"
-            value={performance.totalCustomers}
-            icon={<Users size={20} />}
-            theme="sky"
-            onClick={goToCustomers}
-            large
-          />
-
-          {/* TOTAL ORDER VALUE */}
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-2 text-slate-500 text-xs font-semibold uppercase tracking-wide mb-3">
-                <TrendingUp size={16} />
-                Total Order Value
-              </div>
-              <p className="text-4xl font-bold text-slate-900 mb-4">
-                ₹{(performance.totalOrderValue ?? 0).toLocaleString()}
-              </p>
+        {/* SECONDARY DETAILS GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div onClick={goToCustomers} className="md:col-span-1 bg-white border border-slate-200 rounded-xl p-5 cursor-pointer hover:border-indigo-300 transition-all group">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Total Customers</span>
+              <Users size={16} className="text-slate-300 group-hover:text-indigo-500 transition-colors" />
             </div>
-            
-            {performance.lastOrderDate && (
-              <div className="flex items-center gap-2 text-sm text-slate-500 bg-slate-50 rounded-xl px-4 py-3 border border-slate-200">
-                <Calendar size={16} />
-                <span>
-                  Last Order: {new Date(performance.lastOrderDate).toLocaleDateString('en-IN', { 
-                    day: 'numeric', 
-                    month: 'short', 
-                    year: 'numeric' 
-                  })}
-                </span>
+            <p className="text-3xl font-black text-slate-800">{performance.totalCustomers ?? 0}</p>
+            <div className="mt-2 text-[10px] text-indigo-600 font-bold uppercase">View Directory →</div>
+          </div>
+
+          <div className="md:col-span-2 bg-white border border-slate-200 rounded-xl p-5 flex flex-col justify-between relative overflow-hidden">
+             {/* Background Decoration */}
+             <TrendingUp className="absolute -right-4 -bottom-4 text-slate-50 h-24 w-24 -rotate-12" />
+             
+             <div className="relative z-10">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Order Revenue Distribution</span>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <p className="text-3xl font-black text-slate-800">₹{(performance.totalOrderValue ?? 0).toLocaleString()}</p>
+                  <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">Gross Value</span>
+                </div>
+             </div>
+
+             {performance.lastOrderDate && (
+              <div className="mt-4 flex items-center gap-2 text-[11px] font-medium text-slate-500">
+                <Calendar size={12} className="text-slate-400" />
+                <span>Last Activity: {new Date(performance.lastOrderDate).toLocaleDateString("en-IN", { day: '2-digit', month: 'short', year: 'numeric' })}</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* INFO NOTE */}
-        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
-          <p className="text-sm text-blue-700 font-medium">
-            💡 Click on any card to view detailed information about orders and customers.
-          </p>
+        {/* Tighter Hint Box */}
+        <div className="bg-indigo-50/50 border border-indigo-100 rounded-lg py-2 px-4 flex items-center gap-2">
+          <span className="text-indigo-600 text-[11px] font-bold">PRO TIP:</span>
+          <p className="text-[11px] text-indigo-500 font-medium">Click on any numeric card to drill down into specific data sets.</p>
         </div>
       </div>
     </div>
   );
 }
 
-/* STAT CARD COMPONENT */
-function StatCard({ label, value, icon, theme, onClick, large }) {
+/* COMPACT STAT CARD */
+function StatCard({ label, value, icon, theme, onClick }) {
   const themes = {
-    amber: {
-      bg: "bg-[#FFF9E6]",
-      border: "border-amber-200",
-      text: "text-amber-700",
-      hover: "hover:border-amber-400 hover:shadow-amber-100"
-    },
-    emerald: {
-      bg: "bg-[#E8F5E9]",
-      border: "border-emerald-200",
-      text: "text-emerald-700",
-      hover: "hover:border-emerald-400 hover:shadow-emerald-100"
-    },
-    rose: {
-      bg: "bg-[#FFEBEE]",
-      border: "border-rose-200",
-      text: "text-rose-700",
-      hover: "hover:border-rose-400 hover:shadow-rose-100"
-    },
-    indigo: {
-      bg: "bg-[#EDE7F6]",
-      border: "border-indigo-200",
-      text: "text-indigo-700",
-      hover: "hover:border-indigo-400 hover:shadow-indigo-100"
-    },
-    sky: {
-      bg: "bg-[#E3F2FD]",
-      border: "border-sky-200",
-      text: "text-sky-700",
-      hover: "hover:border-sky-400 hover:shadow-sky-100"
-    }
+    amber: { bg: "bg-white", border: "border-slate-200", stripe: "bg-amber-500", text: "text-amber-600" },
+    emerald: { bg: "bg-white", border: "border-slate-200", stripe: "bg-emerald-500", text: "text-emerald-600" },
+    rose: { bg: "bg-white", border: "border-slate-200", stripe: "bg-rose-500", text: "text-rose-600" },
+    indigo: { bg: "bg-white", border: "border-slate-200", stripe: "bg-indigo-500", text: "text-indigo-600" },
   };
 
-  const currentTheme = themes[theme];
+  const t = themes[theme];
 
   return (
     <div
-      role="button"
-      tabIndex={0}
       onClick={onClick}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          onClick();
-        }
-      }}
-      className={`
-        ${currentTheme.bg} ${currentTheme.border} border rounded-3xl 
-        ${large ? 'p-8' : 'p-6'} 
-        cursor-pointer transition-all 
-        hover:shadow-lg ${currentTheme.hover}
-        flex flex-col gap-3
-      `}
+      className={`${t.bg} border ${t.border} rounded-xl p-4 cursor-pointer transition-all hover:shadow-sm hover:border-slate-300 relative overflow-hidden group`}
     >
-      <div className={`flex items-center gap-2 text-xs font-semibold uppercase tracking-wide ${currentTheme.text} opacity-80`}>
+      <div className={`absolute top-0 left-0 w-1 h-full ${t.stripe} opacity-70`} />
+      <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 group-hover:text-slate-600 transition-colors">
         {icon}
         {label}
       </div>
-      <p className={`${large ? 'text-4xl' : 'text-3xl'} font-bold ${currentTheme.text}`}>
+      <p className="text-2xl font-black text-slate-800">
         {value ?? 0}
       </p>
     </div>

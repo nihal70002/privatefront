@@ -63,7 +63,7 @@ export default function AdminOrders() {
   const statusOptions = ["All", "WaitingSalesApproval", "WaitingAdminApproval", "Confirmed", "Dispatched", "Delivered", "Cancelled"];
 
   return (
-    <div className="min-h-screen bg-[#F0F4F8] p-4 font-sans antialiased text-slate-900">
+     <div className="min-h-screen overflow-y-auto bg-[#F0F4F8] p-4 font-sans antialiased text-slate-900">
       <div className="max-w-[1400px] mx-auto space-y-6">
         
         {/* WATER EFFECT TOP BAR */}

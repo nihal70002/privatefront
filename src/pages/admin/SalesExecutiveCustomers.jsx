@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ChevronLeft, Users, Building2, Mail, Phone, Search, Download } from "lucide-react";
+import { ChevronLeft, Users, Building2, Mail, Phone, Search, Download, MoreVertical } from "lucide-react";
 import api from "../../api/axios";
 
 export default function SalesExecutiveCustomers() {
@@ -21,7 +21,6 @@ export default function SalesExecutiveCustomers() {
         setLoading(false);
       }
     };
-
     if (id) loadCustomers();
   }, [id]);
 
@@ -31,112 +30,113 @@ export default function SalesExecutiveCustomers() {
   );
 
   if (loading) return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-white">
-      <div className="animate-spin h-14 w-14 border-4 border-indigo-600 border-t-transparent rounded-full mb-6" />
-      <p className="text-3xl font-black text-slate-400 uppercase tracking-[0.2em]">Loading Directory...</p>
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="animate-spin h-6 w-6 border-2 border-indigo-600 border-t-transparent rounded-full" />
     </div>
   );
 
   return (
-    <div style={{ zoom: "80%" }} className="min-h-screen bg-[#F8FAFC] p-12 font-sans antialiased">
-      <div className="max-w-[1600px] mx-auto space-y-12">
+    // Reduced padding-top (pt-4) and general padding to push content upwards
+    <div className="min-h-screen bg-[#F8FAFC] px-6 pt-4 pb-10 font-sans antialiased text-slate-900">
+      <div className="max-w-7xl mx-auto">
         
-        {/* TOP NAV & TOOLS */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-3 text-indigo-600 font-black text-2xl hover:-translate-x-2 transition-transform uppercase tracking-widest"
-          >
-            <ChevronLeft size={32} strokeWidth={3} /> Back
-          </button>
+        {/* COMPACT HEADER SECTION */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+          <div className="space-y-1">
+            <button
+              onClick={() => navigate(-1)}
+              className="group flex items-center gap-1.5 text-slate-400 hover:text-indigo-600 transition-colors mb-2"
+            >
+              <ChevronLeft size={16} />
+              <span className="text-[11px] font-bold uppercase tracking-widest">Back to Executives</span>
+            </button>
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-indigo-600 rounded-lg text-white shadow-md shadow-indigo-100">
+                <Users size={22} />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold tracking-tight leading-none">Customer Base</h1>
+                <p className="text-slate-500 text-xs mt-1">Managing {filteredCustomers.length} verified accounts</p>
+              </div>
+            </div>
+          </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+          <div className="flex items-center gap-2">
             <div className="relative">
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={24} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
               <input 
                 type="text"
-                placeholder="Search customers..."
-                className="pl-16 pr-8 py-5 w-full sm:w-[450px] rounded-[2rem] border-4 border-white bg-white shadow-xl shadow-slate-200/50 outline-none focus:border-indigo-500 font-bold text-xl transition-all"
+                placeholder="Search..."
+                className="pl-9 pr-4 py-2 w-full md:w-60 rounded-lg border border-slate-200 bg-white shadow-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm"
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <button className="bg-white p-5 rounded-[2rem] border-4 border-white shadow-xl shadow-slate-200/50 text-slate-400 hover:text-indigo-600 transition-colors">
-              <Download size={28} />
+            <button className="bg-white border border-slate-200 p-2 rounded-lg text-slate-500 hover:bg-slate-50 transition-colors shadow-sm">
+              <Download size={16} />
             </button>
           </div>
         </div>
 
-        {/* PAGE HEADER */}
-        <div className="flex items-end justify-between">
-          <div className="flex items-center gap-6">
-            <div className="p-6 bg-indigo-600 rounded-[2.5rem] text-white shadow-2xl shadow-indigo-200">
-              <Users size={48} strokeWidth={2.5} />
-            </div>
-            <div>
-              <h1 className="text-7xl font-black text-slate-900 tracking-tighter leading-none">Customer Base</h1>
-              <p className="text-2xl text-slate-500 font-bold mt-4">Verified business accounts assigned to this executive.</p>
-            </div>
-          </div>
-          <div className="text-right">
-             <span className="text-sm font-black text-slate-400 uppercase tracking-[0.3em]">Active Directory</span>
-             <p className="text-6xl font-black text-indigo-600 mt-2">{filteredCustomers.length}</p>
-          </div>
-        </div>
-
-        {/* CUSTOMER TABLE */}
-        <div className="bg-white rounded-[4rem] shadow-2xl shadow-slate-200/60 border-4 border-white overflow-hidden">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 border-b-4 border-slate-100">
-                <th className="p-10 text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Contact Identity</th>
-                <th className="p-10 text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Organization</th>
-                <th className="p-10 text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Email Address</th>
-                <th className="p-10 text-xs font-black text-slate-400 uppercase tracking-[0.2em] text-right">Phone Number</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y-2 divide-slate-50">
-              {filteredCustomers.map((c) => (
-                <tr key={c.customerId} className="hover:bg-indigo-50/30 transition-colors group">
-                  <td className="p-10">
-                    <div className="flex items-center gap-5">
-                      <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 font-black text-xl group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                        {c.name.charAt(0)}
-                      </div>
-                      <span className="text-3xl font-black text-slate-800 tracking-tight">{c.name}</span>
-                    </div>
-                  </td>
-                  <td className="p-10">
-                    <div className="flex items-center gap-3 text-indigo-600">
-                      <Building2 size={24} className="opacity-50" />
-                      <span className="text-2xl font-black tracking-tight">{c.companyName || "Personal Account"}</span>
-                    </div>
-                  </td>
-                  <td className="p-10">
-                    <div className="flex items-center gap-3 text-slate-500 font-bold text-xl">
-                      <Mail size={22} className="text-slate-300" />
-                      {c.email}
-                    </div>
-                  </td>
-                  <td className="p-10 text-right">
-                    <div className="inline-flex items-center gap-3 bg-slate-100 px-6 py-3 rounded-2xl text-slate-700 font-black text-xl group-hover:bg-white group-hover:shadow-md transition-all">
-                      <Phone size={20} className="text-indigo-500" />
-                      {c.phoneNumber}
-                    </div>
-                  </td>
+        {/* COMPACT DATA TABLE */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-slate-50/50 border-b border-slate-200">
+                  <th className="px-5 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contact Identity</th>
+                  <th className="px-5 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Organization</th>
+                  <th className="px-5 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email Address</th>
+                  <th className="px-5 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phone Number</th>
+                  <th className="px-5 py-3 text-right"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {filteredCustomers.map((c) => (
+                  <tr key={c.customerId} className="hover:bg-slate-50/50 transition-colors group">
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-slate-500 font-bold text-xs group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                          {c.name.charAt(0)}
+                        </div>
+                        <span className="text-sm font-semibold text-slate-700">{c.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-2 text-slate-600">
+                        <Building2 size={13} className="text-slate-300" />
+                        <span className="text-xs font-medium">{c.companyName || "Personal Account"}</span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-2 text-slate-500 text-xs">
+                        <Mail size={13} className="text-slate-300" />
+                        {c.email}
+                      </div>
+                    </td>
+                    <td className="px-5 py-3">
+                      <div className="inline-flex items-center gap-2 bg-slate-50 px-2.5 py-1 rounded-md text-slate-600 text-[11px] font-bold">
+                        <Phone size={11} className="text-indigo-400" />
+                        {c.phoneNumber}
+                      </div>
+                    </td>
+                    <td className="px-5 py-3 text-right">
+                       <button className="p-1 text-slate-300 hover:text-slate-500 transition-colors">
+                          <MoreVertical size={16} />
+                       </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           
           {filteredCustomers.length === 0 && (
-            <div className="p-32 text-center">
-               <p className="text-3xl font-black text-slate-300 uppercase tracking-widest">No customer data found</p>
+            <div className="py-12 text-center">
+               <p className="text-xs font-medium text-slate-400 uppercase tracking-widest">No customers found</p>
             </div>
           )}
         </div>
 
-        {/* FOOTER SPACER */}
-        <div className="h-20" />
       </div>
     </div>
   );

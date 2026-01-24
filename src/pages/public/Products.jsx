@@ -73,7 +73,7 @@ useEffect(() => {
       setCartCount(updatedCart.data?.length || 0);
       
       const notification = document.createElement('div');
-      notification.className = 'fixed top-20 right-6 bg-teal-600 text-white px-5 py-2.5 rounded-md shadow-lg font-medium z-50 text-sm';
+      notification.className = 'fixed top-20 right-6 bg-teal-600 text-white px-5 py-2.5 rounded-md shadow-lg font-medium z-50 text-xs';
       notification.textContent = '✓ Added to bag';
       document.body.appendChild(notification);
       setTimeout(() => notification.remove(), 2000);
@@ -164,7 +164,7 @@ const filteredProducts = products.filter(product => {
       value={searchQuery}
       onChange={(e) => setSearchQuery(e.target.value)}
       className="
-        w-full pl-12 pr-4 py-2.5 text-sm
+        w-full pl-12 pr-4 py-2.5 text-xs
         bg-slate-50
         border border-slate-300
         rounded-lg
@@ -229,12 +229,12 @@ const filteredProducts = products.filter(product => {
 
         {/* SIDEBAR FILTERS */}
         {showFilters && (
-          <aside className="w-64 bg-white border-r border-gray-200 p-4 sticky top-24">
+          <aside className="w-49 bg-white border-r border-gray-200 p-4 sticky top-24">
 
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal size={18} className="text-teal-600" />
-                <h3 className="text-sm font-bold text-gray-900">FILTERS</h3>
+                <h3 className="text-xs font-bold text-gray-900">FILTERS</h3>
               </div>
               <button
   onClick={clearFilters}
@@ -247,7 +247,7 @@ const filteredProducts = products.filter(product => {
 
             {/* Categories */}
            <div className="mb-6 pb-6 border-b border-gray-100">
- <h4 className="text-sm font-bold text-gray-900 mb-3">
+ <h4 className="text-xs font-bold text-gray-900 mb-3">
   CATEGORIES
 </h4>
 
@@ -255,7 +255,7 @@ const filteredProducts = products.filter(product => {
   {categories.map(cat => (
     <label
       key={cat.categoryId}
-      className="flex items-center text-sm text-gray-700 cursor-pointer hover:text-teal-700"
+      className="flex items-center text-xs text-gray-700 cursor-pointer hover:text-teal-700"
     >
       <input
         type="checkbox"
@@ -270,14 +270,14 @@ const filteredProducts = products.filter(product => {
 </div>
 
 <div className="mb-6">
-  <h4 className="text-sm font-bold text-gray-900 mb-3">BRAND</h4>
+  <h4 className="text-xs font-bold text-gray-900 mb-3">BRAND</h4>
 
 
   <div className="space-y-2">
     {brands.map((brand) => (
       <label
         key={brand.brandId}
-        className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer"
+        className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer"
       >
         <input
           type="checkbox"
@@ -301,16 +301,16 @@ const filteredProducts = products.filter(product => {
             <div className="mb-4">
               <h4 className="text-xs font-bold text-gray-900 mb-4 uppercase tracking-wide">Price Range</h4>
               <div className="space-y-3">
-                <label className="flex items-center gap-2 text-sm text-gray-800 cursor-pointer hover:text-black">
+                <label className="flex items-center gap-2 text-xs text-gray-800 cursor-pointer hover:text-black">
 
                   <input type="checkbox" className="mr-3 w-4 h-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500" />
                   <span className="group-hover:translate-x-0.5 transition-transform">Under ₹500</span>
                 </label>
-                <label className="flex items-center text-sm text-gray-700 hover:text-teal-700 cursor-pointer group">
+                <label className="flex items-center text-xs text-gray-700 hover:text-teal-700 cursor-pointer group">
                   <input type="checkbox" className="mr-3 w-4 h-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500" />
                   <span className="group-hover:translate-x-0.5 transition-transform">₹500 - ₹1000</span>
                 </label>
-                <label className="flex items-center text-sm text-gray-700 hover:text-teal-700 cursor-pointer group">
+                <label className="flex items-center text-xs text-gray-700 hover:text-teal-700 cursor-pointer group">
                   <input type="checkbox" className="mr-3 w-4 h-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500" />
                   <span className="group-hover:translate-x-0.5 transition-transform">Above ₹1000</span>
                 </label>

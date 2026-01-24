@@ -150,9 +150,9 @@ export default function AdminProducts() {
   });
 
   return (
-    <div style={{ zoom: "85%" }} className="min-h-screen bg-[#F8FAFC] p-10 font-sans antialiased text-slate-900">
-      <div className="max-w-[1700px] mx-auto space-y-4">
-        
+   <div className="h-full overflow-y-auto bg-[#F8FAFC] px-6 py-6 text-[13px] leading-tight">
+  <div className="max-w-[1700px] mx-auto space-y-3">
+
         {/* HEADER */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -215,28 +215,28 @@ export default function AdminProducts() {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100 text-xs font-black text-slate-400 uppercase tracking-widest">
-                <th className="px-8 py-3">Product Details</th>
+                <th className="px-6 py-3">Product Details</th>
                 <th className="px-6 py-3 text-center">Visibility</th>
-                <th className="px-8 py-3 text-right">Actions</th>
+                <th className="px-6 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {filteredProducts.map(p => (
                 <React.Fragment key={p.productId}>
                   <tr className="group hover:bg-slate-50/80 transition-all">
-                    <td className="px-8 py-3">
+                    <td className="px-6 py-3">
                       <div className="flex items-center gap-5">
                         <div className="relative">
-                          <img src={p.imageUrl || "https://via.placeholder.com/150"} className="w-12 h-12 rounded-2xl object-cover bg-slate-100 border border-slate-100 shadow-sm" />
+                          <img src={p.imageUrl || "https://via.placeholder.com/150"} className="w-10 h-10 rounded-l object-cover bg-slate-100 border border-slate-100 shadow-sm" />
                           <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${p.isActive ? 'bg-emerald-500' : 'bg-slate-300'}`} />
                         </div>
                         <div>
-                          <p className="font-bold text-slate-800 text-sm leading-tight group-hover:text-blue-600 transition-colors">{p.name}</p>
+                          <p className="font-bold text-slate-800 text-xs leading-tight group-hover:text-blue-600 transition-colors">{p.name}</p>
                           <p className="text-xs font-bold text-blue-500 uppercase tracking-tighter mt-1">{p.categoryName || 'General'}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-3">
+                    <td className="px-6 py-3">
                       <div className="flex justify-center items-center gap-4">
                         <span className={`text-[11px] font-black uppercase tracking-tighter w-12 text-right ${p.isActive ? "text-emerald-500" : "text-slate-300"}`}>
                           {p.isActive ? "Active" : "Hidden"}
@@ -245,23 +245,23 @@ export default function AdminProducts() {
                         <button 
                           disabled={togglingId === p.productId}
                           onClick={() => handleToggleActive(p.productId)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 focus:outline-none ${p.isActive ? 'bg-emerald-500 shadow-lg shadow-emerald-100' : 'bg-slate-200'}`}
+                          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-all duration-300 focus:outline-none ${p.isActive ? 'bg-emerald-500 shadow-lg shadow-emerald-100' : 'bg-slate-200'}`}
                         >
                           <span className="sr-only">Toggle Active</span>
                           {togglingId === p.productId ? (
                             <Loader2 size={12} className="animate-spin mx-auto text-white" />
                           ) : (
-                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-all duration-300 shadow-sm ${p.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
+                            <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-all duration-300 shadow-sm ${p.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
                           )}
                         </button>
                       </div>
                     </td>
-                    <td className="px-8 py-3 text-right">
+                    <td className="px-6 py-3 text-right">
                       <div className="flex justify-end gap-2">
-                        <button onClick={() => openEditModal(p)} className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"><Edit3 size={18} /></button>
-                        <button onClick={() => setDeleteTarget(p)} className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"><Trash2 size={18} /></button>
+                        <button onClick={() => openEditModal(p)} className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"><Edit3 size={16} /></button>
+                        <button onClick={() => setDeleteTarget(p)} className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"><Trash2 size={16} /></button>
                         <button onClick={() => setExpandedRow(expandedRow === p.productId ? null : p.productId)} className={`p-2.5 rounded-xl transition-all ${expandedRow === p.productId ? "bg-slate-100 text-slate-900" : "text-slate-300"}`}>
-                          {expandedRow === p.productId ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                          {expandedRow === p.productId ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                         </button>
                       </div>
                     </td>
@@ -273,7 +273,7 @@ export default function AdminProducts() {
                           {p.variants?.map((v, i) => (
                             <div key={i} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
                               <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Size {v.size}</p>
-                              <p className="text-blue-600 font-black text-sm mb-2">₹{v.price}</p>
+                              <p className="text-blue-600 font-black text-xs mb-2">₹{v.price}</p>
                               <div className="flex items-center gap-2">
                                 <div className={`w-1.5 h-1.5 rounded-full ${v.stock < 10 ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`} />
                                 <p className="text-xs font-bold text-slate-600">Stock: {v.stock}</p>
@@ -304,10 +304,10 @@ export default function AdminProducts() {
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[110] p-4">
           <div className="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl">
             <h3 className="text-xl font-black text-slate-800 mb-2">Delete Product?</h3>
-            <p className="text-sm text-slate-500 mb-8">This will remove <span className="font-bold text-slate-800">{deleteTarget.name}</span> permanently. This action cannot be undone.</p>
+            <p className="text-xs text-slate-500 mb-8">This will remove <span className="font-bold text-slate-800">{deleteTarget.name}</span> permanently. This action cannot be undone.</p>
             <div className="flex gap-3">
-              <button onClick={deleteProduct} className="flex-1 bg-rose-500 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-rose-600 transition shadow-lg shadow-rose-100">Delete Product</button>
-              <button onClick={() => setDeleteTarget(null)} className="flex-1 bg-slate-100 text-slate-500 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition">Cancel</button>
+              <button onClick={deleteProduct} className="flex-1 bg-rose-500 text-white py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-rose-600 transition shadow-lg shadow-rose-100">Delete Product</button>
+              <button onClick={() => setDeleteTarget(null)} className="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition">Cancel</button>
             </div>
           </div>
         </div>
@@ -326,7 +326,7 @@ export default function AdminProducts() {
               placeholder={showCatModal ? "Category Name" : "Brand Name"}
               value={showCatModal ? newCategory : newBrand}
               onChange={(e) => showCatModal ? setNewCategory(e.target.value) : setNewBrand(e.target.value)}
-              className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl p-4 mb-6 focus:bg-white focus:border-blue-500 outline-none transition-all font-bold text-sm"
+              className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl p-4 mb-6 focus:bg-white focus:border-blue-500 outline-none transition-all font-bold text-xs"
             />
             <button
               onClick={showCatModal ? addCategory : async () => {
@@ -336,7 +336,7 @@ export default function AdminProducts() {
                   setNewBrand(""); setShowBrandModal(false); loadData();
                 } catch { alert("Failed to add brand"); }
               }}
-              className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-600 transition shadow-xl"
+              className="w-full bg-slate-900 text-white py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-600 transition shadow-xl"
             >
               Add Item
             </button>
@@ -347,10 +347,12 @@ export default function AdminProducts() {
       {/* ADD/EDIT PRODUCT MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[110] p-4">
-          <div className="bg-white w-full max-w-3xl rounded-[3rem] shadow-2xl overflow-hidden max-h-[95vh] flex flex-col border border-white/20">
-            <div className="p-8 border-b flex justify-between items-center bg-white sticky top-0 z-10">
+          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden max-h-[90vh] flex flex-col border border-slate-200">
+
+           <div className="p-5 border-b flex justify-between items-center bg-white sticky top-0 z-10">
+
               <div>
-                <h2 className="text-3xl font-black text-slate-800 tracking-tighter">
+                <h2 className="text-xl font-black text-slate-800 tracking-tighter">
                   {editingId ? "Update Product" : "Initialize Stock"}
                 </h2>
                 <p className="text-xs font-bold text-blue-500 uppercase tracking-widest">Global Inventory Control</p>
@@ -358,7 +360,7 @@ export default function AdminProducts() {
               <button onClick={closeModal} className="p-3 hover:bg-slate-50 rounded-full transition-all border border-slate-100"><X /></button>
             </div>
 
-            <div className="p-8 overflow-y-auto space-y-8">
+            <div className="p-5 overflow-y-auto space-y-5">
               <div className="flex flex-col md:flex-row gap-8 items-start">
                 <div className="w-full md:w-1/3">
                   <div className="aspect-square border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center relative overflow-hidden bg-slate-50 hover:border-blue-400 transition-all cursor-pointer group">
@@ -435,10 +437,10 @@ export default function AdminProducts() {
             </div>
 
             <div className="p-8 border-t bg-slate-50 flex gap-4">
-              <button onClick={saveProduct} className="flex-1 bg-slate-900 text-white py-4 rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-blue-600 transition shadow-xl shadow-slate-200">
+              <button onClick={saveProduct} className="flex-1 bg-slate-900 text-white py-3 rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-blue-600 transition shadow-xl shadow-slate-200">
                 {editingId ? "Save Changes" : "Create Product"}
               </button>
-              <button onClick={closeModal} className="px-8 border-2 border-slate-200 py-4 rounded-[1.5rem] font-black text-xs text-slate-400 uppercase tracking-widest hover:bg-white transition">Cancel</button>
+              <button onClick={closeModal} className="px-6 border-2 border-slate-200 py-3 rounded-[1.5rem] font-black text-xs text-slate-400 uppercase tracking-widest hover:bg-white transition">Cancel</button>
             </div>
           </div>
         </div>

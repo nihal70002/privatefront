@@ -20,3 +20,8 @@
   -moz-transform-origin: top left;
   width: 125%; /* Offsets the scale so it still fills the screen */
 }
+button,
+[role="button"],
+.cursor-pointer {
+  cursor: pointer;
+}

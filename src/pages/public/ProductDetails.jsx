@@ -17,6 +17,7 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const [addingToCart, setAddingToCart] = useState(false);
+const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -61,12 +62,9 @@ export default function ProductDetail() {
       // API: POST /api/cart/add with { productVariantId, quantity }
       await addToCartApi(selectedVariant.id, quantity);
       
-      const notification = document.createElement('div');
-      notification.className = 'fixed top-20 right-6 bg-teal-600 text-white px-5 py-2.5 rounded-md shadow-lg font-medium z-50 text-sm';
-      notification.textContent = `✓ ${quantity} item(s) added to bag`;
-      document.body.appendChild(notification);
-      setTimeout(() => notification.remove(), 2500);
-      
+      setShowToast(true);
+setTimeout(() => setShowToast(false), 2500);
+
       // Reset quantity after adding
       setQuantity(1);
     } catch (err) {
@@ -185,19 +183,21 @@ export default function ProductDetail() {
 
       {/* PRODUCT CONTENT */}
       <div className="max-w-screen-2xl mx-auto flex bg-white my-4 shadow-sm">
+        {showToast && (
+        <div className="fixed top-20 right-6 z-[99999] bg-teal-600 text-white px-5 py-2.5 rounded-md shadow-lg font-medium text-sm">
+          ✓ {quantity} item(s) added to bag
+        </div>
+      )}
         {/* LEFT: IMAGES */}
-        <div className="w-2/5 p-6">
-          <div className="space-y-3">
-            {productImages.slice(0, 2).map((img, idx) => (
-              <div key={idx} className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-                <img
-                  src={img}
-                  alt={`${product.name} - ${idx + 1}`}
-                  className="w-full h-auto object-cover hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-            ))}
-          </div>
+        <div className="w-1/3 p-4 border-r border-gray-100">
+          <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+  <img
+    src={product.imageUrl}
+    alt={product.name}
+    className="w-full h-[550px] object-contain hover:scale-105 transition-transform duration-300"
+  />
+</div>
+
         </div>
 
         {/* RIGHT: PRODUCT INFO */}
@@ -226,6 +226,7 @@ export default function ProductDetail() {
             </div>
             <p className="text-sm font-semibold text-teal-700">inclusive of all taxes</p>
           </div>
+          
 
           {/* Select Size */}
           <div className="mb-6 pb-6 border-b border-gray-200">
@@ -314,54 +315,9 @@ export default function ProductDetail() {
             </button>
           </div>
 
-          {/* Benefits */}
-          <div className="grid grid-cols-3 gap-4 mb-6 pb-6 border-b border-gray-200">
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-teal-50 rounded-full">
-                <Truck size={16} className="text-teal-600" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-gray-900">Free Delivery</p>
-                <p className="text-[10px] text-gray-500">On orders above ₹500</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-teal-50 rounded-full">
-                <RefreshCw size={16} className="text-teal-600" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-gray-900">Easy Returns</p>
-                <p className="text-[10px] text-gray-500">7 days return policy</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-teal-50 rounded-full">
-                <Shield size={16} className="text-teal-600" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-gray-900">Secure Payment</p>
-                <p className="text-[10px] text-gray-500">100% safe & secure</p>
-              </div>
-            </div>
-          </div>
+        
 
-          {/* Delivery Options */}
-          <div className="border border-gray-300 rounded-md p-4 mb-6">
-            <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase">Delivery Options</h3>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                placeholder="Enter pincode"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-teal-500"
-              />
-              <button className="px-5 py-2 bg-white border-2 border-teal-600 text-teal-600 rounded font-bold text-sm hover:bg-teal-50">
-                CHECK
-              </button>
-            </div>
-            <p className="text-xs text-gray-600">
-              Enter PIN code to check delivery time & Cash on Delivery availability
-            </p>
-          </div>
+   
 
           {/* Product Details */}
           <div className="mb-6">
@@ -374,7 +330,6 @@ export default function ProductDetail() {
       <li key={index}>{line}</li>
     ))}
 </ul>
-
 
             <div className="bg-gray-50 rounded-md p-4 space-y-2">
               <div className="flex text-sm">
@@ -394,5 +349,7 @@ export default function ProductDetail() {
         </div>
       </div>
     </div>
+    
+    
   );
 }
