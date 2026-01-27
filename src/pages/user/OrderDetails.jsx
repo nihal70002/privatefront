@@ -106,14 +106,15 @@ export default function OrderDetails() {
                 className="flex items-center gap-4 py-4"
               >
                 {/* Product Image */}
-                <img
-                  src={item.imageUrl}
-                  alt={item.productName}
-                  className="w-20 h-20 object-cover rounded-xl border"
-                  onError={(e) => {
-                    e.target.src = "/placeholder.png";
-                  }}
-                />
+               <img
+  src={item.productImage || item.imageUrl || "/placeholder.png"}
+  alt={item.productName}
+  className="w-20 h-20 object-cover rounded-xl border flex-shrink-0"
+  onError={(e) => {
+    e.currentTarget.src = "/placeholder.png";
+  }}
+/>
+
 
                 {/* Product Info */}
                 <div className="flex-1">

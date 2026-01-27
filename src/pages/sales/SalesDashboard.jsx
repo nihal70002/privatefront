@@ -58,12 +58,10 @@ export default function SalesDashboard() {
       {/* PAGE HEADER */}
       <header className="flex flex-wrap items-center justify-between gap-4 p-8">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-[#2A334E]">
+          <h2 className="text-2xl font-bold tracking-tight text-[#2A334E]">
             Sales Executive Dashboard
           </h2>
-          <p className="text-[#718096] mt-2 text-base">
-            Monitor your performance and manage client orders.
-          </p>
+          
         </div>
         <div className="flex items-center gap-3">
           <button

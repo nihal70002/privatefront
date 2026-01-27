@@ -7,6 +7,8 @@ import Login from "./pages/public/Login";
 /* PRODUCTS */
 import Products from "./pages/public/Products";
 import ProductDetails from "./pages/public/ProductDetails";
+import ForgotPassword from "./pages/public/ForgotPassword";
+import ResetPassword from "./pages/public/ResetPassword"; 
 
 /* USER */
 import Cart from "./pages/user/Cart";
@@ -16,16 +18,20 @@ import Profile from "./pages/user/Profile";
 import Addresses from "./pages/user/Addresses";
 import ChangePassword from "./pages/user/ChangePassword";
 
-/* SALES */
+/* LAYOUTS */
+import UserLayout from "./layout/UserLayout"; // Added UserLayout
 import SalesLayout from "./layout/SalesLayout";
+import AdminLayout from "./layout/AdminLayout";
+
+/* SALES */
 import SalesDashboard from "./pages/sales/SalesDashboard";
 import SalesOrders from "./pages/sales/SalesOrders";
 import SalesCustomers from "./pages/sales/SalesCustomers";
 import CreateCustomer from "./pages/sales/CreateCustomer";
 import SalesCustomerDetails from "./pages/sales/SalesCustomerDetails";
+import SalesProfile from "./pages/sales/SalesProfile";
 
 /* ADMIN */
-import AdminLayout from "./layout/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminOrderDetails from "./pages/admin/AdminOrderDetails";
@@ -46,23 +52,36 @@ import SalesRoute from "./components/common/SalesRoute";
 export default function App() {
   return (
     <Routes>
-
       {/* PUBLIC */}
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
 
-      {/* USER */}
-      <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
-      <Route path="/products/:id" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>} />
-      <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
-      <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
-      <Route path="/orders/:id" element={<ProtectedRoute><OrderDetails /></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-      <Route path="/profile/addresses" element={<ProtectedRoute><Addresses /></ProtectedRoute>} />
-      <Route path="/profile/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
+      {/* USER - Wrapped in ProtectedRoute and UserLayout */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <UserLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/products" element={<Products />} />
+        <Route path="/products/:id" element={<ProductDetails />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/orders" element={<MyOrders />} />
+        <Route path="/orders/:id" element={<OrderDetails />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile/addresses" element={<Addresses />} />
+        <Route path="/profile/change-password" element={<ChangePassword />} />
+      </Route>
 
       {/* SALES EXECUTIVE */}
-      <Route element={<SalesRoute><SalesLayout /></SalesRoute>}>
+      <Route
+        element={
+          <SalesRoute>
+            <SalesLayout />
+          </SalesRoute>
+        }
+      >
         <Route path="/sales-executive" element={<SalesDashboard />} />
         <Route path="/sales/orders" element={<SalesOrders />} />
         <Route path="/sales/customers" element={<SalesCustomers />} />
@@ -92,9 +111,18 @@ export default function App() {
 
         <Route path="sales-executives" element={<SalesExecutives />} />
         <Route path="sales-executives/:id" element={<SalesExecutiveDetails />} />
-        <Route path="sales-executives/:id/orders" element={<SalesExecutiveOrders />} />
-        <Route path="sales-executives/:id/customers" element={<SalesExecutiveCustomers />} />
+        <Route
+          path="sales-executives/:id/orders"
+          element={<SalesExecutiveOrders />}
+        />
+        <Route
+          path="sales-executives/:id/customers"
+          element={<SalesExecutiveCustomers />}
+        />
       </Route>
+      <Route path="/sales/profile" element={<SalesProfile />} />
+<Route path="/forgot-password" element={<ForgotPassword />} />
+<Route path="/reset-password" element={<ResetPassword />} />
 
     </Routes>
   );

@@ -82,17 +82,33 @@ export default function AdminDashboard() {
   return (
     <div className="h-screen bg-[#F8FAFC] text-slate-900 font-sans antialiased overflow-hidden flex flex-col">
       {/* TIGHTER HEADER */}
-      <header className="h-12 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="h-6 w-6 bg-indigo-600 rounded flex items-center justify-center">
-            <TrendingUp size={14} className="text-white" />
-          </div>
-          <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider">Console</h2>
+    <header className="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 shadow-sm">
+  <div className="flex items-center gap-4">
+    {/* Company Name Container - Styled to match Medico Aid Branding */}
+    <div className="flex items-center gap-6">
+      <div className="flex flex-col items-center">
+        <h1 className="text-[18px] font-bold tracking-tight leading-none">
+          <span className="text-[#0097D7]">Safa Al-Tamayyuz</span>{" "}
+          <span className="text-black">Trading Co</span>
+        </h1>
+        
+        {/* Arabic Name matching the photo's dual-color style */}
+        <div className="flex items-center gap-1 mt-1 font-bold text-[16px]" dir="rtl">
+          <span className="text-black">شـركة صفـا</span>
+          <span className="text-[#0097D7]">التـميز</span>
+          <span className="text-black">التـجـارية</span>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="h-7 w-7 rounded-full bg-slate-200 border border-slate-300 shadow-sm cursor-pointer hover:opacity-80 transition-opacity" />
-        </div>
-      </header>
+      </div>
+    </div>
+  </div>
+
+  <div className="flex items-center gap-3">
+    {/* User Profile */}
+    <div className="h-9 w-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors cursor-pointer shadow-sm">
+      <span className="text-[11px] font-bold">SA</span>
+    </div>
+  </div>
+</header>
 
       {/* COMPACT MAIN CONTENT */}
       <div className="flex-1 overflow-y-auto p-4 lg:p-6 bg-[#F8FAFC]">

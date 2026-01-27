@@ -30,6 +30,7 @@ export default function AdminCustomers() {
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
   const [salesExecutives, setSalesExecutives] = useState([]);
+const [showPassword, setShowPassword] = useState(false);
 
   // Modal States
   const [showAddModal, setShowAddModal] = useState(false);
@@ -37,8 +38,14 @@ export default function AdminCustomers() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
-    name: "", companyName: "", email: "", phoneNumber: "", password: "", salesExecutiveId: ""
-  });
+  name: "",
+  companyName: "",
+  email: "",
+  phoneNumber: "",
+  password: "",
+  salesExecutiveId: ""
+});
+
 
   useEffect(() => { loadCustomers(); }, []);
 
@@ -162,6 +169,10 @@ export default function AdminCustomers() {
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Customer Identity</th>
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Organization</th>
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Contact</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+  Sales Executive
+</th>
+
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Action</th>
               </tr>
             </thead>
@@ -181,6 +192,10 @@ export default function AdminCustomers() {
                   </td>
                   <td className="px-6 py-4 text-sm font-bold text-slate-600">{c.companyName || "—"}</td>
                   <td className="px-6 py-4 text-sm font-medium text-slate-500">{c.phoneNumber || "N/A"}</td>
+                  <td className="px-6 py-4 text-sm font-bold text-slate-600">
+  {c.salesExecutiveName || "Unassigned"}
+</td>
+
                   <td className="px-6 py-4 text-right">
                     <button 
                       onClick={() => handleUserSelect(c.userId)}
@@ -232,6 +247,13 @@ export default function AdminCustomers() {
                       <div className="flex flex-wrap gap-2">
                         <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100"><Mail size={14}/> {selectedUser.email}</span>
                         <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100"><Building size={14}/> {selectedUser.companyName}</span>
+                        {selectedUser.salesExecutiveName && (
+  <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+    <UserCircle size={14} />
+    {selectedUser.salesExecutiveName}
+  </span>
+)}
+
                       </div>
                     </div>
                   </div>
@@ -327,6 +349,48 @@ export default function AdminCustomers() {
                   <label className="text-[10px] font-black uppercase text-slate-400">Company</label>
                   <input required className="w-full px-4 py-2.5 bg-slate-50 rounded-lg text-sm font-bold border border-slate-200" value={formData.companyName} onChange={e => setFormData({...formData, companyName: e.target.value})} />
                 </div>
+                <div className="space-y-1">
+  <label className="text-[10px] font-black uppercase text-slate-400">
+    Email
+  </label>
+  <input
+    type="email"
+    required
+    className="w-full px-4 py-2.5 bg-slate-50 rounded-lg text-sm font-bold border border-slate-200 outline-none focus:border-indigo-600"
+    value={formData.email}
+    onChange={(e) =>
+      setFormData({ ...formData, email: e.target.value })
+    }
+  />
+</div>
+<div className="space-y-1">
+  <label className="text-[10px] font-black uppercase text-slate-400">
+    Password
+  </label>
+
+  <div className="relative">
+    <input
+      type={showPassword ? "text" : "password"}
+      required
+      className="w-full px-4 py-2.5 pr-11 bg-slate-50 rounded-lg text-sm font-bold border border-slate-200 outline-none focus:border-indigo-600"
+      value={formData.password}
+      onChange={(e) =>
+        setFormData({ ...formData, password: e.target.value })
+      }
+    />
+
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition"
+    >
+      {showPassword ? <Eye size={18} /> : <Eye size={18} />}
+    </button>
+  </div>
+</div>
+
+
+
                 <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase text-slate-400">Phone</label>
                   <input required className="w-full px-4 py-2.5 bg-slate-50 rounded-lg text-sm font-bold border border-slate-200" value={formData.phoneNumber} onChange={e => setFormData({...formData, phoneNumber: e.target.value})} />

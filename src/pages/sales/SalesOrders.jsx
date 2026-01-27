@@ -3,34 +3,27 @@ import { useLocation } from "react-router-dom";
 import api from "../../api/axios";
 
 const TABS = [
-  { key: "ALL", label: "All Orders" },
+  { key: "ALL", label: "All" },
   { key: "PendingSalesApproval", label: "Pending" },
-  { key: "PendingAdminApproval", label: "Approved" },
+  { key: "APPROVED_FLOW", label: "Approved" }, // Custom key to catch multiple states
   { key: "Cancelled", label: "Rejected" },
-  { key: "Confirmed", label: "Completed" },
+  { key: "Delivered", label: "Delivered" },
 ];
 
 export default function SalesOrders() {
   const location = useLocation();
-
   const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState(location.state?.tab || "ALL");
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL"); // NEW: Status Filter state
   const [loading, setLoading] = useState(true);
   const [showRejectModal, setShowRejectModal] = useState(false);
-const [rejectReason, setRejectReason] = useState("");
-const [rejectOrderId, setRejectOrderId] = useState(null);
-
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejectOrderId, setRejectOrderId] = useState(null);
 
   useEffect(() => {
     loadOrders();
   }, []);
-
-  useEffect(() => {
-    if (location.state?.tab) {
-      setActiveTab(location.state.tab);
-    }
-  }, [location.state]);
 
   const loadOrders = async () => {
     try {
@@ -45,77 +38,125 @@ const [rejectOrderId, setRejectOrderId] = useState(null);
   };
 
   const approve = async (orderId) => {
-    await api.put(`/sales/orders/${orderId}/approve`);
-    loadOrders();
+    try {
+      await api.put(`/sales/orders/${orderId}/approve`);
+      loadOrders();
+    } catch (err) {
+      alert("Approval failed");
+    }
   };
 
- const openRejectModal = (orderId) => {
-  setRejectOrderId(orderId);
-  setRejectReason("");
-  setShowRejectModal(true);
-};
+  const openRejectModal = (orderId) => {
+    setRejectOrderId(orderId);
+    setRejectReason("");
+    setShowRejectModal(true);
+  };
 
-const submitReject = async () => {
-  try {
-    await api.post(`/sales/cancel/${rejectOrderId}`, {
-      reason: rejectReason
-    });
-    setShowRejectModal(false);
-    loadOrders();
-  } catch (err) {
-    console.error("Reject failed", err);
-  }
-};
-
-
+  const submitReject = async () => {
+    try {
+      await api.post(`/sales/cancel/${rejectOrderId}`, { reason: rejectReason });
+      setShowRejectModal(false);
+      loadOrders();
+    } catch (err) {
+      console.error("Reject failed", err);
+    }
+  };
 
   const filteredOrders = useMemo(() => {
-    return orders
-      .filter(o => activeTab === "ALL" || o.status === activeTab)
-      .filter(o =>
-        (o.customer?.companyName || "")
-          .toLowerCase()
-          .includes(search.toLowerCase())
+    return orders.filter(o => {
+      // 1. Tab Filtering (Live Logic)
+      if (activeTab === "APPROVED_FLOW") {
+        // Includes everything after Sales Approval until it is actually Delivered
+        const liveStatuses = ["PendingAdminApproval", "Confirmed", "Processing", "Shipped", "Dispatched", "ReadyForPickup"];
+        if (!liveStatuses.includes(o.status)) return false;
+      } else if (activeTab !== "ALL" && o.status !== activeTab) {
+        return false;
+      }
+
+      // 2. Status Dropdown Filter
+      // 2. Status Dropdown Filter
+// Do NOT apply dropdown filter when Pending tab is active
+if (
+  statusFilter !== "ALL" &&
+  activeTab !== "PendingSalesApproval" &&
+  o.status !== statusFilter
+) {
+  return false;
+}
+
+
+      // 3. Search Filtering (Company Name or Order ID)
+      const term = search.toLowerCase();
+      return (
+        (o.customer?.companyName || "").toLowerCase().includes(term) ||
+        o.orderId?.toString().includes(term)
       );
-  }, [orders, activeTab, search]);
+    });
+  }, [orders, activeTab, search, statusFilter]);
 
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center min-h-screen bg-[#F4F7F9]">
-        <div className="text-[#718096] text-lg">Loading orders...</div>
+        <div className="w-8 h-8 border-4 border-[#009688] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto bg-[#F4F7F9] min-h-screen">
-      {/* HEADER */}
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-3xl font-bold text-[#2A334E]">Sales Orders</h2>
-        <div className="relative w-80">
-          <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-[#718096] w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
-            className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#4A86F7]/30 focus:border-[#4A86F7] text-sm transition-all outline-none text-[#2A334E] placeholder-[#718096]"
-            placeholder="Search by company name..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            type="text"
-          />
+    <div className="p-6 max-w-7xl mx-auto bg-[#F4F7F9] min-h-screen">
+      {/* HEADER & SEARCH/FILTER SECTION */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <h2 className="text-2xl font-bold text-[#2A334E]">Orders Management</h2>
+        
+        <div className="flex items-center gap-3">
+          {/* Status Filter Dropdown */}
+          <div className="bg-white border border-gray-200 rounded-xl px-2">
+            <select
+  disabled={activeTab === "PendingSalesApproval"}
+  value={statusFilter}
+  onChange={(e) => setStatusFilter(e.target.value)}
+  className={`py-2 text-xs font-bold bg-transparent outline-none
+    ${activeTab === "PendingSalesApproval"
+      ? "opacity-50 cursor-not-allowed"
+      : "cursor-pointer text-[#718096]"
+    }`}
+>
+
+              <option value="ALL">All Status</option>
+              <option value="PendingSalesApproval">Pending</option>
+
+              <option value="Dispatched">Dispatched</option>
+              <option value="Shipped">Shipped</option>
+              <option value="PendingAdminApproval">Waiting Admin</option>
+              <option value="Processing">Processing</option>
+            </select>
+          </div>
+
+          {/* Search Bar */}
+          <div className="relative w-full md:w-64">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-[#718096] w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-[#009688]/20 transition-all"
+              placeholder="Search Company or ID..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
         </div>
       </div>
 
       {/* TABS */}
-      <div className="flex items-center gap-2 mb-8 bg-white rounded-2xl p-2 shadow-sm">
+      <div className="flex items-center gap-1 mb-6 bg-white rounded-xl p-1 shadow-sm overflow-x-auto">
         {TABS.map(t => (
           <button
             key={t.key}
-            onClick={() => setActiveTab(t.key)}
-            className={`px-6 py-3 text-sm font-semibold rounded-xl transition-all ${
+            onClick={() => { setActiveTab(t.key); setStatusFilter("ALL"); }}
+            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all whitespace-nowrap ${
               activeTab === t.key
-                ? "bg-[#4A86F7] text-white shadow-lg shadow-[#4A86F7]/30"
-                : "text-[#718096] hover:text-[#2A334E] hover:bg-gray-50"
+                ? "bg-[#009688] text-white shadow-sm"
+                : "text-[#718096] hover:bg-gray-50"
             }`}
           >
             {t.label}
@@ -123,264 +164,133 @@ const submitReject = async () => {
         ))}
       </div>
 
-      {/* ORDERS */}
-      <div className="space-y-5">
+      {/* ORDERS LIST */}
+      <div className="space-y-3">
         {filteredOrders.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-2xl shadow-sm">
-            <svg className="w-16 h-16 mx-auto text-[#718096] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <p className="text-[#718096] text-lg">No orders found</p>
+          <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-200">
+            <p className="text-[#718096] text-sm">No orders found matching your selection</p>
           </div>
         ) : (
           filteredOrders.map(order => (
-            <OrderCard
-  key={order.orderId}
-  order={order}
-  onApprove={approve}
-  onReject={openRejectModal}
-/>
-
+            <OrderCard key={order.orderId} order={order} onApprove={approve} onReject={openRejectModal} />
           ))
         )}
       </div>
 
-      {/* PAGINATION */}
-      {filteredOrders.length > 0 && (
-        <div className="mt-8 flex items-center justify-between pt-6">
-          <p className="text-sm text-[#718096] font-medium">
-            Showing {filteredOrders.length} of {orders.length} orders
-          </p>
-          <div className="flex gap-2">
-            <button className="px-5 py-2.5 text-sm font-semibold text-[#718096] bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-              Previous
-            </button>
-            <button className="px-5 py-2.5 text-sm font-semibold text-white bg-[#4A86F7] rounded-xl shadow-md shadow-[#4A86F7]/30 hover:bg-[#3a76e7] transition-all">
-              Next
-            </button>
-            
+      {/* REJECT MODAL */}
+      {showRejectModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] p-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-sm shadow-xl">
+            <h3 className="text-md font-bold text-[#2A334E] mb-4">Reason for Rejection</h3>
+            <textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              rows={3}
+              className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:border-[#009688] outline-none"
+              placeholder="Why is this order being cancelled?"
+            />
+            <div className="flex justify-end gap-2 mt-4">
+              <button onClick={() => setShowRejectModal(false)} className="px-4 py-2 text-xs font-bold text-gray-500">Cancel</button>
+              <button disabled={!rejectReason.trim()} onClick={submitReject} className="px-4 py-2 bg-red-500 text-white rounded-lg text-xs font-bold">Submit</button>
+            </div>
           </div>
         </div>
       )}
-      {showRejectModal && (
-  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-    <div className="bg-white rounded-2xl p-6 w-[420px] shadow-xl">
-      <h3 className="text-lg font-bold text-[#2A334E] mb-4">
-        Reason for Rejection
-      </h3>
-
-      <textarea
-        value={rejectReason}
-        onChange={(e) => setRejectReason(e.target.value)}
-        rows={4}
-        className="w-full border border-gray-300 rounded-xl p-3 text-sm"
-        placeholder="Enter reason for cancelling this order..."
-      />
-
-      <div className="flex justify-end gap-3 mt-5">
-        <button
-          onClick={() => setShowRejectModal(false)}
-          className="px-4 py-2 text-gray-600 font-semibold"
-        >
-          Cancel
-        </button>
-
-        <button
-          disabled={!rejectReason.trim()}
-          onClick={submitReject}
-          className="px-5 py-2 bg-red-600 text-white rounded-xl font-semibold disabled:opacity-50"
-        >
-          Submit
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
     </div>
   );
 }
-
-
-/* ================= ORDER CARD ================= */
 
 function OrderCard({ order, onApprove, onReject }) {
   const showActions = order.status === "PendingSalesApproval";
   const items = Array.isArray(order.items) ? order.items : [];
 
   return (
-    <div className="bg-white rounded-2xl p-7 shadow-sm hover:shadow-md transition-all border border-gray-100">
-      <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <h3 className="text-xl font-bold text-[#2A334E]">
-              Order #{order.orderId}
-            </h3>
-            <span className="text-gray-300">|</span>
-            <span className="text-sm font-medium text-[#718096]">
-              {new Date(order.orderDate).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden">
+      <div className="p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-3 pb-3 border-b border-gray-50">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-black text-[#2A334E]">#{order.orderId}</span>
+            <span className="text-[10px] font-bold text-gray-400 uppercase">
+              {new Date(order.orderDate).toLocaleDateString()}
             </span>
+            <StatusBadge status={order.status} />
           </div>
-
-          <p className="text-[#2A334E] font-semibold text-lg mb-2">
-            {order.customer?.companyName || "—"}
-          </p>
-
-          <div className="flex items-center gap-2 text-[#718096] text-sm">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-              />
-            </svg>
-            <span>{order.customer?.phoneNumber || "—"}</span>
+          
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <span className="block text-[9px] text-gray-400 font-bold uppercase">Amount</span>
+              <span className="text-sm font-bold text-[#2A334E]">₹{order.totalAmount}</span>
+            </div>
+            {showActions && (
+              <div className="flex gap-2">
+                <button onClick={() => onReject(order.orderId)} className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+                <button onClick={() => onApprove(order.orderId)} className="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* RIGHT SIDE */}
-        <div className="text-right">
-          <StatusBadge status={order.status} />
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+          <div className="md:col-span-4">
+            <p className="text-xs font-bold text-[#2A334E] uppercase tracking-tight">
+              {order.customer?.companyName || "MEDICO AID"}
+            </p>
+            <p className="text-[10px] text-gray-400 flex items-center gap-1">
+              {order.customer?.phoneNumber}
+            </p>
+          </div>
 
-          {/* ✅ REJECTION REASON */}
-          {order.status === "Cancelled" && order.rejectedReason && (
-            <div className="mt-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-left">
-              <p className="text-red-600 font-semibold mb-1">
-                Rejection Reason
-              </p>
-              <p className="text-red-700">
-                {order.rejectedReason}
-              </p>
+          <div className="md:col-span-8">
+            <div className="bg-gray-50 rounded-lg px-3 py-1.5 space-y-0.5">
+              {items.map((item, idx) => (
+  <div
+    key={idx}
+    className="flex justify-between items-center py-1"
+  >
+    {/* Product Name */}
+    <span className="text-sm font-semibold text-[#2A334E] truncate max-w-[240px]">
+      {item.productName}
+    </span>
+
+    {/* Size & Quantity */}
+    <div className="flex items-center gap-4">
+      <span className="text-xs font-semibold text-gray-500">
+        {item.size || "M"}
+      </span>
+      <span className="text-sm font-bold text-[#009688]">
+        ×{item.quantity}
+      </span>
+    </div>
+  </div>
+))}
+
             </div>
-          )}
-
-          <div className="mt-4 bg-[#F4F7F9] rounded-xl px-5 py-3">
-            <p className="text-xs text-[#718096] uppercase font-semibold mb-1">
-              Total Amount
-            </p>
-            <p className="text-2xl font-bold text-[#2A334E]">
-              ₹{order.totalAmount}
-            </p>
           </div>
         </div>
       </div>
-
-      {/* ITEMS TABLE */}
-      {items.length > 0 && (
-        <div className="overflow-hidden border border-gray-100 rounded-xl mb-5">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-[#F4F7F9]">
-              <tr>
-                <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-wider text-[#718096]">
-                  Product Name
-                </th>
-                <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-wider text-[#718096]">
-                  Specification/Size
-                </th>
-                <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-wider text-[#718096] text-center">
-                  Quantity
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {items.map((i, idx) => (
-                <tr
-                  key={idx}
-                  className="hover:bg-gray-50/50 transition-colors"
-                >
-                  <td className="px-5 py-4 font-medium text-[#2A334E]">
-                    {i.productName}
-                  </td>
-                  <td className="px-5 py-4">
-                    <span className="bg-[#4A86F7]/10 text-[#4A86F7] px-3 py-1.5 rounded-lg text-xs font-semibold">
-                      {i.size || "Standard"}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4 text-center font-semibold text-[#2A334E]">
-                    {i.quantity}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* ACTION BUTTONS */}
-      {showActions && (
-        <div className="flex justify-end gap-3 mt-5 pt-5 border-t border-gray-100">
-          <button
-            onClick={() => onReject(order.orderId)}
-            className="px-6 py-2.5 bg-red-50 text-red-600 rounded-xl font-semibold hover:bg-red-100 transition-all"
-          >
-            Reject
-          </button>
-          <button
-            onClick={() => onApprove(order.orderId)}
-            className="px-6 py-2.5 bg-[#48BB78] hover:bg-[#38a169] text-white rounded-xl font-semibold shadow-md shadow-[#48BB78]/30 transition-all"
-          >
-            Approve
-          </button>
-        </div>
-      )}
     </div>
   );
 }
 
-
 function StatusBadge({ status }) {
-  const statusConfig = {
-    PendingSalesApproval: {
-      bg: "bg-amber-50",
-      text: "text-amber-700",
-      dot: "bg-amber-500",
-      animated: true
-    },
-    Cancelled: {
-  bg: "bg-red-50",
-  text: "text-red-600",
-  dot: "bg-red-500",
-  animated: false
-},
-
-    PendingAdminApproval: {
-      bg: "bg-blue-50",
-      text: "text-[#4A86F7]",
-      dot: "bg-[#4A86F7]",
-      animated: true
-    },
-    
-    Confirmed: {
-      bg: "bg-green-50",
-      text: "text-[#48BB78]",
-      dot: "bg-[#48BB78]",
-      animated: false
-    },
-  };
-
-  const config = statusConfig[status] || {
-    bg: "bg-gray-50",
-    text: "text-[#718096]",
-    dot: "bg-gray-400",
-    animated: false
-  };
-
-  const label = status?.replace(/([A-Z])/g, " $1").trim().toUpperCase() || "UNKNOWN";
+  const config = {
+    PendingSalesApproval: { bg: "bg-amber-100", text: "text-amber-700", label: "PENDING" },
+    Cancelled: { bg: "bg-red-100", text: "text-red-700", label: "REJECTED" },
+    PendingAdminApproval: { bg: "bg-blue-100", text: "text-blue-700", label: "APPROVED" },
+    Confirmed: { bg: "bg-blue-50", text: "text-blue-600", label: "CONFIRMED" },
+    Processing: { bg: "bg-indigo-50", text: "text-indigo-600", label: "PROCESSING" },
+    Shipped: { bg: "bg-purple-100", text: "text-purple-700", label: "SHIPPED" },
+    Dispatched: { bg: "bg-purple-100", text: "text-purple-700", label: "DISPATCHED" },
+    Delivered: { bg: "bg-gray-200", text: "text-gray-600", label: "DELIVERED" },
+  }[status] || { bg: "bg-gray-100", text: "text-gray-600", label: status?.toUpperCase() };
 
   return (
-    <span className={`inline-flex items-center px-4 py-2 rounded-xl text-xs font-bold ${config.bg} ${config.text}`}>
-      <span className={`w-2 h-2 rounded-full ${config.dot} mr-2 ${config.animated ? 'animate-pulse' : ''}`}></span>
-      {label}
+    <span className={`px-2 py-0.5 rounded text-[9px] font-black tracking-widest ${config.bg} ${config.text}`}>
+      {config.label}
     </span>
   );
 }

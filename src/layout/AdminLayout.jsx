@@ -72,14 +72,7 @@ export default function AdminLayout() {
             onClick={() => navigate("/admin/reports")}
           />
 
-          <div className="pt-3 mt-3 border-t border-blue-100">
-            <SidebarItem
-              icon={<Settings size={16} />}
-              label="Settings"
-              active={location.pathname.startsWith("/admin/settings")}
-              onClick={() => navigate("/admin/settings")}
-            />
-          </div>
+          
         </nav>
 
         {/* LOGOUT */}

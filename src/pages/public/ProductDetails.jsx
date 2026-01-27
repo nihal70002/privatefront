@@ -117,58 +117,7 @@ setTimeout(() => setShowToast(false), 2500);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* NAVBAR */}
-      <nav className="sticky top-0 z-50 bg-white shadow-sm">
-        <div className="flex items-center justify-between px-4 py-2.5 max-w-screen-2xl mx-auto">
-          <div 
-            onClick={() => navigate("/products")}
-            className="cursor-pointer"
-          >
-            <img 
-              src="/logo/logo.png" 
-              alt="Safa Store" 
-              className="h-11 w-auto object-contain"
-            />
-          </div>
-
-          <div className="flex-1 max-w-lg mx-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-              <input
-                type="text"
-                placeholder="Search for products, brands and more"
-                className="w-full pl-10 pr-4 py-1.5 text-sm bg-gray-50 border border-gray-200 rounded focus:outline-none focus:bg-white focus:border-gray-300"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-7">
-            <button
-              onClick={() => navigate("/orders")}
-              className="flex flex-col items-center gap-0.5 text-xs font-bold text-gray-800 hover:text-teal-600 transition-colors"
-            >
-              <Package size={20} strokeWidth={2} />
-              <span>Orders</span>
-            </button>
-
-            <button
-              onClick={() => navigate("/profile")}
-              className="flex flex-col items-center gap-0.5 text-xs font-bold text-gray-800 hover:text-teal-600 transition-colors"
-            >
-              <User size={20} strokeWidth={2} />
-              <span>Profile</span>
-            </button>
-
-            <button
-              onClick={() => navigate("/cart")}
-              className="relative flex flex-col items-center gap-0.5 text-xs font-bold text-gray-800 hover:text-teal-600 transition-colors"
-            >
-              <ShoppingCart size={20} strokeWidth={2} />
-              <span>Bag</span>
-            </button>
-          </div>
-        </div>
-      </nav>
+      
 
       {/* BREADCRUMB */}
       <div className="border-b border-gray-200 bg-white">

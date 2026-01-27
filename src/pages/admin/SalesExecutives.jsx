@@ -124,7 +124,6 @@ export default function SalesExecutives() {
                 <th className="px-6 py-4 text-[13px] uppercase font-black text-slate-400 tracking-wider">Executive Details</th>
                 <th className="px-6 py-4 text-[13px] uppercase font-black text-slate-400 tracking-wider">Company</th>
                 <th className="px-6 py-4 text-[13px] uppercase font-black text-slate-400 tracking-wider">Contact</th>
-                <th className="px-6 py-4 text-[13px] uppercase font-black text-slate-400 tracking-wider text-center">Pending Orders</th>
                 <th className="px-6 py-4 text-[13px] uppercase font-black text-slate-400 tracking-wider text-right">Actions</th>
               </tr>
             </thead>
@@ -148,11 +147,7 @@ export default function SalesExecutives() {
                   </td>
                   <td className="px-6 py-4 text-base font-semibold text-slate-600">{se.companyName || "—"}</td>
                   <td className="px-6 py-4 text-base font-medium text-slate-500">{se.phoneNumber}</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="bg-amber-50 text-amber-700 text-xs font-black px-3 py-1 rounded-full border border-amber-100">
-                      {se.pendingOrders ?? 0}
-                    </span>
-                  </td>
+                  
                   <td className="px-6 py-4">
                     <div className="flex justify-end items-center gap-2">
                       <button 

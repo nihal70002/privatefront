@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Package, MapPin, Lock, ChevronRight, Plus, X, Home, CheckCircle2, Trash2, Star } from "lucide-react";
+import { User, Package, MapPin, Lock, ChevronRight, Plus, X, Home, CheckCircle2, Trash2, ShoppingBag, Settings } from "lucide-react";
 import {
   getAddresses,
   addAddress,
@@ -22,7 +22,6 @@ export default function Addresses() {
     isDefault: false
   });
 
-  // ✅ MUST BE ABOVE useEffect
   const loadAddresses = async () => {
     try {
       const res = await getAddresses();
@@ -32,27 +31,20 @@ export default function Addresses() {
     }
   };
 
-  // ✅ SAFE TO USE NOW
   useEffect(() => {
     loadAddresses();
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await addAddress(form);
-
-    setForm({
-      fullName: "",
-      phone: "",
-      addressLine: "",
-      city: "",
-      state: "",
-      pincode: "",
-      isDefault: false
-    });
-
-    setShowForm(false);
-    loadAddresses();
+    try {
+      await addAddress(form);
+      setForm({ fullName: "", phone: "", addressLine: "", city: "", state: "", pincode: "", isDefault: false });
+      setShowForm(false);
+      loadAddresses();
+    } catch (err) {
+      alert("Error adding address");
+    }
   };
 
   const handleDelete = async (id) => {
@@ -67,177 +59,136 @@ export default function Addresses() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Account Settings</h1>
-          <p className="text-slate-600">Manage your profile and view your orders</p>
+    <div className="min-h-screen bg-[#f8f9fa] font-sans text-[#282c3f]">
+      <div className="max-w-6xl mx-auto px-4 py-10">
+        
+        {/* Header matching Profile page */}
+        <div className="mb-8 pb-4 border-b border-gray-200">
+          <h1 className="text-2xl font-bold text-[#282c3f]">Account Settings</h1>
+          <p className="text-sm text-gray-500">Manage your saved addresses for faster checkout</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="flex flex-col md:flex-row gap-10">
           {/* ================= SIDEBAR ================= */}
-          <div className="lg:col-span-1">
+          <div className="w-full md:w-64 shrink-0">
             <ProfileSidebar navigate={navigate} activeTab="addresses" />
           </div>
 
           {/* ================= CONTENT ================= */}
-          <div className="lg:col-span-3">
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200">
-              {/* Header */}
-              <div className="p-6 border-b border-slate-200 flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-slate-900">My Addresses</h2>
-                  <p className="text-slate-600 mt-1">Manage your delivery addresses</p>
-                </div>
+          <div className="flex-1 bg-white p-8 border border-gray-200 rounded-sm">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-lg font-bold uppercase tracking-wider text-gray-700">My Addresses</h2>
+              {!showForm && (
                 <button
-                  onClick={() => setShowForm(!showForm)}
-                  className={`px-4 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 ${
-                    showForm
-                      ? "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                      : "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg shadow-blue-500/30"
-                  }`}
+                  onClick={() => setShowForm(true)}
+                  className="px-5 py-2 border-2 border-[#009688] text-[#009688] font-bold text-xs uppercase tracking-widest hover:bg-[#009688] hover:text-white transition-all"
                 >
-                  {showForm ? (
-                    <>
-                      <X className="w-4 h-4" />
-                      Cancel
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-4 h-4" />
-                      Add Address
-                    </>
-                  )}
+                  + Add New Address
                 </button>
-              </div>
+              )}
+            </div>
 
-              <div className="p-6">
-                {/* Add Address Form */}
-                {showForm && (
-                  <form
-                    onSubmit={handleSubmit}
-                    className="bg-gradient-to-br from-blue-50 to-slate-50 p-6 rounded-xl border border-blue-200 mb-6"
-                  >
-                    <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                      <Home className="w-5 h-5 text-blue-600" />
-                      New Address
-                    </h3>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Form Section */}
+            {showForm && (
+              <div className="mb-10 p-6 border border-gray-200 bg-gray-50">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="font-bold text-gray-700 uppercase text-sm tracking-wide">Add New Address</h3>
+                  <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormInput
+                      label="Full Name"
+                      value={form.fullName}
+                      onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+                      required
+                    />
+                    <FormInput
+                      label="Mobile Number"
+                      value={form.phone}
+                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                      required
+                    />
+                    <div className="md:col-span-2">
                       <FormInput
-                        placeholder="Full Name"
-                        value={form.fullName}
-                        onChange={(e) =>
-                          setForm({ ...form, fullName: e.target.value })
-                        }
-                        required
-                      />
-
-                      <FormInput
-                        placeholder="Phone Number"
-                        value={form.phone}
-                        onChange={(e) =>
-                          setForm({ ...form, phone: e.target.value })
-                        }
-                        required
-                      />
-
-                      <FormInput
-                        placeholder="Address Line (House No, Street, Area)"
+                        label="Address (House No, Building, Street, Area)"
                         value={form.addressLine}
-                        onChange={(e) =>
-                          setForm({ ...form, addressLine: e.target.value })
-                        }
-                        required
-                        className="md:col-span-2"
-                      />
-
-                      <FormInput
-                        placeholder="City"
-                        value={form.city}
-                        onChange={(e) =>
-                          setForm({ ...form, city: e.target.value })
-                        }
+                        onChange={(e) => setForm({ ...form, addressLine: e.target.value })}
                         required
                       />
-
-                      <FormInput
-                        placeholder="State"
-                        value={form.state}
-                        onChange={(e) =>
-                          setForm({ ...form, state: e.target.value })
-                        }
-                        required
-                      />
-
-                      <FormInput
-                        placeholder="Pincode"
-                        value={form.pincode}
-                        onChange={(e) =>
-                          setForm({ ...form, pincode: e.target.value })
-                        }
-                        required
-                      />
-
-                      <label className="flex items-center gap-3 md:col-span-2 bg-white px-4 py-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-all">
-                        <input
-                          type="checkbox"
-                          checked={form.isDefault}
-                          onChange={(e) =>
-                            setForm({
-                              ...form,
-                              isDefault: e.target.checked
-                            })
-                          }
-                          className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                        />
-                        <span className="text-sm font-medium text-slate-700">
-                          Set as default delivery address
-                        </span>
-                      </label>
-
-                      <button
-                        type="submit"
-                        className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all md:col-span-2 shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2"
-                      >
-                        <CheckCircle2 className="w-5 h-5" />
-                        Save Address
-                      </button>
                     </div>
-                  </form>
-                )}
+                    <FormInput
+                      label="Pincode"
+                      value={form.pincode}
+                      onChange={(e) => setForm({ ...form, pincode: e.target.value })}
+                      required
+                    />
+                    <FormInput
+                      label="City / District"
+                      value={form.city}
+                      onChange={(e) => setForm({ ...form, city: e.target.value })}
+                      required
+                    />
+                    <FormInput
+                      label="State"
+                      value={form.state}
+                      onChange={(e) => setForm({ ...form, state: e.target.value })}
+                      required
+                    />
+                  </div>
 
-                {/* Address Cards */}
-                {addresses.length === 0 ? (
-                  <div className="text-center py-16">
-                    <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <MapPin className="w-10 h-10 text-slate-400" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-slate-900 mb-2">No addresses yet</h3>
-                    <p className="text-slate-600 mb-6">Add your first delivery address to get started</p>
+                  <label className="flex items-center gap-3 py-2 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={form.isDefault}
+                      onChange={(e) => setForm({ ...form, isDefault: e.target.checked })}
+                      className="w-4 h-4 accent-[#009688]"
+                    />
+                    <span className="text-sm font-medium text-gray-600 group-hover:text-gray-900 transition-colors">
+                      Make this my default address
+                    </span>
+                  </label>
+
+                  <div className="flex gap-4 pt-2">
                     <button
-                      onClick={() => setShowForm(true)}
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg shadow-blue-500/30"
+                      type="submit"
+                      className="flex-1 md:flex-none md:px-10 py-3 bg-[#009688] text-white font-bold uppercase text-xs tracking-widest shadow-md hover:bg-[#00796b]"
                     >
-                      <Plus className="w-5 h-5" />
-                      Add Address
+                      Save Address
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowForm(false)}
+                      className="px-10 py-3 border border-gray-300 text-gray-600 font-bold uppercase text-xs tracking-widest hover:bg-gray-100"
+                    >
+                      Cancel
                     </button>
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {addresses.map((addr) => (
-                      <AddressCard
-                        key={addr.id}
-                        address={addr}
-                        onDelete={handleDelete}
-                        onSetDefault={handleSetDefault}
-                      />
-                    ))}
-                  </div>
-                )}
+                </form>
               </div>
-            </div>
+            )}
+
+            {/* Address List */}
+            {addresses.length === 0 && !showForm ? (
+              <div className="text-center py-20 border-2 border-dashed border-gray-100">
+                <MapPin className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+                <p className="text-gray-500 font-medium">No saved addresses found</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {addresses.map((addr) => (
+                  <AddressCard
+                    key={addr.id}
+                    address={addr}
+                    onDelete={handleDelete}
+                    onSetDefault={handleSetDefault}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -245,37 +196,23 @@ export default function Addresses() {
   );
 }
 
-/* ================= COMPONENTS ================= */
+/* ================= REFINED COMPONENTS ================= */
 
 function ProfileSidebar({ navigate, activeTab }) {
-  // Mock profile data - replace with actual data if needed
-  const profile = {
-    name: "User",
-    email: "user@example.com"
-  };
-
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-      <div className="p-6 bg-gradient-to-br from-blue-600 to-blue-700 text-white">
-        <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-3">
-          <User className="w-8 h-8" />
-        </div>
-        <h3 className="font-semibold text-lg">{profile.name}</h3>
-        <p className="text-blue-100 text-sm mt-1">{profile.email}</p>
-      </div>
-
-      <div className="p-2">
+    <nav className="flex flex-col border-r border-gray-200 h-full">
+      <div className="pb-4">
         <SidebarItem
           icon={<User className="w-5 h-5" />}
-          label="Profile"
+          label="Overview"
           active={activeTab === "profile"}
           onClick={() => navigate("/profile")}
         />
         <SidebarItem
-          icon={<Package className="w-5 h-5" />}
-          label="My Orders"
+          icon={<ShoppingBag className="w-5 h-5" />}
+          label="Orders"
           active={activeTab === "orders"}
-          onClick={() => navigate("/profile")}
+          onClick={() => navigate("/profile")} 
         />
         <SidebarItem
           icon={<MapPin className="w-5 h-5" />}
@@ -284,13 +221,20 @@ function ProfileSidebar({ navigate, activeTab }) {
           onClick={() => navigate("/profile/addresses")}
         />
         <SidebarItem
-          icon={<Lock className="w-5 h-5" />}
-          label="Change Password"
-          active={activeTab === "password"}
-          onClick={() => navigate("/profile/change-password")}
+          icon={<Settings className="w-5 h-5" />}
+          label="Account Settings"
+          onClick={() => navigate("/profile")}
         />
       </div>
-    </div>
+      <div className="pt-4 border-t border-gray-100">
+         <button 
+          onClick={() => navigate("/profile/change-password")}
+          className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-[#009688] transition-colors"
+         >
+          <Lock className="w-4 h-4" /> Change Password
+         </button>
+      </div>
+    </nav>
   );
 }
 
@@ -298,81 +242,68 @@ function SidebarItem({ icon, label, active, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+      className={`w-full flex items-center gap-4 px-4 py-4 text-sm transition-all border-l-4 ${
         active
-          ? "bg-blue-50 text-blue-700 font-semibold"
-          : "text-slate-700 hover:bg-slate-50"
+          ? "border-[#009688] bg-[#f5f5f6] text-[#009688] font-bold"
+          : "border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-200"
       }`}
     >
       {icon}
-      <span className="text-sm">{label}</span>
-      {!active && <ChevronRight className="w-4 h-4 ml-auto text-slate-400" />}
+      <span>{label}</span>
     </button>
   );
 }
 
-function FormInput({ placeholder, value, onChange, required, className = "" }) {
+function FormInput({ label, value, onChange, required }) {
   return (
-    <input
-      type="text"
-      placeholder={placeholder}
-      value={value}
-      onChange={onChange}
-      required={required}
-      className={`w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all hover:border-slate-400 ${className}`}
-    />
+    <div>
+      <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1 ml-1">{label}</label>
+      <input
+        type="text"
+        value={value}
+        onChange={onChange}
+        required={required}
+        className="w-full px-4 py-3 border border-gray-300 text-sm focus:border-gray-900 outline-none transition-all"
+      />
+    </div>
   );
 }
 
 function AddressCard({ address, onDelete, onSetDefault }) {
   return (
-    <div className={`relative border rounded-xl p-5 transition-all ${
-      address.isDefault
-        ? "border-blue-300 bg-gradient-to-br from-blue-50 to-white shadow-md"
-        : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm"
+    <div className={`relative p-6 border transition-all ${
+      address.isDefault ? "border-[#009688] shadow-sm" : "border-gray-200 hover:shadow-md"
     }`}>
-      {/* Default Badge */}
       {address.isDefault && (
-        <div className="absolute top-4 right-4">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full">
-            <Star className="w-3 h-3 fill-current" />
-            Default
-          </span>
-        </div>
+        <span className="absolute top-0 right-0 bg-[#009688] text-white text-[10px] font-bold px-3 py-1 uppercase tracking-tighter">
+          Default
+        </span>
       )}
-
-      {/* Address Icon */}
-      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-        <Home className="w-5 h-5 text-blue-600" />
+      
+      <h3 className="font-bold text-gray-800 mb-2 uppercase text-xs tracking-wider">
+        {address.fullName}
+      </h3>
+      
+      <div className="text-sm text-gray-600 space-y-1 mb-6 min-h-[80px]">
+        <p className="font-medium text-gray-800">{address.phone}</p>
+        <p className="leading-relaxed">{address.addressLine}</p>
+        <p>{address.city}, {address.state} - {address.pincode}</p>
       </div>
 
-      {/* Address Details */}
-      <div className="mb-4">
-        <h3 className="font-bold text-slate-900 text-lg mb-1">
-          {address.fullName}
-        </h3>
-        <p className="text-sm text-slate-600 mb-1">{address.phone}</p>
-        <p className="text-sm text-slate-700 leading-relaxed">
-          {address.addressLine}, {address.city}, {address.state} - {address.pincode}
-        </p>
-      </div>
-
-      {/* Actions */}
-      <div className="flex items-center gap-2 pt-4 border-t border-slate-200">
+      <div className="flex items-center gap-4 pt-4 border-t border-gray-100">
         {!address.isDefault && (
           <button
             onClick={() => onSetDefault(address.id)}
-            className="flex-1 px-4 py-2 bg-blue-50 text-blue-700 text-sm font-semibold rounded-lg hover:bg-blue-100 transition-all"
+            className="text-[11px] font-bold text-[#009688] uppercase tracking-widest hover:underline"
           >
-            Set as Default
+            Set Default
           </button>
         )}
         <button
           onClick={() => onDelete(address.id)}
-          className="px-4 py-2 bg-red-50 text-red-600 text-sm font-semibold rounded-lg hover:bg-red-100 transition-all flex items-center gap-2"
+          className="text-[11px] font-bold text-red-500 uppercase tracking-widest hover:underline flex items-center gap-1"
         >
-          <Trash2 className="w-4 h-4" />
-          Delete
+          <Trash2 className="w-3 h-3" /> Remove
         </button>
       </div>
     </div>

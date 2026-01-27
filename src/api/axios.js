@@ -1,11 +1,11 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL, // ✅ correct env key
+  baseURL: "https://localhost:7188/api", // 🔥 FORCE LOCALHOST
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: false, // ✅ keep false unless using cookies
+  withCredentials: false,
 });
 
 // ✅ Attach token automatically
@@ -22,13 +22,12 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ✅ Optional: global error handling (very useful)
+// ✅ Global error handling
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
       console.warn("Unauthorized – token expired or invalid");
-      // optional: logout logic
       // localStorage.removeItem("token");
     }
     return Promise.reject(error);
