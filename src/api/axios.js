@@ -8,14 +8,15 @@ const api = axios.create({
   withCredentials: false,
 });
 
-// DEBUG (temporary)
+// 🔎 Debug (remove later if you want)
 console.log("API URL 👉", import.meta.env.VITE_API_URL);
 
-// ✅ Attach token automatically
+// ✅ Attach JWT token automatically
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
     if (token) {
+      config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -23,12 +24,15 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ✅ Global error handling
+// ✅ Global response handling
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
       console.warn("Unauthorized – token expired or invalid");
+      // Optional auto-logout:
+      // localStorage.removeItem("token");
+      // window.location.href = "/login";
     }
     return Promise.reject(error);
   }
