@@ -20,17 +20,34 @@ export default function Login() {
         loginId: loginId.trim(),
         password: password.trim(),
       });
+
+      console.log("LOGIN RESPONSE 👉", res.data);
+console.log("ROLE 👉", res.data.role);
+
+
+
+
       const { token, role, id } = res.data;
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
       localStorage.setItem("userId", id);
 
-      if (role === "Admin") navigate("/admin", { replace: true });
-      else if (role === "SalesExecutive") navigate("/sales-executive", { replace: true });
-      else if (role === "Customer") navigate("/products", { replace: true });
-      else if (role === "Warehouse") {
+      if (role === "Admin") {
+  console.log("NAVIGATING TO 👉 /admin");
+  navigate("/admin", { replace: true });
+} else if (role === "SalesExecutive") {
+  console.log("NAVIGATING TO 👉 /sales-executive");
+  navigate("/sales-executive", { replace: true });
+} else if (role === "Customer") {
+  console.log("NAVIGATING TO 👉 /products");
+  navigate("/products", { replace: true });
+} else if (role === "Warehouse") {
+  console.log("NAVIGATING TO 👉 /warehouse/dashboard");
   navigate("/warehouse/dashboard", { replace: true });
+} else {
+  console.log("UNKNOWN ROLE 👉", role);
 }
+
     } catch (err) {
       const backendError = err.response?.data;
 
