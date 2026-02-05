@@ -100,11 +100,16 @@ const filteredOrders = useMemo(() => {
     const term = search.toLowerCase().trim();
     if (term) {
       const company = o.customer?.companyName?.toLowerCase() || "";
-      const orderId = o.orderId?.toString() || "";
+const orderId = o.orderId?.toString() || "";
 
-      if (!company.includes(term) && !orderId.includes(term)) {
-        return false;
-      }
+const hasProductCode = o.items?.some(i =>
+  i.productCode?.toLowerCase().includes(term)
+);
+
+if (!company.includes(term) && !orderId.includes(term) && !hasProductCode) {
+  return false;
+}
+
     }
 
     return true;
@@ -282,9 +287,15 @@ function OrderCard({ order, onApprove, onReject }) {
     className="flex justify-between items-center py-1"
   >
     {/* Product Name */}
-    <span className="text-sm font-semibold text-[#2A334E] truncate max-w-[240px]">
-      {item.productName}
-    </span>
+    <div className="flex flex-col">
+  <span className="text-sm font-semibold text-[#2A334E] truncate max-w-[240px]">
+    {item.productName}
+  </span>
+  <span className="text-[10px] font-mono text-gray-400">
+    {item.productCode}
+  </span>
+</div>
+
 
     {/* Size & Quantity */}
     <div className="flex items-center gap-4">

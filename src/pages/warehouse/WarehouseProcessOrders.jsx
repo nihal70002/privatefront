@@ -79,10 +79,11 @@ export default function WarehouseProcessOrders() {
       }
       const term = search.toLowerCase();
       return (
-        (o.customer?.name || "").toLowerCase().includes(term) ||
-        (o.customer?.email || "").toLowerCase().includes(term) ||
-        o.orderId?.toString().includes(term)
-      );
+  (o.customer?.companyName || "").toLowerCase().includes(term) ||
+  (o.customer?.phoneNumber || "").toLowerCase().includes(term) ||
+  o.orderId?.toString().includes(term)
+);
+
     });
   }, [orders, activeTab, search, statusFilter]);
 
@@ -245,12 +246,13 @@ function OrderCard({ order, onAction, updatingId, navigate }) {
         {/* Card Body & Dropdown Toggle */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="lg:col-span-4">
-            <p className="text-xs font-bold text-[#2A334E] uppercase tracking-tight truncate">
-              {order.customer?.name || "N/A"}
-            </p>
-            <p className="text-[10px] text-gray-500 truncate">
-              {order.customer?.email || order.customer?.phoneNumber || ""}
-            </p>
+           <p className="text-[15px] font-black text-[#2A334E] uppercase tracking-wide truncate">
+  {order.customer?.companyName || "N/A"}
+</p>
+<p className="text-[13px] font-semibold text-gray-600 truncate">
+  📞 {order.customer?.phoneNumber || "N/A"}
+</p>
+
           </div>
 
           {/* THE DROPDOWN BUTTON */}
@@ -277,14 +279,32 @@ function OrderCard({ order, onAction, updatingId, navigate }) {
                   <span className="text-[13px] font-semibold text-[#2A334E] truncate">
                     {item.productName || item.product?.name || "-"}
                   </span>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-[10px] font-bold text-gray-400 bg-white px-1.5 py-0.5 rounded border border-gray-100 uppercase">
-                      {item.variantSize || item.size || item.sku || "N/A"}
-                    </span>
-                    <span className="text-[13px] font-black text-blue-600">
-                      ×{item.quantity}
-                    </span>
-                  </div>
+                  <div
+  key={idx}
+  className="flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-gray-200"
+>
+  {/* PRODUCT NAME */}
+  
+
+  {/* CODE | SIZE | QTY */}
+  <div className="flex items-center gap-3">
+    {/* PRODUCT CODE */}
+    <span className="min-w-[90px] text-center text-[13px] font-black text-gray-800 bg-yellow-200 px-2 py-1 rounded border border-yellow-400">
+      {item.productCode}
+    </span>
+
+    {/* SIZE */}
+    <span className="min-w-[40px] text-center text-[13px] font-bold text-gray-700 bg-gray-100 px-2 py-1 rounded border border-gray-300">
+      {item.variantSize}
+    </span>
+
+    {/* QTY */}
+    <span className="min-w-[40px] text-center text-[14px] font-black text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-200">
+      ×{item.quantity}
+    </span>
+  </div>
+</div>
+
                 </div>
               ))}
             </div>
