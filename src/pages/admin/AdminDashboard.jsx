@@ -115,7 +115,7 @@ export default function AdminDashboard() {
         <div className="max-w-[1300px] mx-auto space-y-4">
           
           {/* STATS SECTION - Smaller Cards */}
-          <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <section className="grid grid-cols-2 lg:grid-cols-3 gap-3">
             <StatCard 
               title="Revenue" 
               value={`₹${stats.totalRevenue.toLocaleString()}`} 
@@ -125,13 +125,7 @@ export default function AdminDashboard() {
             />
             <MiniStat label="Sales Pending" value={stats.salesPending} theme="amber" onClick={() => navigate("/admin/orders?status=PendingSalesApproval")} />
             <MiniStat label="Admin Pending" value={stats.adminPending} theme="amber" onClick={() => navigate("/admin/orders?status=PendingAdminApproval")} />
-            <StatCard 
-              title="Low Stock" 
-              value={stats.lowStock} 
-              icon={<AlertTriangle size={16} />} 
-              theme="rose" 
-              onClick={() => navigate("/admin/low-stock")} 
-            />
+            
           </section>
 
           {/* MIDDLE SECTION - Chart and Products */}

@@ -5,7 +5,7 @@ import {
   ShoppingCart,
   Users,
   BarChart3,
-  Settings,
+  Warehouse,
   LogOut,
 } from "lucide-react";
 
@@ -41,38 +41,49 @@ export default function AdminLayout() {
             active={location.pathname === "/admin/dashboard"}
             onClick={() => navigate("/admin/dashboard")}
           />
+
           <SidebarItem
             icon={<ShoppingCart size={16} />}
             label="Orders"
             active={location.pathname.startsWith("/admin/orders")}
             onClick={() => navigate("/admin/orders")}
           />
+
           <SidebarItem
             icon={<Package size={16} />}
             label="Products"
             active={location.pathname.startsWith("/admin/products")}
             onClick={() => navigate("/admin/products")}
           />
+
           <SidebarItem
             icon={<Users size={16} />}
             label="Sales Executive"
             active={location.pathname.startsWith("/admin/sales-executives")}
             onClick={() => navigate("/admin/sales-executives")}
           />
+
           <SidebarItem
             icon={<Users size={16} />}
             label="Customers"
             active={location.pathname.startsWith("/admin/customers")}
             onClick={() => navigate("/admin/customers")}
           />
+
+          {/* ✅ WAREHOUSE (NEW) */}
+          <SidebarItem
+            icon={<Warehouse size={16} />}
+            label="Warehouse"
+            active={location.pathname.startsWith("/admin/warehouse")}
+            onClick={() => navigate("/admin/warehouse")}
+          />
+
           <SidebarItem
             icon={<BarChart3 size={16} />}
             label="Reports"
             active={location.pathname.startsWith("/admin/reports")}
             onClick={() => navigate("/admin/reports")}
           />
-
-          
         </nav>
 
         {/* LOGOUT */}

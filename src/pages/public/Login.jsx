@@ -28,8 +28,18 @@ export default function Login() {
       if (role === "Admin") navigate("/admin", { replace: true });
       else if (role === "SalesExecutive") navigate("/sales-executive", { replace: true });
       else if (role === "Customer") navigate("/products", { replace: true });
+      else if (role === "Warehouse") {
+  navigate("/warehouse/dashboard", { replace: true });
+}
     } catch (err) {
-      setError(err.response?.data?.message || "Invalid credentials");
+      const backendError = err.response?.data;
+
+if (typeof backendError === "string") {
+  setError(backendError);
+} else {
+  setError(backendError?.message || "Invalid credentials");
+}
+
     } finally {
       setLoading(false);
     }

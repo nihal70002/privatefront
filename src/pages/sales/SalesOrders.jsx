@@ -5,9 +5,10 @@ import api from "../../api/axios";
 const TABS = [
   { key: "ALL", label: "All" },
   { key: "PendingSalesApproval", label: "Pending" },
-  { key: "APPROVED_FLOW", label: "Approved" }, // Custom key to catch multiple states
-  { key: "Cancelled", label: "Rejected" },
+  { key: "APPROVED", label: "Approved" }, // Custom key to catch multiple states
+  
   { key: "Delivered", label: "Delivered" },
+  { key: "Cancelled", label: "Rejected" },
 ];
 
 export default function SalesOrders() {
@@ -62,37 +63,53 @@ export default function SalesOrders() {
     }
   };
 
-  const filteredOrders = useMemo(() => {
-    return orders.filter(o => {
-      // 1. Tab Filtering (Live Logic)
-      if (activeTab === "APPROVED_FLOW") {
-        // Includes everything after Sales Approval until it is actually Delivered
-        const liveStatuses = ["PendingAdminApproval", "Confirmed", "Processing", "Shipped", "Dispatched", "ReadyForPickup"];
-        if (!liveStatuses.includes(o.status)) return false;
-      } else if (activeTab !== "ALL" && o.status !== activeTab) {
+const filteredOrders = useMemo(() => {
+  return orders.filter(o => {
+
+    /* 1️⃣ TAB FILTERING */
+    if (activeTab === "PendingSalesApproval" && o.status !== "PendingSalesApproval") {
+      return false;
+    }
+
+    if (activeTab === "Cancelled" && o.status !== "Cancelled") {
+      return false;
+    }
+
+    if (activeTab === "Delivered" && o.status !== "Delivered") {
+      return false;
+    }
+
+    if (activeTab === "APPROVED") {
+      const approvedStatuses = [
+        "PendingWarehouseApproval",
+        "Confirmed",
+        "Dispatched",
+        "Delivered",
+      ];
+      if (!approvedStatuses.includes(o.status)) {
         return false;
       }
+    }
 
-      // 2. Status Dropdown Filter
-      // 2. Status Dropdown Filter
-// Do NOT apply dropdown filter when Pending tab is active
-if (
-  statusFilter !== "ALL" &&
-  activeTab !== "PendingSalesApproval" &&
-  o.status !== statusFilter
-) {
-  return false;
-}
+    /* 2️⃣ STATUS DROPDOWN FILTER (TOP RIGHT) */
+    if (statusFilter !== "ALL" && o.status !== statusFilter) {
+      return false;
+    }
 
+    /* 3️⃣ SEARCH FILTER (TOP RIGHT) */
+    const term = search.toLowerCase().trim();
+    if (term) {
+      const company = o.customer?.companyName?.toLowerCase() || "";
+      const orderId = o.orderId?.toString() || "";
 
-      // 3. Search Filtering (Company Name or Order ID)
-      const term = search.toLowerCase();
-      return (
-        (o.customer?.companyName || "").toLowerCase().includes(term) ||
-        o.orderId?.toString().includes(term)
-      );
-    });
-  }, [orders, activeTab, search, statusFilter]);
+      if (!company.includes(term) && !orderId.includes(term)) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+}, [orders, activeTab, statusFilter, search]);
 
   if (loading) {
     return (
@@ -126,9 +143,10 @@ if (
               <option value="PendingSalesApproval">Pending</option>
 
               <option value="Dispatched">Dispatched</option>
-              <option value="Shipped">Shipped</option>
-              <option value="PendingAdminApproval">Waiting Admin</option>
-              <option value="Processing">Processing</option>
+              
+              <option value="PendingWarehouseApproval">Waiting Warehouse</option>
+
+              
             </select>
           </div>
 
@@ -215,6 +233,18 @@ function OrderCard({ order, onApprove, onReject }) {
             </span>
             <StatusBadge status={order.status} />
           </div>
+          {/* REJECTION REASON (ONLY FOR REJECTED ORDERS) */}
+{order.status === "Cancelled" && order.rejectedReason && (
+  <div className="mb-4 bg-red-50 border border-red-100 rounded-lg p-3">
+    <p className="text-[10px] font-bold text-red-600 uppercase tracking-wide">
+      Rejection Reason
+    </p>
+    <p className="text-xs text-red-700 mt-1 leading-snug">
+      {order.rejectedReason}
+    </p>
+  </div>
+)}
+
           
           <div className="flex items-center gap-4">
             <div className="text-right">

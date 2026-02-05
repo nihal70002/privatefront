@@ -18,11 +18,12 @@ export default function ProductCard({ product, onAddToCart }) {
       
       {/* IMAGE (UNCHANGED) */}
       <div
-        onClick={handleView}
-        className="relative h-64 w-full cursor-pointer rounded-t-2xl 
-                   bg-slate-100 flex items-center justify-center overflow-hidden
-                   group-hover:bg-slate-200 transition"
-      >
+  onClick={handleView}
+  className="relative h-64 w-full cursor-pointer rounded-t-2xl 
+             bg-white flex items-center justify-center overflow-hidden
+             transition"
+>
+
         <img
           src={product.imageUrl}
           alt={product.name}
@@ -54,13 +55,7 @@ export default function ProductCard({ product, onAddToCart }) {
             ₹{price}
           </span>
 
-          <span className="text-xs text-slate-400 line-through">
-            ₹{price + 200}
-          </span>
-
-          <span className="text-xs font-medium text-emerald-600">
-            50% OFF
-          </span>
+          
         </div>
 
       </div>

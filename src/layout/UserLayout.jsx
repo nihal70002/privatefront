@@ -1,45 +1,67 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Search, Package, User, ShoppingCart } from "lucide-react";
-import api from "../api/axios"; // Adjust path based on your folder structure
+import api from "../api/axios";
+import { useCart } from "../context/CartContext";
+import {  useLocation } from "react-router-dom";
+
 
 export default function UserLayout() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const [cartCount, setCartCount] = useState(0);
+const location = useLocation();
+const isCartPage = location.pathname === "/cart";
 
-  // Optional: Fetch actual cart count if you have the endpoint
-  useEffect(() => {
-    const fetchCartCount = async () => {
-      try {
-        const res = await api.get("/cart"); // Adjust to your cart endpoint
-        setCartCount(res.data.items?.length || 0);
-      } catch (err) {
-        console.error("Failed to fetch cart count", err);
-      }
-    };
-    fetchCartCount();
-  }, []);
+  // ✅ GLOBAL cart state from context
+  const { cartCount, setCartFromApi } = useCart();
+
+  // ✅ Hydrate cart count from backend on refresh
+ useEffect(() => {
+  const fetchCartCount = async () => {
+    try {
+      const res = await api.get("/cart");
+
+      // DISTINCT cart items (not quantity)
+      setCartFromApi(res.data.length || 0);
+    } catch (err) {
+      console.error("Failed to fetch cart count", err);
+      setCartFromApi(0);
+    }
+  };
+
+  fetchCartCount();
+}, [location.pathname]); // 🔥 THIS IS THE FIX
+const handleSearch = (e) => {
+  if (e.key === "Enter") {
+    const query = searchQuery.trim();
+    if (!query) return;
+
+    navigate(`/products?search=${encodeURIComponent(query)}`);
+    setSearchQuery("");
+  }
+};
+
+
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* NAVBAR */}
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
         <div className="flex items-center justify-between px-6 py-3 max-w-screen-2xl mx-auto">
-          
+
           {/* LOGO */}
-          <div 
+          <div
             onClick={() => navigate("/products")}
             className="cursor-pointer hover:scale-105 transition-transform"
           >
-            <img 
-              src="/logo/logo.png" 
-              alt="Safa Store" 
+            <img
+              src="/logo/logo.png"
+              alt="Safa Store"
               className="h-12 w-auto object-contain"
             />
           </div>
 
-          {/* SEARCH BAR */}
+          {/* SEARCH */}
           <div className="w-[320px] ml-auto mr-6">
             <div className="relative">
               <Search
@@ -47,60 +69,58 @@ export default function UserLayout() {
                 size={18}
               />
               <input
-                type="text"
-                placeholder="Search for products, brands and more..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="
-                  w-full pl-12 pr-4 py-2.5 text-xs
-                  bg-slate-50
-                  border border-slate-300
-                  rounded-lg
-                  focus:outline-none
-                  focus:border-slate-500
-                  focus:bg-white
-                  transition-all
-                  placeholder:text-slate-400
-                "
-              />
+  type="text"
+  placeholder="Search for products, brands and more..."
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  onKeyDown={handleSearch}
+  className="
+    w-full pl-12 pr-4 py-2.5 text-xs
+    bg-slate-50 border border-slate-300 rounded-lg
+    focus:outline-none focus:border-slate-500 focus:bg-white
+  "
+/>
+
             </div>
           </div>
 
-          {/* NAV ACTIONS */}
-          <div className="flex items-center gap-6">
-            <button
-              onClick={() => navigate("/orders")}
-              className="flex flex-col items-center gap-1 text-xs font-bold text-gray-500 hover:text-teal-600 transition-colors group"
-            >
-              <Package size={22} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
-              <span>Orders</span>
-            </button>
+          {/* ACTIONS */}
+  {/* ACTIONS */}
+<div className="flex items-center gap-6 text-gray-600">
+  <button
+    onClick={() => navigate("/orders")}
+    className="flex flex-col items-center gap-1 hover:text-gray-900 transition-colors"
+  >
+    <Package size={22} />
+    <span className="text-xs">Orders</span>
+  </button>
 
-            <button
-              onClick={() => navigate("/profile")}
-              className="flex flex-col items-center gap-1 text-xs font-bold text-gray-500 hover:text-teal-600 transition-colors group"
-            >
-              <User size={22} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
-              <span>Profile</span>
-            </button>
+  <button
+    onClick={() => navigate("/profile")}
+    className="flex flex-col items-center gap-1 hover:text-gray-900 transition-colors"
+  >
+    <User size={22} />
+    <span className="text-xs">Profile</span>
+  </button>
 
-            <button
-              onClick={() => navigate("/cart")}
-              className="relative flex flex-col items-center gap-1 text-xs font-bold text-gray-500 hover:text-teal-600 transition-colors group"
-            >
-              <ShoppingCart size={22} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
-              <span>Bag</span>
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-3 flex h-5 w-5 items-center justify-center rounded-full bg-teal-600 text-[10px] font-bold text-white shadow-md animate-pulse">
-                  {cartCount}
-                </span>
-              )}
-            </button>
-          </div>
+  <button
+    onClick={() => navigate("/cart")}
+    className="relative flex flex-col items-center gap-1 hover:text-gray-900 transition-colors"
+  >
+    <ShoppingCart size={22} />
+    <span className="text-xs">Bag</span>
+
+    {cartCount > 0 && !isCartPage && (
+      <span className="absolute -top-1 -right-3 flex h-5 w-5 items-center justify-center rounded-full bg-teal-600 text-[10px] font-bold text-white">
+        {cartCount}
+      </span>
+    )}
+  </button>
+</div>
+
         </div>
       </nav>
 
-      {/* PAGE CONTENT */}
       <main className="flex-grow">
         <Outlet />
       </main>

@@ -1,14 +1,16 @@
 import { Routes, Route } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import WarehouseRoutes from "./pages/warehouse/WarehouseRoutes";
 
 /* PUBLIC */
 import Landing from "./pages/public/Landing";
 import Login from "./pages/public/Login";
+import ForgotPassword from "./pages/public/ForgotPassword";
+import ResetPassword from "./pages/public/ResetPassword";
 
 /* PRODUCTS */
 import Products from "./pages/public/Products";
 import ProductDetails from "./pages/public/ProductDetails";
-import ForgotPassword from "./pages/public/ForgotPassword";
-import ResetPassword from "./pages/public/ResetPassword"; 
 
 /* USER */
 import Cart from "./pages/user/Cart";
@@ -19,7 +21,7 @@ import Addresses from "./pages/user/Addresses";
 import ChangePassword from "./pages/user/ChangePassword";
 
 /* LAYOUTS */
-import UserLayout from "./layout/UserLayout"; // Added UserLayout
+import UserLayout from "./layout/UserLayout";
 import SalesLayout from "./layout/SalesLayout";
 import AdminLayout from "./layout/AdminLayout";
 
@@ -43,6 +45,7 @@ import SalesExecutives from "./pages/admin/SalesExecutives";
 import SalesExecutiveDetails from "./pages/admin/SalesExecutiveDetails";
 import SalesExecutiveOrders from "./pages/admin/SalesExecutiveOrders";
 import SalesExecutiveCustomers from "./pages/admin/SalesExecutiveCustomers";
+import AdminWarehouseUsers from "./pages/admin/AdminWarehouseUsers";
 
 /* GUARDS */
 import ProtectedRoute from "./components/common/ProtectedRoute";
@@ -51,79 +54,81 @@ import SalesRoute from "./components/common/SalesRoute";
 
 export default function App() {
   return (
-    <Routes>
-      {/* PUBLIC */}
-      <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
+    <>
+      {/* 🔔 GLOBAL TOAST */}
+      <Toaster
+        position="top-right"
+        toastOptions={{ style: { zIndex: 99999 } }}
+      />
 
-      {/* USER - Wrapped in ProtectedRoute and UserLayout */}
-      <Route
-        element={
-          <ProtectedRoute>
-            <UserLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route path="/products" element={<Products />} />
-        <Route path="/products/:id" element={<ProductDetails />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/orders" element={<MyOrders />} />
-        <Route path="/orders/:id" element={<OrderDetails />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/profile/addresses" element={<Addresses />} />
-        <Route path="/profile/change-password" element={<ChangePassword />} />
-      </Route>
+      <Routes>
+        {/* ================= PUBLIC ================= */}
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
-      {/* SALES EXECUTIVE */}
-      <Route
-        element={
-          <SalesRoute>
-            <SalesLayout />
-          </SalesRoute>
-        }
-      >
-        <Route path="/sales-executive" element={<SalesDashboard />} />
-        <Route path="/sales/orders" element={<SalesOrders />} />
-        <Route path="/sales/customers" element={<SalesCustomers />} />
-        <Route path="/sales/customers/create" element={<CreateCustomer />} />
-        <Route path="/sales/customers/:id" element={<SalesCustomerDetails />} />
-      </Route>
-
-      {/* ADMIN (🔥 FIXED PROPERLY) */}
-      <Route
-        path="/admin"
-        element={
-          <AdminRoute>
-            <AdminLayout />
-          </AdminRoute>
-        }
-      >
-        <Route index element={<AdminDashboard />} />
-        <Route path="dashboard" element={<AdminDashboard />} />
-
-        <Route path="orders" element={<AdminOrders />} />
-        <Route path="orders/:orderId" element={<AdminOrderDetails />} />
-
-        <Route path="products" element={<AdminProducts />} />
-        <Route path="low-stock" element={<AdminLowStock />} />
-        <Route path="reports" element={<AdminReports />} />
-        <Route path="customers" element={<AdminCustomers />} />
-
-        <Route path="sales-executives" element={<SalesExecutives />} />
-        <Route path="sales-executives/:id" element={<SalesExecutiveDetails />} />
+        {/* ================= USER ================= */}
         <Route
-          path="sales-executives/:id/orders"
-          element={<SalesExecutiveOrders />}
-        />
-        <Route
-          path="sales-executives/:id/customers"
-          element={<SalesExecutiveCustomers />}
-        />
-      </Route>
-      <Route path="/sales/profile" element={<SalesProfile />} />
-<Route path="/forgot-password" element={<ForgotPassword />} />
-<Route path="/reset-password" element={<ResetPassword />} />
+          element={
+            <ProtectedRoute>
+              <UserLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="/products" element={<Products />} />
+          <Route path="/products/:id" element={<ProductDetails />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/orders" element={<MyOrders />} />
+          <Route path="/orders/:id" element={<OrderDetails />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/addresses" element={<Addresses />} />
+          <Route path="/profile/change-password" element={<ChangePassword />} />
+        </Route>
 
-    </Routes>
+        {/* ================= SALES ================= */}
+        <Route
+          element={
+            <SalesRoute>
+              <SalesLayout />
+            </SalesRoute>
+          }
+        >
+          <Route path="/sales-executive" element={<SalesDashboard />} />
+          <Route path="/sales/orders" element={<SalesOrders />} />
+          <Route path="/sales/customers" element={<SalesCustomers />} />
+          <Route path="/sales/customers/create" element={<CreateCustomer />} />
+          <Route path="/sales/customers/:id" element={<SalesCustomerDetails />} />
+          <Route path="/sales/profile" element={<SalesProfile />} />
+        </Route>
+
+        {/* ================= WAREHOUSE ================= */}
+        {WarehouseRoutes}
+
+        {/* ================= ADMIN ================= */}
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminLayout />
+            </AdminRoute>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="orders" element={<AdminOrders />} />
+          <Route path="orders/:orderId" element={<AdminOrderDetails />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="low-stock" element={<AdminLowStock />} />
+          <Route path="reports" element={<AdminReports />} />
+          <Route path="customers" element={<AdminCustomers />} />
+          <Route path="sales-executives" element={<SalesExecutives />} />
+          <Route path="sales-executives/:id" element={<SalesExecutiveDetails />} />
+          <Route path="sales-executives/:id/orders" element={<SalesExecutiveOrders />} />
+          <Route path="sales-executives/:id/customers" element={<SalesExecutiveCustomers />} />
+          <Route path="warehouse" element={<AdminWarehouseUsers />} />
+        </Route>
+      </Routes>
+    </>
   );
 }

@@ -29,13 +29,21 @@ export default function Cart() {
   }, []);
 
   const handleRemove = async (productVariantId) => {
-    try {
-      await api.delete(`/cart/remove/${productVariantId}`);
-      loadCart();
-    } catch (err) {
-      alert("Failed to remove item");
-    }
-  };
+  // 1️⃣ Optimistic UI update (NO blink)
+  setCart(prev =>
+    prev.filter(item => item.productVariantId !== productVariantId)
+  );
+
+  try {
+    // 2️⃣ Backend call
+    await api.delete(`/cart/remove/${productVariantId}`);
+  } catch (err) {
+    // 3️⃣ Rollback only if API fails
+    alert("Failed to remove item");
+    loadCart();
+  }
+};
+
 
   const handleQuantityChange = async (productVariantId, newQty) => {
     if (newQty < 1) return;
@@ -198,10 +206,7 @@ export default function Cart() {
                     <ShieldCheck size={14} className="text-emerald-500" />
                     <span>Safe & Secure Payments</span>
                   </div>
-                  <div className="flex items-center gap-3 text-[11px] text-slate-400 font-medium px-2">
-                    <CreditCard size={14} className="text-teal-500" />
-                    <span>Cash on Delivery Available</span>
-                  </div>
+                  
                 </div>
               </div>
             </div>

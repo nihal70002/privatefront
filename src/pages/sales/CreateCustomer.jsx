@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
+import { Eye, EyeOff } from "lucide-react";
+
 
 export default function CreateCustomer() {
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+
 
   const [form, setForm] = useState({
     name: "",
@@ -116,21 +120,34 @@ export default function CreateCustomer() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Temporary Password
-                </label>
-                <input
-                  name="password"
-                  type="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  className="w-full mt-1 p-3 border rounded-lg"
-                  required
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Customer can change this password after first login
-                </p>
-              </div>
+  <label className="text-sm font-medium text-gray-700">
+    Temporary Password
+  </label>
+
+  <div className="relative mt-1">
+    <input
+      name="password"
+      type={showPassword ? "text" : "password"}
+      value={form.password}
+      onChange={handleChange}
+      className="w-full p-3 pr-10 border rounded-lg"
+      required
+    />
+
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+    >
+      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+    </button>
+  </div>
+
+  <p className="text-xs text-gray-500 mt-1">
+    Customer can change this password after first login
+  </p>
+</div>
+
             </div>
           </div>
 

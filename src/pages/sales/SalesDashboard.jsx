@@ -29,13 +29,35 @@ export default function SalesDashboard() {
 
       const orders = ordersRes.data;
 
-      setStats({
-        total: orders.length,
-        pending: orders.filter(o => o.status === "PendingSalesApproval").length,
-        approved: orders.filter(o => o.status === "PendingAdminApproval").length,
-        rejected: orders.filter(o => o.status === "RejectedBySales").length,
-        customers: customersRes.data.length,
-      });
+     const approvedStatuses = [
+  "PendingAdminApproval",
+  "PendingWarehouseApproval",
+  "Confirmed",
+  "Dispatched",
+  "Delivered",
+];
+
+setStats({
+  total: orders.length,
+
+  // Waiting for sales action
+  pending: orders.filter(
+    o => o.status === "PendingSalesApproval"
+  ).length,
+
+  // Approved by sales (at any later stage)
+  approved: orders.filter(
+    o => approvedStatuses.includes(o.status)
+  ).length,
+
+  // Rejected by sales
+  rejected: orders.filter(
+    o => o.status === "Cancelled" || o.status === "RejectedBySales"
+  ).length,
+
+  customers: customersRes.data.length,
+});
+
 
       setRecentOrders(orders.slice(0, 5));
     } catch (err) {
@@ -89,7 +111,7 @@ export default function SalesDashboard() {
       <div className="px-8 pb-8 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5">
         {/* Pending Approval */}
         <div
-          onClick={() => navigate("/sales/orders", { state: { tab: "PendingSalesApproval" } })}
+          onClick={() => navigate("/sales/orders", { state: { tab: "" } })}
           className="bg-white p-6 rounded-2xl flex flex-col gap-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-all group"
         >
           <div className="flex items-center justify-between">
@@ -114,7 +136,7 @@ export default function SalesDashboard() {
 
         {/* Approved by Sales */}
         <div
-          onClick={() => navigate("/sales/orders", { state: { tab: "PendingAdminApproval" } })}
+          onClick={() => navigate("/sales/orders", { state: { tab: "APPROVED" } })}
           className="bg-white p-6 rounded-2xl flex flex-col gap-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-all group"
         >
           <div className="flex items-center justify-between">
@@ -139,7 +161,7 @@ export default function SalesDashboard() {
 
         {/* Rejected by Sales */}
         <div
-          onClick={() => navigate("/sales/orders", { state: { tab: "RejectedBySales" } })}
+          onClick={() => navigate("/sales/orders", { state: { tab: "Cancelled" } })}
           className="bg-white p-6 rounded-2xl flex flex-col gap-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-all group"
         >
           <div className="flex items-center justify-between">

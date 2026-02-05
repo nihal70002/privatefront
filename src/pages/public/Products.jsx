@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { getProducts } from "../../api/products.api";
 import { addToCartApi, getCart } from "../../api/cart.api";
 import ProductCard from "../../components/products/ProductCard";
 import { ShoppingCart, User, Package, Search, ChevronRight, Filter, SlidersHorizontal } from "lucide-react";
 import api from "../../api/axios";
 
+
+
 export default function Products() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
 
   const [products, setProducts] = useState([]);
   const [cartCount, setCartCount] = useState(0);
@@ -20,12 +24,28 @@ const PAGE_SIZE = 12;
 const [selectedCategories, setSelectedCategories] = useState([]);
 const [brands, setBrands] = useState([]);
 const [selectedBrand, setSelectedBrand] = useState(null);
+const [showCategorySearch, setShowCategorySearch] = useState(false);
+const [showBrandSearch, setShowBrandSearch] = useState(false);
+const [categorySearch, setCategorySearch] = useState("");
+const [brandSearch, setBrandSearch] = useState("");
 
 
 useEffect(() => {
   loadProducts(1, true);
   loadCart();
 }, []);
+
+useEffect(() => {
+  const queryFromUrl = searchParams.get("search") || "";
+  setSearchQuery(queryFromUrl);
+}, [searchParams]);
+
+useEffect(() => {
+  if (searchQuery === "") {
+    navigate("/products", { replace: true });
+  }
+}, [searchQuery]);
+
 
 const loadCart = async () => {
   const cartRes = await getCart();
@@ -100,8 +120,14 @@ const toggleCategory = (categoryId) => {
 };
 const clearFilters = () => {
   setSelectedCategories([]);
+  setSelectedBrand(null);
+  setCategorySearch("");
+  setBrandSearch("");
+  setShowCategorySearch(false);
+  setShowBrandSearch(false);
   setSearchQuery("");
 };
+
 
 const filteredProducts = products.filter(product => {
   const matchesSearch =
@@ -155,85 +181,129 @@ const filteredProducts = products.filter(product => {
 
         {/* SIDEBAR FILTERS */}
         {showFilters && (
-          <aside className="w-49 bg-white border-r border-gray-200 p-4 sticky top-24">
+         <aside className="w-49 bg-white border-r border-gray-200 p-4 sticky top-24">
 
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <SlidersHorizontal size={18} className="text-teal-600" />
-                <h3 className="text-xs font-bold text-gray-900">FILTERS</h3>
-              </div>
-              <button
-  onClick={clearFilters}
-  className="text-xs font-bold text-teal-600 hover:text-teal-700 transition-colors"
->
-  CLEAR
-</button>
-
-            </div>
-
-          <div className="mb-6 pb-6 border-b border-gray-100">
-  <h4 className="text-xs font-bold text-gray-900 mb-4">
-    CATEGORIES
-  </h4>
-
-  <div className="space-y-1">
-    {categories.map((cat) => (
-      <label
-        key={cat.categoryId}
-        className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer
-                   hover:text-teal-700 transition-colors"
-      >
-        <input
-          type="checkbox"
-          checked={selectedCategories.includes(cat.categoryId)}
-          onChange={() => toggleCategory(cat.categoryId)}
-          className="w-4 h-4 rounded border-gray-300 text-teal-600"
-        />
-        <span className="leading-snug">
-          {cat.categoryName}
-        </span>
-      </label>
-    ))}
+  {/* FILTER HEADER */}
+  <div className="flex items-center justify-between mb-6">
+    <div className="flex items-center gap-2">
+      <SlidersHorizontal size={18} className="text-teal-600" />
+      <h3 className="text-xs font-bold text-gray-900">FILTERS</h3>
+    </div>
+    <button
+      onClick={clearFilters}
+      className="text-xs font-bold text-teal-600 hover:text-teal-700 transition-colors"
+    >
+      CLEAR
+    </button>
   </div>
-</div>
 
-
-<div className="mb-6">
-  <h4 className="text-xs font-bold text-gray-900 mb-3">BRAND</h4>
-
-
-  <div className="space-y-2">
-    {brands.map((brand) => (
-      <label
-        key={brand.brandId}
-        className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer"
+  {/* CATEGORIES */}
+  <div className="mb-6 pb-6 border-b border-gray-100">
+    <div className="flex items-center justify-between mb-4">
+      <h4 className="text-xs font-bold text-gray-900">CATEGORIES</h4>
+      <button
+        onClick={() => setShowCategorySearch(prev => !prev)}
+        className="text-gray-400 hover:text-teal-600"
       >
-        <input
-          type="checkbox"
-          checked={selectedBrand === brand.brandId}
-          onChange={() =>
-            setSelectedBrand(
-              selectedBrand === brand.brandId ? null : brand.brandId
-            )
-          }
-          className="accent-indigo-600"
-        />
-        {brand.brandName}
-      </label>
-    ))}
+        <Search size={14} />
+      </button>
+    </div>
+
+    {showCategorySearch && (
+      <input
+        autoFocus
+        type="text"
+        placeholder="Search category"
+        value={categorySearch}
+        onChange={(e) => setCategorySearch(e.target.value)}
+        className="w-full mb-3 px-2 py-1 text-xs border rounded-md"
+      />
+    )}
+
+    <div className="space-y-1">
+      {categories
+        .filter(cat =>
+          cat.categoryName
+            .toLowerCase()
+            .includes(categorySearch.toLowerCase())
+        )
+        .map((cat) => (
+          <label
+            key={cat.categoryId}
+            className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer hover:text-teal-700 transition-colors"
+          >
+            <input
+              type="checkbox"
+              checked={selectedCategories.includes(cat.categoryId)}
+              onChange={() => toggleCategory(cat.categoryId)}
+              className="w-4 h-4 rounded border-gray-300 text-teal-600"
+            />
+            <span className="leading-snug">
+              {cat.categoryName}
+            </span>
+          </label>
+        ))}
+    </div>
   </div>
-</div>
 
-            
+  {/* BRAND */}
+  <div className="mb-6">
+    <div className="flex items-center justify-between mb-3">
+      <h4 className="text-xs font-bold text-gray-900">BRAND</h4>
+      <button
+        onClick={() => setShowBrandSearch(prev => !prev)}
+        className="text-gray-400 hover:text-indigo-600"
+      >
+        <Search size={14} />
+      </button>
+    </div>
 
-            {/* Price */}
-            <div className="mb-4">
-              
-              <div className="space-y-3">
-               
-              </div>
-            </div>
-          </aside>
+    {showBrandSearch && (
+      <input
+        autoFocus
+        type="text"
+        placeholder="Search brand"
+        value={brandSearch}
+        onChange={(e) => setBrandSearch(e.target.value)}
+        className="w-full mb-3 px-2 py-1 text-xs border rounded-md"
+      />
+    )}
+
+    <div className="space-y-2">
+      {brands
+        .filter(brand =>
+          brand.brandName
+            .toLowerCase()
+            .includes(brandSearch.toLowerCase())
+        )
+        .map((brand) => (
+          <label
+            key={brand.brandId}
+            className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer"
+          >
+            <input
+              type="checkbox"
+              checked={selectedBrand === brand.brandId}
+              onChange={() =>
+                setSelectedBrand(
+                  selectedBrand === brand.brandId ? null : brand.brandId
+                )
+              }
+              className="accent-indigo-600"
+            />
+            {brand.brandName}
+          </label>
+        ))}
+    </div>
+  </div>
+
+  {/* Price (unchanged placeholder) */}
+  <div className="mb-4">
+    <div className="space-y-3"></div>
+  </div>
+
+</aside>
+
         )}
 
         {/* PRODUCTS SECTION */}

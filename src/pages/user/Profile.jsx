@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import { 
-  User, Package, MapPin, Lock, Mail, Building2, 
+  User, Eye, EyeOff,Package, MapPin, Lock, Mail, Building2, 
   Phone, ShoppingBag, Settings, LogOut, ChevronRight, CheckCircle2, ShieldCheck
 } from "lucide-react";
 
@@ -13,6 +13,11 @@ export default function Profile() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [btnLoading, setBtnLoading] = useState(false);
+const [showPassword, setShowPassword] = useState({
+  old: false,
+  new: false,
+  confirm: false,
+});
 
   // Form States
   const [passwords, setPasswords] = useState({ old: "", new: "", confirm: "" });
@@ -55,22 +60,30 @@ export default function Profile() {
   };
 
   const handleChangePassword = async (e) => {
-    e.preventDefault();
-    if (passwords.new !== passwords.confirm) return alert("Passwords do not match");
-    setBtnLoading(true);
-    try {
-      await api.put("/users/change-password", { 
-        oldPassword: passwords.old, 
-        newPassword: passwords.new 
-      });
-      alert("Password changed successfully!");
-      setPasswords({ old: "", new: "", confirm: "" });
-    } catch (err) {
-      alert(err.response?.data?.message || "Error changing password");
-    } finally {
-      setBtnLoading(false);
-    }
-  };
+  e.preventDefault();
+
+  if (passwords.new !== passwords.confirm) {
+    alert("Passwords do not match");
+    return;
+  }
+
+  setBtnLoading(true);
+  try {
+    await api.post("/auth/change-password", {
+      currentPassword: passwords.old,
+      newPassword: passwords.new,
+    });
+
+    alert("Password changed successfully!");
+    setPasswords({ old: "", new: "", confirm: "" });
+  } catch (err) {
+    console.error(err);
+    alert(err.response?.data?.message || "Error changing password");
+  } finally {
+    setBtnLoading(false);
+  }
+};
+
 
   if (loading || !profile) {
     return (
@@ -178,9 +191,45 @@ export default function Profile() {
               <div className="animate-in fade-in duration-300">
                 <h2 className="text-lg font-bold uppercase tracking-wider text-gray-700 mb-8 border-b pb-2">Change Password</h2>
                 <form onSubmit={handleChangePassword} className="max-w-md space-y-6">
-                  <FormInput type="password" label="Current Password" value={passwords.old} onChange={(e) => setPasswords({...passwords, old: e.target.value})} required />
-                  <FormInput type="password" label="New Password" value={passwords.new} onChange={(e) => setPasswords({...passwords, new: e.target.value})} required />
-                  <FormInput type="password" label="Confirm New Password" value={passwords.confirm} onChange={(e) => setPasswords({...passwords, confirm: e.target.value})} required />
+                  <FormInput
+  type="password"
+  label="Current Password"
+  value={passwords.old}
+  onChange={(e) => setPasswords({ ...passwords, old: e.target.value })}
+  required
+  showToggle
+  isVisible={showPassword.old}
+  onToggle={() =>
+    setShowPassword({ ...showPassword, old: !showPassword.old })
+  }
+/>
+
+<FormInput
+  type="password"
+  label="New Password"
+  value={passwords.new}
+  onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
+  required
+  showToggle
+  isVisible={showPassword.new}
+  onToggle={() =>
+    setShowPassword({ ...showPassword, new: !showPassword.new })
+  }
+/>
+
+<FormInput
+  type="password"
+  label="Confirm New Password"
+  value={passwords.confirm}
+  onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
+  required
+  showToggle
+  isVisible={showPassword.confirm}
+  onToggle={() =>
+    setShowPassword({ ...showPassword, confirm: !showPassword.confirm })
+  }
+/>
+
                   
                   <div className="bg-amber-50 p-4 border-l-4 border-amber-400 text-xs text-amber-800">
                     Strong passwords include a mix of letters, numbers, and symbols.
@@ -218,23 +267,51 @@ function SidebarItem({ icon, label, active, onClick }) {
   );
 }
 
-function FormInput({ label, value, onChange, disabled, type = "text", required }) {
+function FormInput({
+  label,
+  value,
+  onChange,
+  disabled,
+  type = "text",
+  required,
+  showToggle,
+  isVisible,
+  onToggle,
+}) {
   return (
-    <div>
-      <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1 ml-1 tracking-wider">{label}</label>
+    <div className="relative">
+      <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1 ml-1 tracking-wider">
+        {label}
+      </label>
+
       <input
-        type={type}
+        type={isVisible ? "text" : type}
         value={value || ""}
         onChange={onChange}
         disabled={disabled}
         required={required}
-        className={`w-full px-4 py-3 border text-sm outline-none transition-all ${
-          disabled ? "bg-gray-50 border-gray-100 text-gray-400 cursor-not-allowed" : "border-gray-300 focus:border-gray-900"
+        className={`w-full px-4 py-3 pr-12 border text-sm outline-none transition-all ${
+          disabled
+            ? "bg-gray-50 border-gray-100 text-gray-400 cursor-not-allowed"
+            : "border-gray-300 focus:border-gray-900"
         }`}
       />
+
+      {showToggle && (
+  <button
+    type="button"
+    onClick={onToggle}
+    className="absolute right-3 top-[34px] text-gray-400 hover:text-gray-700 transition-colors"
+    aria-label={isVisible ? "Hide password" : "Show password"}
+  >
+    {isVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+  </button>
+)}
+
     </div>
   );
 }
+
 
 function OrderRow({ order, navigate }) {
   return (

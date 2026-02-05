@@ -7,9 +7,17 @@ import {
   Package, User, Share2, ChevronRight, Truck, Shield, RefreshCw, Plus, Minus
 } from "lucide-react";
 
+import api from "../../api/axios";          // ✅ ADD THIS
+import { useCart } from "../../context/CartContext"; // ✅ already there
+
+
+
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { setCartFromApi } = useCart();
+
+
 
   const [product, setProduct] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
@@ -31,11 +39,11 @@ const [showToast, setShowToast] = useState(false);
           description: res.data.description,
           imageUrl: res.data.imageUrl,
           variants: res.data.sizes.map(s => ({
-            id: s.variantId,
-            size: s.size,
-            price: s.price,
-            stock: s.availableStock
-          }))
+  id: s.variantId,
+  size: s.size,
+  price: s.price
+}))
+
         };
 
         setProduct(mappedProduct);
@@ -51,41 +59,46 @@ const [showToast, setShowToast] = useState(false);
     loadProduct();
   }, [id]);
 
-  const handleAddToCart = async () => {
-    if (!selectedVariant || selectedVariant.stock === 0) {
-      alert("Please select an available size");
-      return;
-    }
+const handleAddToCart = async () => {
+  if (!selectedVariant) return;
 
-    try {
-      setAddingToCart(true);
-      // API: POST /api/cart/add with { productVariantId, quantity }
-      await addToCartApi(selectedVariant.id, quantity);
-      
-      setShowToast(true);
-setTimeout(() => setShowToast(false), 2500);
 
-      // Reset quantity after adding
-      setQuantity(1);
-    } catch (err) {
-      console.error("Failed to add to cart:", err);
-      alert("Failed to add to cart. Please try again.");
-    } finally {
-      setAddingToCart(false);
-    }
-  };
+  try {
+    setAddingToCart(true);
 
-  const increaseQuantity = () => {
-    if (quantity < selectedVariant.stock) {
-      setQuantity(prev => prev + 1);
-    }
-  };
+    // 1️⃣ Add/update cart in backend
+    await addToCartApi(selectedVariant.id, quantity);
 
-  const decreaseQuantity = () => {
-    if (quantity > 1) {
-      setQuantity(prev => prev - 1);
-    }
-  };
+    // 2️⃣ Re-sync cart count from backend (DISTINCT items)
+    const res = await api.get("/cart");
+    setCartFromApi(res.data.length || 0);
+
+    // UI only
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2500);
+    setQuantity(1);
+  } catch (err) {
+    console.error("Failed to add to cart:", err);
+  } finally {
+    setAddingToCart(false);
+  }
+};
+
+
+  const MAX_QTY = 1000;
+
+const increaseQuantity = () => {
+  if (quantity < MAX_QTY) {
+    setQuantity(prev => prev + 1);
+  }
+};
+
+const decreaseQuantity = () => {
+  if (quantity > 1) {
+    setQuantity(prev => prev - 1);
+  }
+};
+
 
   if (loading) {
     return (
@@ -160,18 +173,17 @@ setTimeout(() => setShowToast(false), 2500);
           {/* Rating */}
           <div className="flex items-center gap-2 mb-5 pb-5 border-b border-gray-200">
             <div className="flex items-center gap-1 px-2.5 py-1 bg-teal-600 text-white rounded text-xs font-bold">
-              <span>4.4</span>
+              <span>4.8</span>
               <Star size={11} className="fill-white" />
             </div>
-            <span className="text-sm text-gray-600 font-medium">34.7k Ratings</span>
+            
           </div>
 
           {/* Price */}
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-2">
               <span className="text-2xl font-bold text-gray-900">₹{selectedVariant.price}</span>
-              <span className="text-base text-gray-400 line-through">₹{Math.round(selectedVariant.price * 2)}</span>
-              <span className="text-base font-bold text-orange-600">(50% OFF)</span>
+             
             </div>
             <p className="text-sm font-semibold text-teal-700">inclusive of all taxes</p>
           </div>
@@ -181,27 +193,24 @@ setTimeout(() => setShowToast(false), 2500);
           <div className="mb-6 pb-6 border-b border-gray-200">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-bold text-gray-900 uppercase">Select Size</h3>
-              <button className="text-sm font-bold text-teal-600 hover:text-teal-700">
-                SIZE CHART &gt;
-              </button>
+              
             </div>
             
             <div className="flex gap-3">
               {product.variants.map(v => (
                 <button
                   key={v.id}
-                  disabled={v.stock === 0}
+                  disabled={false}
                   onClick={() => {
                     setSelectedVariant(v);
                     setQuantity(1); // Reset quantity when size changes
                   }}
                   className={`w-14 h-14 rounded-full border-2 font-bold text-sm transition ${
-                    v.stock === 0
-                      ? "border-gray-200 text-gray-300 cursor-not-allowed line-through bg-gray-50"
-                      : selectedVariant.id === v.id
-                      ? "border-teal-600 text-teal-600 bg-teal-50"
-                      : "border-gray-300 text-gray-900 hover:border-teal-400"
-                  }`}
+  selectedVariant.id === v.id
+    ? "border-teal-600 text-teal-600 bg-teal-50"
+    : "border-gray-300 text-gray-900 hover:border-teal-400"
+}`}
+
                 >
                   {v.size}
                 </button>
@@ -226,38 +235,32 @@ setTimeout(() => setShowToast(false), 2500);
                 </span>
                 <button
                   onClick={increaseQuantity}
-                  disabled={quantity >= selectedVariant.stock}
+                  disabled={quantity >= MAX_QTY}
+
                   className="p-3 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
                 >
                   <Plus size={16} className="text-gray-700" />
                 </button>
               </div>
-              <span className="text-sm text-gray-600">
-                {selectedVariant.stock > 0 ? (
-                  <span className="text-teal-600 font-medium">
-                    {selectedVariant.stock} items available
-                  </span>
-                ) : (
-                  <span className="text-red-600 font-medium">Out of stock</span>
-                )}
-              </span>
+              
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="flex gap-3 mb-6">
             <button
-              disabled={selectedVariant.stock === 0 || addingToCart}
-              onClick={handleAddToCart}
-              className={`flex-1 py-3.5 rounded-md font-bold text-sm transition shadow-sm ${
-                selectedVariant.stock === 0 || addingToCart
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-teal-600 text-white hover:bg-teal-700"
-              }`}
-            >
-              <ShoppingCart size={18} className="inline mr-2 mb-0.5" />
-              {selectedVariant.stock === 0 ? "OUT OF STOCK" : addingToCart ? "ADDING..." : "ADD TO BAG"}
-            </button>
+  disabled={addingToCart}
+  onClick={handleAddToCart}
+  className={`flex-1 py-3.5 rounded-md font-bold text-sm transition shadow-sm ${
+    addingToCart
+      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+      : "bg-teal-600 text-white hover:bg-teal-700"
+  }`}
+>
+  <ShoppingCart size={18} className="inline mr-2 mb-0.5" />
+  {addingToCart ? "ADDING..." : "ADD TO BAG"}
+</button>
+
 
             <button className="px-5 py-3.5 border-2 border-gray-300 rounded-md hover:border-teal-400 hover:bg-teal-50 transition group">
               <Heart size={18} className="text-gray-700 group-hover:text-teal-600" />

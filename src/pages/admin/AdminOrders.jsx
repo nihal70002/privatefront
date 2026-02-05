@@ -3,7 +3,6 @@ import { Link, useSearchParams } from "react-router-dom";
 import api from "../../api/axios";
 import { Search, Eye, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 
-
 const PAGE_SIZE = 8;
 
 export default function AdminOrders() {
@@ -13,14 +12,16 @@ export default function AdminOrders() {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [updatingId, setUpdatingId] = useState(null);
-
   const [searchParams, setSearchParams] = useSearchParams();
+const [confirmModal, setConfirmModal] = useState(null);
+// { orderId, action }
+
   const currentStatus = searchParams.get("status") || "All";
 
   const statusMap = {
-    WaitingSalesApproval: "PendingSalesApproval",
-    WaitingAdminApproval: "PendingAdminApproval",
-  };
+  WaitingSalesApproval: "PendingSalesApproval",
+  WaitingWarehouseApproval: "PendingWarehouseApproval",
+};
 
   const fetchOrders = async () => {
     try {
@@ -39,20 +40,82 @@ export default function AdminOrders() {
     }
   };
 
-  useEffect(() => { setPage(1); }, [currentStatus]);
-  useEffect(() => { fetchOrders(); }, [page, currentStatus]);
+  useEffect(() => {
+    setPage(1);
+  }, [currentStatus]);
 
-  const doAction = async (orderId, action) => {
-    try {
-      setUpdatingId(orderId);
-      await api.put(`/admin/orders/${orderId}/${action}`);
-      fetchOrders();
-    } catch (err) {
+  useEffect(() => {
+    fetchOrders();
+  }, [page, currentStatus]);
+
+  const doAction = async (orderId, action, isConfirmed = false) => {
+  try {
+    setUpdatingId(orderId);
+
+    await api.put(
+      `/admin/orders/${orderId}/${action}`,
+      { isConfirmed }
+    );
+
+    fetchOrders();
+  } catch (err) {
+    if (err.response?.data?.message === "CONFIRMATION_REQUIRED") {
+      setConfirmModal({ orderId, action });
+    } else {
       alert("Action failed");
-    } finally {
-      setUpdatingId(null);
     }
-  };
+  } finally {
+    setUpdatingId(null);
+  }
+};
+
+  // NEW: Action for Sales Approval
+ const doSalesAction = async (orderId, action) => {
+  try {
+    setUpdatingId(orderId);
+
+    if (action === "approve") {
+      await api.put(`/sales/orders/${orderId}/approve`);
+    } else {
+      await api.post(`/sales/cancel/${orderId}`);
+    }
+
+    fetchOrders();
+  } catch (err) {
+    console.error(err);
+    alert("Sales action failed");
+  } finally {
+    setUpdatingId(null);
+  }
+};
+
+
+  // NEW: Action for Warehouse Approval
+ const doWarehouseAction = async (orderId, action) => {
+  try {
+    setUpdatingId(orderId);
+
+    const actionMap = {
+      confirm: "approve",
+      reject: "reject",
+      dispatch: "dispatch",
+      deliver: "deliver",
+    };
+
+    await api.post(
+      `/warehouse/orders/${orderId}/${actionMap[action]}`
+    );
+
+    fetchOrders();
+  } catch (err) {
+    console.error(err);
+    alert("Warehouse action failed");
+  } finally {
+    setUpdatingId(null);
+  }
+};
+
+
 
   const filteredOrders = orders.filter(o =>
     o.orderId.toString().includes(searchTerm) ||
@@ -61,124 +124,216 @@ export default function AdminOrders() {
   );
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
-  const statusOptions = ["All", "WaitingSalesApproval", "WaitingAdminApproval", "Confirmed", "Dispatched", "Delivered", "Cancelled"];
+
+  const statusOptions = ["All", "WaitingSalesApproval", "WaitingWarehouseApproval", "Confirmed", "Dispatched", "Delivered", "Cancelled"];
 
   return (
-     <div className="min-h-screen overflow-y-auto bg-[#F0F4F8] p-4 font-sans antialiased text-slate-900">
-      <div className="max-w-[1400px] mx-auto space-y-6">
+    <div className="min-h-screen overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
+
+      {/* WATER EFFECT TOP BAR */}
+      <div className="mb-6 flex items-center justify-between gap-4 flex-wrap bg-white/60 backdrop-blur-md rounded-2xl p-4 shadow-lg border border-white/40">
+        {/* Glowing Status Tabs */}
+        <div className="flex gap-2 flex-wrap">
+          {statusOptions.map(s => (
+            <button
+              key={s}
+              onClick={() => setSearchParams(s === "All" ? {} : { status: s }, { replace: true })}
+              className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 ${
+                currentStatus === s
+                  ? "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)] scale-105"
+                  : "text-slate-500 hover:bg-blue-50 hover:text-blue-600"
+              }`}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+
+        {/* Small Glowing Search Bar on Right */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search orders..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="w-40 md:w-52 pl-9 pr-3 py-2 bg-white/80 backdrop-blur-sm text-xs text-slate-700 rounded-lg border border-white/50 shadow-sm outline-none transition-all"
+          />
+        </div>
+      </div>
+
+      {/* MODERN TABLE CONTAINER */}
+      <div className="bg-white/70 backdrop-blur-md rounded-3xl shadow-2xl border border-white/50 overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">ID</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Client Details</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Date</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Amount</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Status</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Process</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredOrders.map(o => (
+              <tr key={o.orderId} className="border-b border-slate-100 hover:bg-blue-50/40 transition-all">
+                <td className="px-4 py-4">
+                  <span className="text-sm font-bold text-indigo-600">#{o.orderId}</span>
+                </td>
+                <td className="px-4 py-4">
+                  <div className="text-sm font-semibold text-slate-800">{o.customerName}</div>
+                  <div className="text-xs text-slate-500">{o.companyName}</div>
+                </td>
+                <td className="px-4 py-4">
+                  <div className="text-xs text-slate-600">{new Date(o.orderDate).toLocaleDateString()}</div>
+                </td>
+                <td className="px-4 py-4">
+                  <span className="text-sm font-bold text-emerald-600">₹{o.totalAmount}</span>
+                </td>
+                <td className="px-4 py-4">
+                  <StatusBadge status={o.status} />
+                </td>
+                <td className="px-4 py-4">
+                  <div className="flex gap-2 items-center flex-wrap">
+                    {/* SALES APPROVAL BUTTONS */}
+                    {o.status === "PendingSalesApproval" && (
+                      <>
+                        <ActionBtn
+                          label="Approve"
+                          variant="success"
+                          onClick={() => doSalesAction(o.orderId, "approve")}
+                          disabled={updatingId === o.orderId}
+                        />
         
-        {/* WATER EFFECT TOP BAR */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          
-          {/* Glowing Status Tabs */}
-          <div className="backdrop-blur-md bg-white/70 p-1.5 rounded-2xl shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] border border-white/40 flex flex-wrap gap-1">
-            {statusOptions.map(s => (
-              <button
-                key={s}
-                onClick={() => setSearchParams(s === "All" ? {} : { status: s }, { replace: true })}
-                className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 ${
-                  currentStatus === s 
-                    ? "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)] scale-105" 
-                    : "text-slate-500 hover:bg-blue-50 hover:text-blue-600"
-                }`}
-              >
-                {s}
-              </button>
+
+                      </>
+                    )}
+
+                    {/* ADMIN APPROVAL BUTTONS */}
+                    {o.status === "PendingWarehouseApproval" && (
+  <>
+    <ActionBtn
+      label="Confirm"
+      variant="success"
+      onClick={() => doWarehouseAction(o.orderId, "confirm")}
+      disabled={updatingId === o.orderId}
+    />
+    
+  </>
+)}
+
+
+                    {/* WAREHOUSE APPROVAL BUTTONS */}
+                    {o.status === "Confirmed" && (
+                      <>
+                        <ActionBtn
+                          label="Dispatch"
+                          variant="info"
+                          onClick={() => doWarehouseAction(o.orderId, "dispatch")}
+                          disabled={updatingId === o.orderId}
+                        />
+                       
+                      </>
+                    )}
+                    {confirmModal && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="bg-white rounded-2xl p-6 w-80 shadow-2xl">
+      <h3 className="text-lg font-bold text-slate-800 mb-2">
+        Confirm Action
+      </h3>
+      <p className="text-sm text-slate-600 mb-4">
+        This order is already dispatched or delivered.
+        Are you sure you want to revert?
+      </p>
+
+      <div className="flex justify-end gap-2">
+        <button
+          onClick={() => setConfirmModal(null)}
+          className="px-4 py-2 text-sm rounded-lg bg-slate-100"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={() => {
+            doAction(
+              confirmModal.orderId,
+              confirmModal.action,
+              true
+            );
+            setConfirmModal(null);
+          }}
+          className="px-4 py-2 text-sm rounded-lg bg-rose-500 text-white"
+        >
+          Yes, Revert
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
+                    {/* DELIVERY BUTTON */}
+                    {o.status === "Dispatched" && (
+                      <ActionBtn
+                        label="Deliver"
+                        variant="primary"
+                        onClick={() => doAction(o.orderId, "deliver")}
+                        disabled={updatingId === o.orderId}
+                      />
+                    )}
+                    {/* REVERT BUTTON FOR CANCELLED ORDERS */}
+{o.status === "Cancelled" && (
+  <ActionBtn
+    label="Revert"
+    variant="danger"
+    onClick={() => doAction(o.orderId, "revert")}
+    disabled={updatingId === o.orderId}
+  />
+)}
+
+
+                    <Link to={`/admin/orders/${o.orderId}`}>
+                      <button className="p-2 hover:bg-indigo-100 rounded-lg transition-all">
+                        <Eye className="w-4 h-4 text-indigo-600" />
+                      </button>
+                    </Link>
+                  </div>
+                </td>
+              </tr>
             ))}
-          </div>
+          </tbody>
+        </table>
+      </div>
 
-          {/* Small Glowing Search Bar on Right */}
-          <div className="relative group self-end">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-lg blur opacity-20 group-focus-within:opacity-40 transition duration-1000"></div>
-            <div className="relative flex items-center">
-              <Search className="absolute left-3 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={14} />
-              <input
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                className="w-40 md:w-52 pl-9 pr-3 py-2 bg-white/80 backdrop-blur-sm text-xs text-slate-700 rounded-lg border border-white/50 shadow-sm outline-none transition-all"
-              />
-            </div>
-          </div>
+      {/* PAGINATION */}
+      <div className="mt-6 flex items-center justify-between bg-white/60 backdrop-blur-md rounded-2xl p-4 shadow-lg border border-white/40">
+        <div className="flex items-center gap-2 text-xs text-slate-600">
+          <RefreshCw className="w-3.5 h-3.5" />
+          Live Order Stream
         </div>
 
-        {/* MODERN TABLE CONTAINER */}
-        <div className="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.02)] border border-slate-100 overflow-hidden mt-2">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50/30 border-b border-slate-100">
-                  <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">ID</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Client Details</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Date</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-right">Amount</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">Process</th>
-                  <th className="px-6 py-4"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {filteredOrders.map(o => (
-                  <tr key={o.orderId} className="hover:bg-blue-50/30 transition-all duration-300 group">
-                    <td className="px-6 py-4 text-sm font-bold text-slate-900">#{o.orderId}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-bold text-slate-800">{o.customerName}</span>
-                        <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">{o.companyName}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-xs text-slate-500 font-medium">
-                      {new Date(o.orderDate).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-black text-slate-900 text-right">₹{o.totalAmount}</td>
-                    <td className="px-6 py-4">
-                      <StatusBadge status={o.status} />
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-center gap-2">
-                        {o.status === "PendingSalesApproval" && (
-                          <span className="text-[10px] font-bold text-blue-400/70 uppercase tracking-widest animate-pulse">Processing...</span>
-                        )}
-                        {o.status === "PendingAdminApproval" && (
-                          <>
-                            <ActionBtn label="Confirm" variant="success" onClick={() => doAction(o.orderId, "confirm")} disabled={updatingId === o.orderId} />
-                            <ActionBtn label="Cancel" variant="danger" onClick={() => doAction(o.orderId, "cancel")} disabled={updatingId === o.orderId} />
-                          </>
-                        )}
-                        {o.status === "Confirmed" && (
-                          <>
-                            <ActionBtn label="Dispatch" variant="info" onClick={() => doAction(o.orderId, "dispatch")} disabled={updatingId === o.orderId} />
-                          </>
-                        )}
-                        {o.status === "Dispatched" && (
-                          <ActionBtn label="Deliver" variant="primary" onClick={() => doAction(o.orderId, "deliver")} disabled={updatingId === o.orderId} />
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <Link to={`/admin/orders/${o.orderId}`} className="p-2 inline-flex text-slate-300 hover:text-blue-600 hover:scale-110 transition-all">
-                        <Eye size={18} />
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <div className="flex items-center gap-3">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage(p => p - 1)}
+            className="p-2 hover:bg-white rounded-xl transition-all disabled:opacity-20"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
 
-        {/* PAGINATION */}
-        <div className="flex items-center justify-between px-4 pb-10">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Live Order Stream</p>
-          <div className="flex items-center gap-4 bg-white/50 backdrop-blur-md p-1 rounded-2xl border border-white/50 shadow-sm">
-            <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="p-2 hover:bg-white rounded-xl transition-all disabled:opacity-20">
-              <ChevronLeft size={16} />
-            </button>
-            <span className="text-xs font-black text-slate-700"> {page} / {totalPages}</span>
-            <button disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} className="p-2 hover:bg-white rounded-xl transition-all disabled:opacity-20">
-              <ChevronRight size={16} />
-            </button>
-          </div>
+          <span className="text-sm font-semibold text-slate-700">
+            {page} / {totalPages}
+          </span>
+
+          <button
+            disabled={page >= totalPages}
+            onClick={() => setPage(p => p + 1)}
+            className="p-2 hover:bg-white rounded-xl transition-all disabled:opacity-20"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </div>
@@ -197,7 +352,7 @@ const ActionBtn = ({ label, variant, onClick, disabled }) => {
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`px-3 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 disabled:opacity-50 ${variants[variant]}`}
+      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all disabled:opacity-50 ${variants[variant]}`}
     >
       {label}
     </button>
@@ -207,15 +362,21 @@ const ActionBtn = ({ label, variant, onClick, disabled }) => {
 function StatusBadge({ status }) {
   const config = {
     PendingSalesApproval: { label: "Pending", class: "bg-amber-100 text-amber-600 border-amber-200" },
-    PendingAdminApproval: { label: "Admin Review", class: "bg-orange-100 text-orange-600 border-orange-200" },
+    PendingWarehouseApproval: {
+  label: "Warehouse Review",
+  class: "bg-purple-100 text-purple-600 border-purple-200"
+},
+
     Confirmed: { label: "Confirmed", class: "bg-emerald-100 text-emerald-600 border-emerald-200" },
     Dispatched: { label: "In Transit", class: "bg-blue-100 text-blue-600 border-blue-200" },
     Delivered: { label: "Delivered", class: "bg-slate-100 text-slate-500 border-slate-200" },
     Cancelled: { label: "Cancelled", class: "bg-rose-100 text-rose-600 border-rose-200" },
   };
+
   const s = config[status];
+
   return (
-    <span className={`inline-flex px-2.5 py-1 rounded-full border text-[9px] font-bold uppercase tracking-tighter ${s?.class}`}>
+    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${s?.class || "bg-gray-100 text-gray-600"}`}>
       {s?.label || status}
     </span>
   );

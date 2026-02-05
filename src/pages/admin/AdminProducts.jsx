@@ -8,7 +8,14 @@ import {
 } from "lucide-react";
 
 /* ================= CONSTANTS ================= */
-const DEFAULT_VARIANT = { size: "M", price: 100, stock: 0 };
+/* ================= CONSTANTS ================= */
+const DEFAULT_VARIANT = {
+  size: "M",
+  price: 100,
+  stock: 0,
+  productCode: ""
+};
+
 const EMPTY_FORM = {
   name: "",
   categoryId: "",
@@ -17,6 +24,7 @@ const EMPTY_FORM = {
   imageUrl: "",
   variants: [{ ...DEFAULT_VARIANT }]
 };
+
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
@@ -104,50 +112,164 @@ export default function AdminProducts() {
   const openEditModal = (product) => {
     setEditingId(product.productId);
     setForm({
-      name: product.name,
-      categoryId: product.categoryId.toString(),
-      brandId: product.brandId?.toString() || "",
-      description: product.description || "",
-      imageUrl: product.imageUrl || "",
-      variants: product.variants.map(v => ({ ...v }))
-    });
+  name: product.name,
+  categoryId: product.categoryId.toString(),
+  brandId: product.brandId?.toString() || "",
+  description: product.description || "",
+  imageUrl: product.imageUrl || "",
+  variants: product.variants.map(v => ({ ...v }))
+});
+
     setShowModal(true);
   };
 
-  const saveProduct = async () => {
-    if (!form.name || !form.categoryId || !form.brandId) return alert("All fields are required");
-    const payload = { ...form, categoryId: Number(form.categoryId), brandId: Number(form.brandId) };
-    try {
-      if (editingId) {
-        await api.put(`/admin/products/${editingId}`, payload);
-        for (const v of form.variants) {
-          if(v.variantId) await api.put(`/admin/products/variant/${v.variantId}`, v);
-        }
-      } else {
-        await api.post("/admin/products", payload);
-      }
-      closeModal(); loadData();
-    } catch { alert("Error saving product"); }
+const saveProduct = async () => {
+  // 🔴 BASIC PRODUCT VALIDATION
+  if (!form.name || !form.categoryId || !form.brandId) {
+    alert("Product name, category and brand are required");
+    return;
+  }
+
+  if (!form.variants || form.variants.length === 0) {
+    alert("At least one variant is required");
+    return;
+  }
+
+  // 🔴 VARIANT VALIDATION (ON SAVE ONLY)
+  const sizes = new Set();
+  const skus = new Set();
+
+  for (const v of form.variants) {
+    const size = v.size?.trim();
+    const sku = v.productCode?.trim();
+
+    if (!size) {
+      alert("Variant size cannot be empty");
+      return;
+    }
+
+    if (!sku) {
+      alert("SKU / Product Code is required for each variant");
+      return;
+    }
+
+    const sizeKey = size.toLowerCase();
+    const skuKey = sku.toLowerCase();
+
+    if (sizes.has(sizeKey)) {
+      alert(`Duplicate size not allowed: ${size}`);
+      return;
+    }
+
+    if (skus.has(skuKey)) {
+      alert(`Duplicate SKU not allowed: ${sku}`);
+      return;
+    }
+
+    sizes.add(sizeKey);
+    skus.add(skuKey);
+  }
+
+  // ✅ CLEAN & SAFE PAYLOAD
+  const payload = {
+    ...form,
+    categoryId: Number(form.categoryId),
+    brandId: Number(form.brandId),
+    variants: form.variants.map(v => ({
+      ...v,
+      size: v.size.trim(),
+      productCode: v.productCode.trim(),
+      price: Number(v.price) || 0,
+      stock: Number(v.stock) || 0
+    }))
   };
 
-  const deleteProduct = async () => {
-    if (!deleteTarget) return;
-    try {
-      await api.delete(`/admin/products/${deleteTarget.productId}`);
-      setDeleteTarget(null); loadData();
-    } catch { alert("Failed to delete"); }
-  };
+  try {
+    if (editingId) {
+      // 1️⃣ UPDATE PRODUCT BASIC INFO
+      await api.put(`/admin/products/${editingId}`, payload);
+
+      // 2️⃣ UPDATE / ADD VARIANTS
+      for (const v of payload.variants) {
+        if (v.variantId) {
+          // UPDATE EXISTING VARIANT
+          await api.put(`/admin/products/variant/${v.variantId}`, v);
+        } else {
+          // ➕ ADD NEW VARIANT (XL, XS, Baby-2, etc.)
+          await api.post(`/admin/products/${editingId}/variant`, v);
+        }
+      }
+    } else {
+      // CREATE PRODUCT + VARIANTS
+      await api.post("/admin/products", payload);
+    }
+
+    closeModal();
+    loadData();
+  } catch (err) {
+    const msg =
+      err?.response?.data?.message ||
+      err?.response?.data ||
+      "Error saving product";
+    alert(msg);
+  }
+};
+
+
+
+ const deleteProduct = async () => {
+  if (!deleteTarget) return;
+
+  try {
+    await api.delete(`/admin/products/${deleteTarget.productId}`);
+    setDeleteTarget(null);
+    loadData();
+  } catch (err) {
+    alert("Failed to delete product permanently");
+  }
+};
+
+
 
   const closeModal = () => {
     setShowModal(false); setEditingId(null); setForm(EMPTY_FORM);
   };
 
-  const filteredProducts = products.filter(p => {
-    const matchesStatus = filter === "ALL" ? true : (filter === "ACTIVE" ? p.isActive : !p.isActive);
-    const matchesCategory = selectedCatFilter === "ALL" ? true : p.categoryId.toString() === selectedCatFilter;
-    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesStatus && matchesCategory && matchesSearch;
-  });
+ const filteredProducts = products.filter(p => {
+  const term = searchTerm.toLowerCase();
+
+  const matchesStatus =
+    filter === "ALL"
+      ? true
+      : filter === "ACTIVE"
+      ? p.isActive
+      : !p.isActive;
+
+  const matchesCategory =
+    selectedCatFilter === "ALL"
+      ? true
+      : p.categoryId.toString() === selectedCatFilter;
+
+  const matchesName =
+    p.name?.toLowerCase().includes(term);
+
+  const matchesProductCode =
+    p.productCode?.toLowerCase().includes(term);
+
+  const matchesVariantSku =
+    p.variants?.some(v =>
+      v.productCode?.toLowerCase().includes(term)
+    );
+
+  const matchesSearch =
+    !term ||
+    matchesName ||
+    matchesProductCode ||
+    matchesVariantSku;
+
+  return matchesStatus && matchesCategory && matchesSearch;
+});
+
 
   return (
    <div className="h-full overflow-y-auto bg-[#F8FAFC] px-6 py-6 text-[13px] leading-tight">
@@ -169,13 +291,7 @@ export default function AdminProducts() {
               + BRAND
             </button>
             {/* LOW STOCK ALERT BUTTON */}
-<button 
-  onClick={() => navigate("/admin/low-stock")}
-  className="flex items-center gap-2 bg-rose-50 border border-rose-100 px-4 py-2 rounded-xl text-[11px] font-black text-rose-600 hover:bg-rose-100 transition shadow-sm animate-pulse"
->
-  <AlertTriangle size={14} />
-  LOW STOCK
-</button>
+
 
 <button onClick={() => setShowModal(true)} className="bg-blue-600 text-white px-5 py-2 rounded-xl text-[11px] font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition">
   + ADD PRODUCT
@@ -233,6 +349,9 @@ export default function AdminProducts() {
                         <div>
                           <p className="font-bold text-slate-800 text-xs leading-tight group-hover:text-blue-600 transition-colors">{p.name}</p>
                           <p className="text-xs font-bold text-blue-500 uppercase tracking-tighter mt-1">{p.categoryName || 'General'}</p>
+                          <p className="text-[10px] font-bold text-slate-400 tracking-widest mt-0.5">
+    {p.productCode}
+  </p>
                         </div>
                       </div>
                     </td>
@@ -272,11 +391,18 @@ export default function AdminProducts() {
                         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                           {p.variants?.map((v, i) => (
                             <div key={i} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-                              <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Size {v.size}</p>
+                              <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">
+  Size {v.size}
+</p>
+
+<p className="text-[10px] font-bold text-slate-500 tracking-widest">
+  SKU: {v.productCode}
+</p>
+
                               <p className="text-blue-600 font-black text-xs mb-2">₹{v.price}</p>
                               <div className="flex items-center gap-2">
-                                <div className={`w-1.5 h-1.5 rounded-full ${v.stock < 10 ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`} />
-                                <p className="text-xs font-bold text-slate-600">Stock: {v.stock}</p>
+                            
+                                
                               </div>
                             </div>
                           ))}
@@ -405,36 +531,111 @@ export default function AdminProducts() {
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Nomenclature/Description</label>
                 <textarea rows="3" className="w-full bg-slate-50 border-none p-4 rounded-2xl focus:bg-white outline-none transition-all font-medium text-base" placeholder="Summarize product attributes..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
               </div>
+     
+
 
               <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-[13px] font-black text-slate-900 uppercase tracking-[0.2em]">Sku Configurations</h4>
-                  <button onClick={() => setForm({ ...form, variants: [...form.variants, { ...DEFAULT_VARIANT }] })} className="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-xs font-black hover:bg-blue-600 hover:text-white transition-all">+ CONFIG</button>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {form.variants.map((v, i) => (
-                    <div key={i} className="flex gap-2 items-center bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
-                      <select className="bg-white border-none rounded-lg text-xs font-bold p-1.5 w-16" value={v.size} onChange={e => {
-                        const vs = [...form.variants]; vs[i].size = e.target.value; setForm({ ...form, variants: vs });
-                      }}>
-                        <option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option>
-                      </select>
-                      <input type="number" placeholder="Price" className="bg-white border-none rounded-lg text-xs font-bold p-1.5 w-full" value={v.price} onChange={e => {
-                        const vs = [...form.variants]; vs[i].price = e.target.value; setForm({ ...form, variants: vs });
-                      }} onBlur={e => {
-                        const vs = [...form.variants]; vs[i].price = Number(e.target.value); setForm({ ...form, variants: vs });
-                      }} />
-                      <input type="number" placeholder="Stock" className="bg-white border-none rounded-lg text-xs font-bold p-1.5 w-24" value={v.stock} onChange={e => {
-                        const vs = [...form.variants]; vs[i].stock = e.target.value; setForm({ ...form, variants: vs });
-                      }} onBlur={e => {
-                        const vs = [...form.variants]; vs[i].stock = Number(e.target.value); setForm({ ...form, variants: vs });
-                      }} />
-                      <button onClick={() => setForm({ ...form, variants: form.variants.filter((_, idx) => idx !== i) })} className="p-1.5 text-rose-400 hover:bg-rose-50 rounded-lg"><Trash2 size={14}/></button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+  <div className="flex justify-between items-center">
+    <h4 className="text-[13px] font-black text-slate-900 uppercase tracking-[0.2em]">
+      SKU Configurations
+    </h4>
+
+    <button
+      type="button"
+      onClick={() =>
+        setForm({
+          ...form,
+          variants: [...form.variants, { ...DEFAULT_VARIANT }]
+        })
+      }
+      className="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-xs font-black hover:bg-blue-600 hover:text-white transition-all"
+    >
+      + CONFIG
+    </button>
+  </div>
+
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+    {form.variants.map((v, i) => (
+      <div
+        key={i}
+        className="flex gap-2 items-center bg-slate-50/50 p-3 rounded-2xl border border-slate-100"
+      >
+        {/* SIZE */}
+        {/* SIZE (CUSTOM + UNIQUE) */}
+<input
+  type="text"
+  placeholder="Size (eg: M, 2-3Y, Baby-2)"
+  className="bg-white border-none rounded-lg text-xs font-bold p-1.5 w-32"
+  value={v.size}
+  onChange={e => {
+    const value = e.target.value;
+
+   <input
+  type="text"
+  placeholder="Size (eg: M, XS, 2-3Y, Baby-2)"
+  className="bg-white border-none rounded-lg text-xs font-bold p-1.5 w-32"
+  value={v.size}
+  onChange={e => {
+    const vs = [...form.variants];
+    vs[i].size = e.target.value;   // ✅ JUST UPDATE VALUE
+    setForm({ ...form, variants: vs });
+  }}
+/>
+
+
+    const vs = [...form.variants];
+    vs[i].size = value;
+    setForm({ ...form, variants: vs });
+  }}
+/>
+
+       
+        {/* PRODUCT CODE (SKU) */}
+        <input
+          type="text"
+          placeholder="SKU / Product Code"
+          className="bg-white border-none rounded-lg text-xs font-bold p-1.5 w-40"
+          value={v.productCode}
+          onChange={e => {
+            const vs = [...form.variants];
+            vs[i].productCode = e.target.value;
+            setForm({ ...form, variants: vs });
+          }}
+        />
+
+        {/* PRICE */}
+        <input
+  type="number"
+  placeholder="Price"
+  className="bg-white border-none rounded-lg text-xs font-bold p-1.5 w-24"
+  value={v.price === 0 ? "" : v.price}
+  onChange={e => {
+    const vs = [...form.variants];
+    vs[i].price = e.target.value === "" ? "" : Number(e.target.value);
+    setForm({ ...form, variants: vs });
+  }}
+/>
+
+
+        {/* REMOVE VARIANT */}
+        <button
+          type="button"
+          onClick={() =>
+            setForm({
+              ...form,
+              variants: form.variants.filter((_, idx) => idx !== i)
+            })
+          }
+          className="p-1.5 text-rose-400 hover:bg-rose-50 rounded-lg"
+        >
+          <Trash2 size={14} />
+        </button>
+      </div>
+    ))}
+  </div>
+</div>
+</div>
+
 
             <div className="p-8 border-t bg-slate-50 flex gap-4">
               <button onClick={saveProduct} className="flex-1 bg-slate-900 text-white py-3 rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-blue-600 transition shadow-xl shadow-slate-200">
