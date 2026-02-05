@@ -1,15 +1,15 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: `${import.meta.env.VITE_API_URL}/api`,
   headers: {
     "Content-Type": "application/json",
   },
   withCredentials: false,
 });
 
-// 🔎 Debug (remove later if you want)
-console.log("API URL 👉", import.meta.env.VITE_API_URL);
+// 🔎 Debug (remove later)
+console.log("API URL 👉", `${import.meta.env.VITE_API_URL}/api`);
 
 // ✅ Attach JWT token automatically
 api.interceptors.request.use(
@@ -30,13 +30,9 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       console.warn("Unauthorized – token expired or invalid");
-      // Optional auto-logout:
-      // localStorage.removeItem("token");
-      // window.location.href = "/login";
     }
     return Promise.reject(error);
   }
 );
 
 export default api;
-`;  `
