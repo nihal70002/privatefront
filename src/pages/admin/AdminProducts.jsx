@@ -123,6 +123,16 @@ export default function AdminProducts() {
     setShowModal(true);
   };
 
+const formatSAR = (amount) =>
+  new Intl.NumberFormat("en-SA", {
+    style: "currency",
+    currency: "SAR",
+  }).format(amount);
+
+
+
+
+
 const saveProduct = async () => {
   // 🔴 BASIC PRODUCT VALIDATION
   if (!form.name || !form.categoryId || !form.brandId) {
@@ -399,7 +409,10 @@ const saveProduct = async () => {
   SKU: {v.productCode}
 </p>
 
-                              <p className="text-blue-600 font-black text-xs mb-2">₹{v.price}</p>
+                              <p className="text-blue-600 font-black text-xs mb-2">
+  {formatSAR(v.price)}
+</p>
+
                               <div className="flex items-center gap-2">
                             
                                 

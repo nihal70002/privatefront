@@ -25,13 +25,17 @@ export default function ProductCard({ product, onAddToCart }) {
 >
 
         <img
-          src={product.imageUrl}
-          alt={product.name}
-          className="h-full w-full object-contain 
-                     p-2 scale-110 
-                     transition-transform duration-300 
-                     group-hover:scale-125"
-        />
+  src={product.primaryImageUrl}
+  alt={product.name}
+  className="h-full w-full object-contain 
+             p-2 scale-110 
+             transition-transform duration-300 
+             group-hover:scale-125"
+  onError={(e) => {
+    e.currentTarget.src = "/no-image.png";
+  }}
+/>
+
       </div>
 
       {/* CONTENT */}

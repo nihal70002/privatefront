@@ -27,37 +27,70 @@ export default function ProductDetail() {
   const [addingToCart, setAddingToCart] = useState(false);
 const [showToast, setShowToast] = useState(false);
 
+const hasImages = product?.images?.length > 0;
+
+const nextImage = () => {
+  if (!hasImages) return;
+  setSelectedImage((prev) =>
+    prev === product.images.length - 1 ? 0 : prev + 1
+  );
+};
+
+const prevImage = () => {
+  if (!hasImages) return;
+  setSelectedImage((prev) =>
+    prev === 0 ? product.images.length - 1 : prev - 1
+  );
+};
+
+
   useEffect(() => {
-    const loadProduct = async () => {
-      try {
-        const res = await getProductById(id);
+  const loadProduct = async () => {
+    try {
+      const res = await getProductById(id);
 
-        const mappedProduct = {
-          id: res.data.productId,
-          name: res.data.name,
-          category: res.data.categoryName,
-          description: res.data.description,
-          imageUrl: res.data.imageUrl,
-          variants: res.data.sizes.map(s => ({
-  id: s.variantId,
-  size: s.size,
-  price: s.price
-}))
+      // ✅ Build image array (primary first)
+      const images = res.data.imageUrls?.length
+        ? res.data.imageUrls
+        : res.data.primaryImageUrl
+          ? [res.data.primaryImageUrl]
+          : [];
 
-        };
+      const mappedProduct = {
+        id: res.data.productId,
+        name: res.data.name,
+        category: res.data.categoryName,
+        description: res.data.description,
 
-        setProduct(mappedProduct);
-        setSelectedVariant(mappedProduct.variants[0]);
-      } catch (err) {
-        console.error("Failed to load product", err);
-        setProduct(null);
-      } finally {
-        setLoading(false);
-      }
-    };
+        // ✅ MULTI IMAGE SUPPORT
+        images,
+        primaryImage: res.data.primaryImageUrl,
 
-    loadProduct();
-  }, [id]);
+        // ✅ SAFE VARIANT MAP
+        variants: (res.data.sizes || []).map(s => ({
+          id: s.variantId,
+          size: s.size,
+          price: s.price,
+          stock: s.availableStock
+        }))
+      };
+
+      setProduct(mappedProduct);
+
+      // ✅ RESET IMAGE + VARIANT SAFELY
+      setSelectedImage(0);
+      setSelectedVariant(mappedProduct.variants[0] || null);
+
+    } catch (err) {
+      console.error("Failed to load product", err);
+      setProduct(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  loadProduct();
+}, [id]);
 
 const handleAddToCart = async () => {
   if (!selectedVariant) return;
@@ -126,7 +159,7 @@ const decreaseQuantity = () => {
     );
   }
 
-  const productImages = [product.imageUrl, product.imageUrl, product.imageUrl, product.imageUrl];
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -153,12 +186,86 @@ const decreaseQuantity = () => {
         {/* LEFT: IMAGES */}
         <div className="w-1/3 p-4 border-r border-gray-100">
           <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-  <img
-    src={product.imageUrl}
-    alt={product.name}
-    className="w-full h-[550px] object-contain hover:scale-105 transition-transform duration-300"
-  />
+ <div className="relative overflow-hidden rounded-lg border border-gray-200 bg-white group">
+  
+  {/* LEFT ARROW */}
+  {product.images.length > 1 && (
+    <button
+      onClick={prevImage}
+      className="absolute left-3 top-1/2 -translate-y-1/2 z-20 
+                 bg-white/80 hover:bg-white shadow rounded-full p-2
+                 transition opacity-0 group-hover:opacity-100"
+    >
+      <ChevronLeft size={22} />
+    </button>
+  )}
+
+  {/* IMAGE WITH ZOOM */}
+  <div className="relative overflow-hidden rounded-lg border border-gray-200 bg-white h-[550px] w-full">
+
+  {/* TRACK */}
+  <div
+    className="flex h-full transition-transform ease-in-out"
+    style={{
+      transform: `translateX(-${selectedImage * 100}%)`,
+      transitionDuration: "700ms"
+    }}
+  >
+    {product.images.map((img, index) => (
+      <div
+        key={index}
+        className="h-full w-full flex-shrink-0 flex items-center justify-center"
+      >
+        <img
+          src={img}
+          alt={`${product.name} ${index + 1}`}
+          className="h-full w-full object-contain"
+        />
+      </div>
+    ))}
+  </div>
+
+  {/* LEFT */}
+  
 </div>
+
+
+  {/* RIGHT ARROW */}
+  {product.images.length > 1 && (
+    <button
+      onClick={nextImage}
+      className="absolute right-3 top-1/2 -translate-y-1/2 z-20
+                 bg-white/80 hover:bg-white shadow rounded-full p-2
+                 transition opacity-0 group-hover:opacity-100"
+    >
+      <ChevronRight size={22} />
+    </button>
+  )}
+</div>
+
+
+</div>
+<div className="flex gap-3 p-3 justify-center bg-white ">
+  {product.images.map((img, index) => (
+    <button
+      key={index}
+      onClick={() => setSelectedImage(index)}
+      className={`w-20 h-20 border rounded-md overflow-hidden transition ${
+        selectedImage === index
+          ? "border-teal-600 ring-2 ring-teal-500"
+          : "border-gray-300 hover:border-teal-400"
+      }`}
+    >
+      <img
+        src={img}
+        alt={`thumb-${index}`}
+        className="w-full h-full object-contain"
+      />
+    </button>
+  ))}
+</div>
+
+
 
         </div>
 
@@ -167,7 +274,7 @@ const decreaseQuantity = () => {
           {/* Brand & Name */}
           <div className="mb-1">
             <h2 className="text-xl font-bold text-gray-900">{product.category}</h2>
-            <h1 className="text-lg text-gray-600 mt-1">{product.name}</h1>
+            <h1 className="text-lg font-bold mt-1">{product.name}</h1>
           </div>
 
           {/* Rating */}

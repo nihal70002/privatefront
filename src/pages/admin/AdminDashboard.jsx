@@ -17,7 +17,11 @@ export default function AdminDashboard() {
     total: 0, salesPending: 0, adminPending: 0, confirmed: 0, 
     dispatched: 0, delivered: 0, lowStock: 0, totalRevenue: 0
   });
-
+       const formatSAR = (amount) =>
+  new Intl.NumberFormat("en-SA", {
+    style: "currency",
+    currency: "SAR",
+  }).format(amount);
   const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [topProducts, setTopProducts] = useState([]);
@@ -37,6 +41,12 @@ export default function AdminDashboard() {
           api.get("/admin/reports/top-customers"),
           api.get(`/admin/reports/monthly?year=${year}`)
         ]);
+
+
+
+
+ 
+
 
         setMonthlyData(monthlyRes.data || []);
         const orders = ordersRes.data.items || [];
@@ -118,7 +128,8 @@ export default function AdminDashboard() {
           <section className="grid grid-cols-2 lg:grid-cols-3 gap-3">
             <StatCard 
               title="Revenue" 
-              value={`₹${stats.totalRevenue.toLocaleString()}`} 
+              value={formatSAR(stats.totalRevenue)}
+
               icon={<Wallet size={16} />} 
               theme="indigo" 
               onClick={() => navigate("/admin/reports")} 
@@ -171,7 +182,8 @@ export default function AdminDashboard() {
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-bold text-slate-700 truncate w-24 leading-none">{item.productName}</p>
-              <p className="text-[9px] text-slate-400 font-bold mt-1 uppercase tracking-tighter">₹{item.revenue.toLocaleString()}</p>
+              <p className="text-[9px] text-slate-400 font-bold mt-1 uppercase tracking-tighter">{formatSAR(item.revenue)}
+</p>
             </div>
           </div>
           <span className="text-[9px] font-black text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">{item.quantitySold} Qty</span>
@@ -194,7 +206,8 @@ export default function AdminDashboard() {
                     <tr key={o.orderId} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-4 py-2.5 text-xs font-bold text-slate-700">#ORD-{o.orderId}</td>
                       <td className="px-4 py-2.5"><StatusBadge status={o.status} /></td>
-                      <td className="px-4 py-2.5 text-xs font-black text-slate-900 text-right">₹{o.totalAmount.toLocaleString()}</td>
+                      <td className="px-4 py-2.5 text-xs font-black text-slate-900 text-right">{formatSAR(o.totalAmount)}
+</td>
                       <td className="px-4 py-2.5 text-right">
                         <button onClick={() => navigate(`/admin/orders/${o.orderId}`)} className="text-slate-300 hover:text-indigo-600">
                           <ChevronRight size={14} />
@@ -220,7 +233,7 @@ export default function AdminDashboard() {
                         <p className="text-[9px] text-slate-400 font-bold mt-1 uppercase tracking-tighter">{cust.ordersCount} Orders</p>
                       </div>
                     </div>
-                    <p className="text-[11px] font-black text-slate-800">₹{cust.totalSpent.toLocaleString()}</p>
+                    <p className="text-[11px] font-black text-slate-800">{formatSAR(cust.totalSpent)}</p>
                   </div>
                 ))}
               </div>

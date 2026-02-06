@@ -23,6 +23,16 @@ const [confirmModal, setConfirmModal] = useState(null);
   WaitingWarehouseApproval: "PendingWarehouseApproval",
 };
 
+const formatSAR = (amount) =>
+  new Intl.NumberFormat("en-SA", {
+    style: "currency",
+    currency: "SAR",
+  }).format(amount);
+
+
+
+
+
   const fetchOrders = async () => {
     try {
       setLoading(true);
@@ -189,7 +199,10 @@ const [confirmModal, setConfirmModal] = useState(null);
                   <div className="text-xs text-slate-600">{new Date(o.orderDate).toLocaleDateString()}</div>
                 </td>
                 <td className="px-4 py-4">
-                  <span className="text-sm font-bold text-emerald-600">₹{o.totalAmount}</span>
+                  <span className="text-sm font-bold text-emerald-600">
+  {formatSAR(o.totalAmount)}
+</span>
+
                 </td>
                 <td className="px-4 py-4">
                   <StatusBadge status={o.status} />
