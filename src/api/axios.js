@@ -5,10 +5,22 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: false,
 });
 
-// 🔎 Debug
+// ✅ THIS IS THE MISSING PIECE
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 console.log("API URL 👉", import.meta.env.VITE_API_URL);
 
 export default api;
