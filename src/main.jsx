@@ -7,18 +7,16 @@ import { CartProvider } from "./context/CartContext"; // ✅ make sure path & na
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      {/* 🔔 GLOBAL TOAST */}
-      <Toaster
-        position="top-right"
-        containerStyle={{ zIndex: 2147483647 }}
-        toastOptions={{ style: { zIndex: 2147483647 } }}
-      />
+  <BrowserRouter>
+    <Toaster
+      position="top-right"
+      containerStyle={{ zIndex: 2147483647 }}
+      toastOptions={{ style: { zIndex: 2147483647 } }}
+    />
 
-      <CartProvider>
-        <App />
-      </CartProvider>
-    </BrowserRouter>
-  </React.StrictMode>
+    <CartProvider>
+      <App />
+    </CartProvider>
+  </BrowserRouter>
 );
+
