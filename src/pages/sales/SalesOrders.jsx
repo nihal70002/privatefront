@@ -281,33 +281,66 @@ function OrderCard({ order, onApprove, onReject }) {
 
           <div className="md:col-span-8">
             <div className="bg-gray-50 rounded-lg px-3 py-1.5 space-y-0.5">
-              {items.map((item, idx) => (
+   {items.map((item, idx) => (
   <div
     key={idx}
-    className="flex justify-between items-center py-1"
+    className="flex justify-between items-start py-2 border-b border-gray-100 last:border-b-0"
   >
-    {/* Product Name */}
-    <div className="flex flex-col">
-  <span className="text-sm font-semibold text-[#2A334E] truncate max-w-[240px]">
-    {item.productName}
-  </span>
-  <span className="text-[10px] font-mono text-gray-400">
-    {item.productCode}
-  </span>
-</div>
-
-
-    {/* Size & Quantity */}
-    <div className="flex items-center gap-4">
-      <span className="text-xs font-semibold text-gray-500">
-        {item.size || "M"}
+    {/* LEFT SIDE – PRODUCT INFO */}
+    <div className="flex flex-col max-w-[260px]">
+      <span className="text-sm font-semibold text-[#2A334E] truncate">
+        {item.productName}
       </span>
+
+      {item.productCode && (
+        <span className="text-[10px] font-mono text-gray-400">
+          {item.productCode}
+        </span>
+      )}
+
+      {/* 🔹 VARIANT DETAILS */}
+      <div className="flex flex-wrap gap-1 mt-1">
+        {item.size && (
+          <span className="px-2 py-0.5 bg-teal-50 text-teal-700 text-[10px] font-bold rounded">
+            {item.size}
+          </span>
+        )}
+
+        {item.class && (
+          <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] rounded">
+            {item.class}
+          </span>
+        )}
+
+        {item.style && (
+          <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] rounded">
+            {item.style}
+          </span>
+        )}
+
+        {item.material && (
+          <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] rounded">
+            {item.material}
+          </span>
+        )}
+
+        {item.color && (
+          <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] rounded">
+            {item.color}
+          </span>
+        )}
+      </div>
+    </div>
+
+    {/* RIGHT SIDE – QUANTITY */}
+    <div className="flex items-center gap-4">
       <span className="text-sm font-bold text-[#009688]">
         ×{item.quantity}
       </span>
     </div>
   </div>
 ))}
+
 
             </div>
           </div>

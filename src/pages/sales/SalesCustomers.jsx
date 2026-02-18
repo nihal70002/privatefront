@@ -140,9 +140,14 @@ export default function SalesCustomers() {
                   <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#718096]">
                     Phone
                   </th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#718096] text-right">
-                    Actions
-                  </th>
+                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#718096]">
+  Variant Details
+</th>
+
+<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#718096] text-right">
+  Actions
+</th>
+
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -165,6 +170,42 @@ export default function SalesCustomers() {
                       <td className="px-6 py-4 text-[#2A334E]">{c.name}</td>
                       <td className="px-6 py-4 text-[#718096]">{c.email}</td>
                       <td className="px-6 py-4 text-[#718096]">{c.phoneNumber}</td>
+                      <td className="px-6 py-4">
+  <div className="flex flex-wrap gap-2 text-xs">
+
+    {c.size && (
+      <span className="px-2 py-1 rounded-md bg-teal-50 text-teal-700 font-semibold">
+        {c.size}
+      </span>
+    )}
+
+    {c.class && (
+      <span className="px-2 py-1 rounded-md bg-slate-100 text-slate-700">
+        {c.class}
+      </span>
+    )}
+
+    {c.style && (
+      <span className="px-2 py-1 rounded-md bg-slate-100 text-slate-700">
+        {c.style}
+      </span>
+    )}
+
+    {c.material && (
+      <span className="px-2 py-1 rounded-md bg-slate-100 text-slate-700">
+        {c.material}
+      </span>
+    )}
+
+    {c.color && (
+      <span className="px-2 py-1 rounded-md bg-slate-100 text-slate-700">
+        {c.color}
+      </span>
+    )}
+
+  </div>
+</td>
+
                       <td className="px-6 py-4 text-right">
                         <button
                           onClick={() => navigate(`/sales/customers/${c.id}`)}
@@ -180,7 +221,7 @@ export default function SalesCustomers() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="5" className="px-6 py-12 text-center">
+                    <td colSpan="6" className="px-6 py-12 text-center">
                       <div className="flex flex-col items-center gap-3">
                         <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
                           <svg className="w-8 h-8 text-[#718096]" fill="none" stroke="currentColor" viewBox="0 0 24 24">

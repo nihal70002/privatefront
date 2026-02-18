@@ -275,38 +275,75 @@ function OrderCard({ order, onAction, updatingId, navigate }) {
           <div className="mt-4 pt-4 border-t border-gray-100 animate-in fade-in slide-in-from-top-1 duration-200">
             <div className="bg-gray-50/80 rounded-lg p-3 space-y-2">
               {items.map((item, idx) => (
-                <div key={idx} className="flex justify-between items-center gap-2">
-                  <span className="text-[13px] font-semibold text-[#2A334E] truncate">
-                    {item.productName || item.product?.name || "-"}
-                  </span>
-                  <div
-  key={idx}
-  className="flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-gray-200"
->
-  {/* PRODUCT NAME */}
-  
+  <div
+    key={idx}
+    className="bg-white rounded-lg px-4 py-3 border border-gray-200 space-y-2"
+  >
+    {/* TOP ROW */}
+    <div className="flex justify-between items-start gap-3">
+      
+      {/* PRODUCT NAME */}
+      <div className="flex-1">
+        <p className="text-[14px] font-black text-[#2A334E]">
+          {item.productName || "-"}
+        </p>
 
-  {/* CODE | SIZE | QTY */}
-  <div className="flex items-center gap-3">
-    {/* PRODUCT CODE */}
-    <span className="min-w-[90px] text-center text-[13px] font-black text-gray-800 bg-yellow-200 px-2 py-1 rounded border border-yellow-400">
-      {item.productCode}
-    </span>
+        {item.productCode && (
+          <p className="text-[11px] text-gray-400 font-mono mt-0.5">
+            Code: {item.productCode}
+          </p>
+        )}
+      </div>
 
-    {/* SIZE */}
-    <span className="min-w-[40px] text-center text-[13px] font-bold text-gray-700 bg-gray-100 px-2 py-1 rounded border border-gray-300">
-      {item.variantSize}
-    </span>
+      {/* QTY */}
+      <span className="text-[14px] font-black text-blue-700 bg-blue-50 px-3 py-1 rounded-lg border border-blue-200">
+        ×{item.quantity}
+      </span>
+    </div>
 
-    {/* QTY */}
-    <span className="min-w-[40px] text-center text-[14px] font-black text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-200">
-      ×{item.quantity}
-    </span>
+    {/* VARIANT DETAILS (ONLY IF EXISTS) */}
+    {(item.variantSize ||
+      item.class ||
+      item.style ||
+      item.material ||
+      item.color) && (
+      <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
+
+        {item.variantSize && (
+          <span className="px-2 py-0.5 text-[11px] font-semibold bg-indigo-50 text-indigo-700 rounded-md">
+            Size: {item.variantSize}
+          </span>
+        )}
+
+        {item.class && (
+          <span className="px-2 py-0.5 text-[11px] bg-blue-50 text-blue-700 rounded-md">
+            {item.class}
+          </span>
+        )}
+
+        {item.style && (
+          <span className="px-2 py-0.5 text-[11px] bg-purple-50 text-purple-700 rounded-md">
+            {item.style}
+          </span>
+        )}
+
+        {item.material && (
+          <span className="px-2 py-0.5 text-[11px] bg-amber-50 text-amber-700 rounded-md">
+            {item.material}
+          </span>
+        )}
+
+        {item.color && (
+          <span className="px-2 py-0.5 text-[11px] bg-gray-100 text-gray-700 rounded-md">
+            {item.color}
+          </span>
+        )}
+
+      </div>
+    )}
   </div>
-</div>
+))}
 
-                </div>
-              ))}
             </div>
           </div>
         )}

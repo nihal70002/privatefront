@@ -26,6 +26,11 @@ export default function ProductDetail() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [addingToCart, setAddingToCart] = useState(false);
 const [showToast, setShowToast] = useState(false);
+const [selectedClass, setSelectedClass] = useState(null);
+const [selectedStyle, setSelectedStyle] = useState(null);
+const [selectedMaterial, setSelectedMaterial] = useState(null);
+const [selectedColor, setSelectedColor] = useState(null);
+
 
 const hasImages = product?.images?.length > 0;
 
@@ -44,7 +49,7 @@ const prevImage = () => {
 };
 
 
-  useEffect(() => {
+ useEffect(() => {
   const loadProduct = async () => {
     try {
       const res = await getProductById(id);
@@ -67,19 +72,31 @@ const prevImage = () => {
         primaryImage: res.data.primaryImageUrl,
 
         // ✅ SAFE VARIANT MAP
-        variants: (res.data.sizes || []).map(s => ({
-          id: s.variantId,
-          size: s.size,
-          price: s.price,
-          stock: s.availableStock
+        variants: (res.data.sizes || []).map(v => ({
+          id: v.variantId,
+          class: v.class,
+          style: v.style,
+          material: v.material,
+          color: v.color,
+          size: v.size,
+          price: v.price,
+          stock: v.availableStock
         }))
       };
 
       setProduct(mappedProduct);
 
-      // ✅ RESET IMAGE + VARIANT SAFELY
+      // ✅ Reset image + variant safely
       setSelectedImage(0);
-      setSelectedVariant(mappedProduct.variants[0] || null);
+      if (mappedProduct.variants.length > 0) {
+  const first = mappedProduct.variants[0];
+  setSelectedClass(first.class || null);
+  setSelectedStyle(first.style || null);
+  setSelectedMaterial(first.material || null);
+  setSelectedColor(first.color || null);
+  setSelectedVariant(first);
+}
+
 
     } catch (err) {
       console.error("Failed to load product", err);
@@ -91,6 +108,42 @@ const prevImage = () => {
 
   loadProduct();
 }, [id]);
+
+
+// 🔥 Helper to extract unique option values
+const getUniqueValues = (key) => {
+  return [...new Set(
+    product?.variants
+      ?.map(v => v[key])
+      ?.filter(Boolean)
+  )];
+};
+
+// 🔥 Extract dynamic options
+const classOptions = getUniqueValues("class");
+const styleOptions = getUniqueValues("style");
+const materialOptions = getUniqueValues("material");
+const colorOptions = getUniqueValues("color");
+
+const filteredVariants = product?.variants?.filter(v =>
+  (!selectedClass || v.class === selectedClass) &&
+  (!selectedStyle || v.style === selectedStyle) &&
+  (!selectedMaterial || v.material === selectedMaterial) &&
+  (!selectedColor || v.color === selectedColor)
+) || [];
+
+
+useEffect(() => {
+  if (filteredVariants.length > 0) {
+    setSelectedVariant(filteredVariants[0]);
+  } else {
+    setSelectedVariant(null);
+  }
+}, [selectedClass, selectedStyle, selectedMaterial, selectedColor, product]);
+
+
+
+
 
 const handleAddToCart = async () => {
   if (!selectedVariant) return;
@@ -144,7 +197,8 @@ const decreaseQuantity = () => {
     );
   }
 
-  if (!product || !selectedVariant) {
+  if (!product)
+ {
     return (
       <div className="flex h-screen flex-col items-center justify-center bg-white">
         <div className="text-5xl mb-3">😕</div>
@@ -289,41 +343,94 @@ const decreaseQuantity = () => {
           {/* Price */}
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-2">
-              <span className="text-2xl font-bold text-gray-900">₹{selectedVariant.price}</span>
+              <span className="text-2xl font-bold text-gray-900">₹{selectedVariant?.price ?? "--"}
+</span>
              
             </div>
             <p className="text-sm font-semibold text-teal-700">inclusive of all taxes</p>
           </div>
+
+          {classOptions.length > 0 && (
+  <div className="mb-6">
+    <h3 className="text-sm font-bold uppercase mb-3">Select Class</h3>
+    <div className="flex gap-3 flex-wrap">
+      {classOptions.map(option => (
+        <button
+          key={option}
+          onClick={() => setSelectedClass(option)}
+          className={`px-4 py-2 border rounded-md ${
+            selectedClass === option
+              ? "border-teal-600 bg-teal-50 text-teal-600"
+              : "border-gray-300"
+          }`}
+        >
+          {option}
+        </button>
+      ))}
+    </div>
+  </div>
+)}
+
+
+
+{styleOptions.length > 0 && (
+  <div className="mb-6">
+    <h3 className="text-sm font-bold uppercase mb-3">Select Style</h3>
+    <div className="flex gap-3 flex-wrap">
+      {styleOptions.map(option => (
+        <button
+          key={option}
+          onClick={() => setSelectedStyle(option)}
+          className={`px-4 py-2 border rounded-md ${
+            selectedStyle === option
+              ? "border-teal-600 bg-teal-50 text-teal-600"
+              : "border-gray-300"
+          }`}
+        >
+          {option}
+        </button>
+      ))}
+    </div>
+  </div>
+)}
+
+
           
 
           {/* Select Size */}
-          <div className="mb-6 pb-6 border-b border-gray-200">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-gray-900 uppercase">Select Size</h3>
-              
-            </div>
-            
-            <div className="flex gap-3">
-              {product.variants.map(v => (
-                <button
-                  key={v.id}
-                  disabled={false}
-                  onClick={() => {
-                    setSelectedVariant(v);
-                    setQuantity(1); // Reset quantity when size changes
-                  }}
-                  className={`w-14 h-14 rounded-full border-2 font-bold text-sm transition ${
-  selectedVariant.id === v.id
-    ? "border-teal-600 text-teal-600 bg-teal-50"
-    : "border-gray-300 text-gray-900 hover:border-teal-400"
-}`}
+         <div className="mb-6 pb-6 border-b border-gray-200">
+  <div className="flex items-center justify-between mb-3">
+    <h3 className="text-sm font-bold text-gray-900 uppercase">
+      Select Size
+    </h3>
+  </div>
 
-                >
-                  {v.size}
-                </button>
-              ))}
-            </div>
-          </div>
+  {filteredVariants.length === 0 ? (
+    <p className="text-sm text-red-500">
+      This combination is not available.
+    </p>
+  ) : (
+    <div className="flex gap-3">
+      {filteredVariants.map(v => (
+        <button
+          key={v.id}
+          onClick={() => {
+            setSelectedVariant(v);
+            setQuantity(1);
+          }}
+          className={`w-14 h-14 rounded-full border-2 font-bold text-sm transition ${
+            selectedVariant?.id === v.id
+              ? "border-teal-600 text-teal-600 bg-teal-50"
+              : "border-gray-300 text-gray-900 hover:border-teal-400"
+          }`}
+        >
+          {v.size}
+        </button>
+      ))}
+    </div>
+  )}
+</div>
+
 
           {/* Quantity Selector */}
           <div className="mb-6">

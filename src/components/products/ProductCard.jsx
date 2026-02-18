@@ -1,67 +1,62 @@
-import React from "react";
-import { ShoppingCart, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Heart } from "lucide-react"; // Import for the wishlist icon
 
-export default function ProductCard({ product, onAddToCart }) {
+export default function ProductCard({ product }) {
   const navigate = useNavigate();
 
+  // Safeguard for nested data
   const variant = product?.variants?.[0];
   const price = variant?.price || 0;
-  const stock = variant?.stock || 0;
-
-  const handleView = () => {
-    navigate(`/products/${product.productId}`);
-  };
+  const originalPrice = Math.round(price * 1.5); // Mocked original price for the "Myntra" look
 
   return (
-    <div className="group flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg transition-all duration-300">
-      
-      {/* IMAGE (UNCHANGED) */}
-      <div
-  onClick={handleView}
-  className="relative h-64 w-full cursor-pointer rounded-t-2xl 
-             bg-white flex items-center justify-center overflow-hidden
-             transition"
->
-
+    <div 
+      onClick={() => navigate(`/products/${product.productId}`)}
+      className="group flex flex-col bg-white overflow-hidden cursor-pointer relative"
+    >
+      {/* IMAGE SECTION - 3:4 Aspect Ratio is standard for fashion */}
+      <div className="relative w-full aspect-[3/4] overflow-hidden bg-gray-100">
         <img
-  src={product.primaryImageUrl}
-  alt={product.name}
-  className="h-full w-full object-contain 
-             p-2 scale-110 
-             transition-transform duration-300 
-             group-hover:scale-125"
-  onError={(e) => {
-    e.currentTarget.src = "/no-image.png";
-  }}
-/>
-
-      </div>
-
-      {/* CONTENT */}
-      <div className="flex flex-col gap-1.5 p-3">
-
-        {/* BRAND */}
-        {product.brandName && (
-          <p className="text-[10px] font-bold text-slate-600 tracking-wide uppercase">
-            {product.brandName}
-          </p>
-        )}
-
-        {/* PRODUCT NAME */}
-        <h3 className="line-clamp-2 text-sm font-semibold text-slate-900 leading-snug">
-          {product.name}
-        </h3>
-
-        {/* PRICE */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-base font-bold text-slate-900">
-            ₹{price}
-          </span>
-
-          
+          src={product?.primaryImageUrl || "/no-image.png"}
+          alt={product?.name}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+        
+        {/* Rating Badge - Matches the white pill style in your screenshot */}
+        <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-sm flex items-center gap-1 text-[10px] font-bold text-gray-800 border border-gray-100 shadow-sm">
+           4.2 <span className="text-teal-600 text-[8px]">★</span>
+           <span className="text-gray-400 font-normal border-l border-gray-300 pl-1">628</span>
         </div>
 
+        {/* Wishlist Icon - Hidden on mobile usually, or top right */}
+        <button className="absolute top-2 right-2 p-1.5 rounded-full bg-white/20 hover:bg-white transition-colors lg:opacity-0 lg:group-hover:opacity-100">
+           <Heart size={16} className="text-gray-600" />
+        </button>
+      </div>
+
+      {/* CONTENT SECTION */}
+      <div className="p-2.5 space-y-0.5">
+        {/* Brand Name - Bold and slightly larger */}
+        <h3 className="text-[14px] font-bold text-gray-900 truncate tracking-tight">
+          {product?.brandName || "Brand Name"}
+        </h3>
+
+        {/* Product Name - Soft gray and smaller */}
+        <p className="text-[12px] text-gray-500 truncate leading-tight font-light">
+          {product?.name}
+        </p>
+
+        {/* Price Row */}
+        <div className="flex items-center gap-1.5 mt-0.5">
+          <span className="text-[13px] font-bold text-gray-900">₹{price}</span>
+          <span className="text-[11px] text-gray-400 line-through">₹{originalPrice}</span>
+          <span className="text-[11px] text-orange-500 font-bold">(50% OFF)</span>
+        </div>
+        
+        {/* Extra Info - Only visible on Myntra for specific items */}
+        <p className="text-[10px] text-gray-400 mt-1">
+          Delivery by Feb 21
+        </p>
       </div>
     </div>
   );

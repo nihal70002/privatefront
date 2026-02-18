@@ -307,37 +307,70 @@ export default function SalesCustomerDetails() {
                           <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
                             <table className="w-full">
                               <thead>
-                                <tr className="bg-slate-100 border-b border-slate-200">
-                                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wide">
-                                    Product
-                                  </th>
-                                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wide">
-                                    Code
-                                  </th>
-                                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wide">
-                                    Size
-                                  </th>
-                                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-700 uppercase tracking-wide">
-                                    Quantity
-                                  </th>
-                                </tr>
+                               <tr className="bg-slate-100 border-b border-slate-200">
+  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wide">
+    Product
+  </th>
+  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wide">
+    Code
+  </th>
+  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wide">
+    Size
+  </th>
+  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wide">
+    Class
+  </th>
+  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wide">
+    Style
+  </th>
+  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wide">
+    Material
+  </th>
+  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wide">
+    Color
+  </th>
+  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-700 uppercase tracking-wide">
+    Quantity
+  </th>
+</tr>
+
                               </thead>
                               <tbody className="divide-y divide-slate-200">
                                 {order.items.map((item, i) => (
                                   <tr key={i} className="hover:bg-slate-50 transition-colors">
-                                    <td className="px-4 py-3 text-sm text-slate-900 font-medium">
-                                      {item.productName}
-                                    </td>
-                                    <td className="px-4 py-3 text-sm text-slate-600">
-                                      {item.productCode || "—"}
-                                    </td>
-                                    <td className="px-4 py-3 text-sm text-slate-600">
-                                      {item.size}
-                                    </td>
-                                    <td className="px-4 py-3 text-sm text-slate-900 font-semibold text-right">
-                                      {item.quantity}
-                                    </td>
-                                  </tr>
+  <td className="px-4 py-3 text-sm text-slate-900 font-medium">
+    {item.productName}
+  </td>
+
+  <td className="px-4 py-3 text-sm text-slate-600">
+    {item.productCode || "—"}
+  </td>
+
+  <td className="px-4 py-3 text-sm text-slate-600">
+    {item.size || "—"}
+  </td>
+
+  <td className="px-4 py-3 text-sm text-slate-600">
+    {item.class || "—"}
+  </td>
+
+  <td className="px-4 py-3 text-sm text-slate-600">
+    {item.style || "—"}
+  </td>
+
+  <td className="px-4 py-3 text-sm text-slate-600">
+    {item.material || "—"}
+  </td>
+
+  <td className="px-4 py-3 text-sm text-slate-600">
+    {item.color || "—"}
+  </td>
+
+  <td className="px-4 py-3 text-sm text-slate-900 font-semibold text-right">
+    {item.quantity}
+  </td>
+</tr>
+
                                 ))}
                               </tbody>
                             </table>

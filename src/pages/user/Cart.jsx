@@ -135,42 +135,115 @@ export default function Cart() {
         ) : (
           <div className="flex flex-col lg:flex-row gap-10">
             {/* ITEM LIST */}
-            <div className="flex-1 space-y-4">
-              {cart.map(item => (
-                <div key={item.productVariantId} className="bg-white rounded-2xl p-4 flex gap-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="w-24 h-24 bg-slate-50 rounded-xl overflow-hidden flex-shrink-0 border border-slate-100 p-2">
-                    <img src={item.imageUrl} alt={item.productName} className="w-full h-full object-contain" />
-                  </div>
+           <div className="flex-1 space-y-4">
+  {cart.map(item => (
+    <div
+      key={item.productVariantId}
+      className="bg-white rounded-2xl p-4 flex gap-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow"
+    >
+      {/* IMAGE */}
+      <div className="w-24 h-24 bg-slate-50 rounded-xl overflow-hidden flex-shrink-0 border border-slate-100 p-2">
+        <img
+          src={item.imageUrl}
+          alt={item.productName}
+          className="w-full h-full object-contain"
+        />
+      </div>
 
-                  <div className="flex flex-col justify-between flex-1 py-1">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-bold text-slate-900 leading-tight">{item.productName}</h3>
-                        <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider font-semibold">Size: {item.size}</p>
-                      </div>
-                      <button onClick={() => handleRemove(item.productVariantId)} className="text-slate-300 hover:text-red-500 transition-colors">
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
+      {/* DETAILS */}
+      <div className="flex flex-col justify-between flex-1 py-1">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="font-bold text-slate-900 leading-tight">
+              {item.productName}
+            </h3>
 
-                    <div className="flex justify-between items-end mt-4">
-                      <div className="flex items-center bg-slate-100 rounded-lg p-1">
-                        <button 
-                          onClick={() => handleQuantityChange(item.productVariantId, item.quantity - 1)}
-                          className="w-7 h-7 flex items-center justify-center hover:bg-white rounded-md transition-colors text-slate-600 font-bold"
-                        > − </button>
-                        <span className="w-10 text-center text-sm font-bold text-slate-800">{item.quantity}</span>
-                        <button 
-                          onClick={() => handleQuantityChange(item.productVariantId, item.quantity + 1)}
-                          className="w-7 h-7 flex items-center justify-center hover:bg-white rounded-md transition-colors text-slate-600 font-bold"
-                        > + </button>
-                      </div>
-                      <span className="text-lg font-bold text-slate-900">₹{(item.price * item.quantity).toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {/* 🔥 VARIANT DETAILS */}
+            <div className="mt-3 flex flex-wrap gap-2 text-xs">
+  
+  {/* Size (Primary Highlight) */}
+  <span className="px-2.5 py-1 rounded-md bg-teal-50 text-teal-700 font-semibold">
+    Size: {item.size}
+  </span>
+
+  {item.class && (
+    <span className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-700">
+      {item.class}
+    </span>
+  )}
+
+  {item.style && (
+    <span className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-700">
+      {item.style}
+    </span>
+  )}
+
+  {item.material && (
+    <span className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-700">
+      {item.material}
+    </span>
+  )}
+
+  {item.color && (
+    <span className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-700">
+      {item.color}
+    </span>
+  )}
+
+</div>
+</div>
+
+
+          {/* REMOVE BUTTON */}
+          <button
+            onClick={() => handleRemove(item.productVariantId)}
+            className="text-slate-300 hover:text-red-500 transition-colors"
+          >
+            <Trash2 size={18} />
+          </button>
+        </div>
+
+        {/* QUANTITY + PRICE */}
+        <div className="flex justify-between items-end mt-4">
+          <div className="flex items-center bg-slate-100 rounded-lg p-1">
+            <button
+              onClick={() =>
+                handleQuantityChange(
+                  item.productVariantId,
+                  item.quantity - 1
+                )
+              }
+              className="w-7 h-7 flex items-center justify-center hover:bg-white rounded-md transition-colors text-slate-600 font-bold"
+            >
+              −
+            </button>
+
+            <span className="w-10 text-center text-sm font-bold text-slate-800">
+              {item.quantity}
+            </span>
+
+            <button
+              onClick={() =>
+                handleQuantityChange(
+                  item.productVariantId,
+                  item.quantity + 1
+                )
+              }
+              className="w-7 h-7 flex items-center justify-center hover:bg-white rounded-md transition-colors text-slate-600 font-bold"
+            >
+              +
+            </button>
+          </div>
+
+          <span className="text-lg font-bold text-slate-900">
+            ₹{(item.price * item.quantity).toLocaleString()}
+          </span>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
+
 
             {/* CHECKOUT SIDEBAR */}
             <div className="w-full lg:w-[380px]">

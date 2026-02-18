@@ -554,18 +554,59 @@ function OrderDetails({ order }) {
                 {order.items.map((item, idx) => (
                   <tr key={idx} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3">
-                      <p className="text-sm font-medium text-gray-900">
-                        {item.productName || item.product?.name || "-"}
-                      </p>
+                      <div>
+  <p className="text-sm font-semibold text-gray-900">
+    {item.productName || "-"}
+  </p>
+
+  {(item.variantSize ||
+    item.class ||
+    item.style ||
+    item.material ||
+    item.color) && (
+    <div className="flex flex-wrap gap-2 mt-1">
+      {item.variantSize && (
+        <span className="px-2 py-0.5 text-[11px] bg-indigo-50 text-indigo-700 rounded">
+          Size: {item.variantSize}
+        </span>
+      )}
+
+      {item.class && (
+        <span className="px-2 py-0.5 text-[11px] bg-blue-50 text-blue-700 rounded">
+          {item.class}
+        </span>
+      )}
+
+      {item.style && (
+        <span className="px-2 py-0.5 text-[11px] bg-purple-50 text-purple-700 rounded">
+          {item.style}
+        </span>
+      )}
+
+      {item.material && (
+        <span className="px-2 py-0.5 text-[11px] bg-amber-50 text-amber-700 rounded">
+          {item.material}
+        </span>
+      )}
+
+      {item.color && (
+        <span className="px-2 py-0.5 text-[11px] bg-gray-100 text-gray-700 rounded">
+          {item.color}
+        </span>
+      )}
+    </div>
+  )}
+</div>
+
                     </td>
                     <td className="px-4 py-3 text-center text-sm text-gray-900 font-medium">
                       {item.quantity}
                     </td>
                     <td className="px-4 py-3 text-right text-sm text-gray-900">
-                      ₹{item.price?.toLocaleString("en-IN") || "0"}
+                      ₹{item.unitprice?.toLocaleString("en-IN") || "0"}
                     </td>
                     <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
-                      ₹{((item.quantity || 0) * (item.price || 0)).toLocaleString("en-IN")}
+                      ₹{((item.quantity || 0) * (item.unitPrice || 0)).toLocaleString("en-IN")}
                     </td>
                   </tr>
                 ))}

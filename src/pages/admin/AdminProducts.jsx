@@ -18,11 +18,16 @@ import Papa from "papaparse";
 
 /* ================= CONSTANTS ================= */
 const DEFAULT_VARIANT = {
-  size: "M",
-  price: 100,
+  class: "",
+  style: "",
+  material: "",
+  color: "",
+  size: "",
+  price: "",
   stock: 0,
   productCode: ""
 };
+
 
 const EMPTY_FORM = {
   name: "",
@@ -215,116 +220,128 @@ export default function AdminProducts() {
       currency: "SAR",
     }).format(amount);
 
-  const saveProduct = async () => {
-    if (!form.name || !form.categoryId || !form.brandId) {
-      alert("Product name, category and brand are required");
+ const saveProduct = async () => {
+  /* ================= 1. VALIDATION ================= */
+  if (!form.name || !form.categoryId || !form.brandId) {
+    toast.error("Product name, category and brand are required");
+    return;
+  }
+
+  if (!form.variants || form.variants.length === 0) {
+    toast.error("At least one variant is required");
+    return;
+  }
+
+  const combinations = new Set();
+  const skus = new Set();
+
+  for (const v of form.variants) {
+    const size = v.size?.trim();
+    const sku = v.productCode?.trim();
+
+    if (!size) {
+      toast.error("Variant size cannot be empty");
+      return;
+    }
+    if (!sku) {
+      toast.error("SKU is required for each variant");
       return;
     }
 
-    if (!form.variants || form.variants.length === 0) {
-      alert("At least one variant is required");
+    const comboKey = [
+      v.class?.trim().toLowerCase() || "",
+      v.style?.trim().toLowerCase() || "",
+      v.material?.trim().toLowerCase() || "",
+      v.color?.trim().toLowerCase() || "",
+      size.toLowerCase()
+    ].join("|");
+
+    if (combinations.has(comboKey)) {
+      toast.error(`Duplicate variant: ${size}`);
+      return;
+    }
+    if (skus.has(sku.toLowerCase())) {
+      toast.error(`Duplicate SKU: ${sku}`);
       return;
     }
 
-    const sizes = new Set();
-    const skus = new Set();
+    combinations.add(comboKey);
+    skus.add(sku.toLowerCase());
+  }
 
-    for (const v of form.variants) {
-      const size = v.size?.trim();
-      const sku = v.productCode?.trim();
+  /* ================= 2. IMAGE REORDERING ================= */
+  const orderedImages = [...form.images];
+  if (primaryImageIndex > 0 && orderedImages.length > primaryImageIndex) {
+    const [primary] = orderedImages.splice(primaryImageIndex, 1);
+    orderedImages.unshift(primary);
+  }
 
-      if (!size) {
-        alert("Variant size cannot be empty");
-        return;
-      }
+  /* ================= 3. PAYLOAD PREPARATION ================= */
+  // We prepare the base product data (matches AdminUpdateProductDto)
+  const productPayload = {
+    name: form.name.trim(),
+    categoryId: Number(form.categoryId),
+    brandId: Number(form.brandId),
+    description: form.description?.trim() || "",
+    imageUrls: orderedImages,
+  };
 
-      if (!sku) {
-        alert("SKU / Product Code is required for each variant");
-        return;
-      }
-
-      const sizeKey = size.toLowerCase();
-      const skuKey = sku.toLowerCase();
-
-      if (sizes.has(sizeKey)) {
-        alert(`Duplicate size not allowed: ${size}`);
-        return;
-      }
-
-      if (skus.has(skuKey)) {
-        alert(`Duplicate SKU not allowed: ${sku}`);
-        return;
-      }
-
-      sizes.add(sizeKey);
-      skus.add(skuKey);
-    }
-
-// ✅ REORDER IMAGES SO SELECTED PRIMARY GOES FIRST
-const orderedImages = [...form.images];
-
-if (primaryImageIndex > 0) {
-  const [primary] = orderedImages.splice(primaryImageIndex, 1);
-  orderedImages.unshift(primary);
-}
-
-    
-
- const payload = {
-  name: form.name,
-  categoryId: Number(form.categoryId),
-  brandId: Number(form.brandId),
-  description: form.description,
-  imageUrls: orderedImages,
-// 👈 THIS IS THE KEY
-  variants: form.variants.map(v => ({
-    ...v,
+  // Prepare variants separately for the loop
+  const variantData = form.variants.map(v => ({
+    class: v.class?.trim() || "",
+    style: v.style?.trim() || "",
+    material: v.material?.trim() || "",
+    color: v.color?.trim() || "",
     size: v.size.trim(),
     productCode: v.productCode.trim(),
     price: Number(v.price) || 0,
-    stock: Number(v.stock) || 0
-  }))
-};
+    stock: Number(v.stock) || 0,
+    variantId: v.variantId // Important for updates
+  }));
+  console.log("Variants before save:", form.variants);
 
 
-   try {
-  if (editingId) {
-    await api.put(`/admin/products/${editingId}`, payload);
+  /* ================= 4. API EXECUTION ================= */
+  try {
+    if (editingId) {
+      // STEP A: Update the main product details
+      // (Note: productPayload does NOT include the variants array here)
+      await api.put(`/admin/products/${editingId}`, productPayload);
 
-    for (const v of payload.variants) {
-      if (v.variantId) {
-        await api.put(`/admin/products/variant/${v.variantId}`, v);
-      } else {
-        await api.post(`/admin/products/${editingId}/variant`, v);
+      // STEP B: Update/Create variants one by one
+      // We use a regular for-loop to avoid concurrency issues on the server
+      for (const v of variantData) {
+        if (v.variantId) {
+          await api.put(`/admin/products/variant/${v.variantId}`, v);
+        } else {
+          await api.post(`/admin/products/${editingId}/variant`, v);
+        }
       }
+    } else {
+      // For NEW products, we send everything in one POST
+      const createPayload = { ...productPayload, variants: variantData };
+      await api.post("/admin/products", createPayload);
     }
-  } else {
-    await api.post("/admin/products", payload);
+
+    /* ================= 5. UI REFRESH ================= */
+    toast.success(editingId ? "Product updated" : "Product added");
+    closeModal();
+    loadData(); // Safer to reload everything to sync with DB state
+
+  } catch (err) {
+    console.error("Save Error:", err);
+    let msg = "Error saving product";
+
+    if (err?.response?.data?.errors) {
+      const firstError = Object.values(err.response.data.errors)[0];
+      msg = Array.isArray(firstError) ? firstError[0] : firstError;
+    } else if (err?.response?.data) {
+      msg = typeof err.response.data === 'string' ? err.response.data : (err.response.data.title || msg);
+    }
+
+    toast.error(String(msg));
   }
-
-  // ✅ ADD THIS EXACTLY HERE
-  toast.success(
-    editingId
-      ? "Product updated successfully"
-      : "Product added successfully"
-  );
-
-  closeModal();
-  loadData();
-} catch (err) {
-  const msg =
-    err?.response?.data?.message ||
-    err?.response?.data ||
-    "Error saving product";
-
-  // ❌ remove alert
-  // alert(msg);
-
-  // ✅ ADD THIS
-  toast.error(msg);
-}
-
-  }
+};
   const deleteProduct = async () => {
     if (!deleteTarget) return;
 
@@ -355,7 +372,7 @@ if (primaryImageIndex > 0) {
         ? p.isActive
         : !p.isActive;
 
-       console.log("PRODUCT IMAGES:", p.imageUrls);
+    
 
 
     const matchesCategory =
@@ -1026,7 +1043,82 @@ if (primaryImageIndex > 0) {
                   <div className="space-y-3">
                     {form.variants.map((v, i) => (
                       <div key={i} className="bg-slate-50 rounded-xl p-4 border border-slate-200">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
+
+                          <div>
+  <label className="text-xs font-semibold text-slate-600 mb-1.5 block">
+    Class
+  </label>
+  <input
+    type="text"
+    placeholder="e.g., Class 1"
+    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm"
+    value={v.class || ""}
+    onChange={e => {
+      const vs = [...form.variants];
+      vs[i].class = e.target.value;
+      setForm({ ...form, variants: vs });
+    }}
+  />
+</div>
+
+
+<div>
+  <label className="text-xs font-semibold text-slate-600 mb-1.5 block">
+    Style
+  </label>
+  <input
+    type="text"
+    placeholder="e.g., AD / AF"
+    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm"
+    value={v.style || ""}
+    onChange={e => {
+      const vs = [...form.variants];
+      vs[i].style = e.target.value;
+      setForm({ ...form, variants: vs });
+    }}
+  />
+</div>
+
+
+<div>
+  <label className="text-xs font-semibold text-slate-600 mb-1.5 block">
+    Material
+  </label>
+  <input
+    type="text"
+    placeholder="e.g., Cotton"
+    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm"
+    value={v.material || ""}
+    onChange={e => {
+      const vs = [...form.variants];
+      vs[i].material = e.target.value;
+      setForm({ ...form, variants: vs });
+    }}
+  />
+</div>
+
+<div>
+  <label className="text-xs font-semibold text-slate-600 mb-1.5 block">
+    Color
+  </label>
+  <input
+    type="text"
+    placeholder="e.g., Beige"
+    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm"
+    value={v.color || ""}
+    onChange={e => {
+      const vs = [...form.variants];
+      vs[i].color = e.target.value;
+      setForm({ ...form, variants: vs });
+    }}
+  />
+</div>
+
+
+
+
+
                           
                           <div>
                             <label className="text-xs font-semibold text-slate-600 mb-1.5 block">
