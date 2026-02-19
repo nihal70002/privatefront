@@ -28,6 +28,10 @@ const [showCategorySearch, setShowCategorySearch] = useState(false);
 const [showBrandSearch, setShowBrandSearch] = useState(false);
 const [categorySearch, setCategorySearch] = useState("");
 const [brandSearch, setBrandSearch] = useState("");
+const [allCategories, setAllCategories] = useState([]); // Holds all categories from DB
+const [showAllCategories, setShowAllCategories] = useState(false); 
+
+
 
 const observer = useRef();
 const lastProductRef = useCallback(node => {
@@ -49,16 +53,31 @@ const lastProductRef = useCallback(node => {
 
 
 
-
+// This effect runs on mount AND whenever filters change
 useEffect(() => {
   loadProducts(1, true);
+}, [selectedCategories, selectedBrand, searchQuery]);
+
+// Keep loadCart separate so it only runs once on mount
+useEffect(() => {
   loadCart();
 }, []);
+
+
 
 useEffect(() => {
   const queryFromUrl = searchParams.get("search") || "";
   setSearchQuery(queryFromUrl);
 }, [searchParams]);
+
+// If search is cleared, ensure we are on the base products route
+useEffect(() => {
+  if (searchQuery === "" && searchParams.get("search")) {
+    navigate("/products", { replace: true });
+  }
+}, [searchQuery, navigate, searchParams]);
+
+
 
 useEffect(() => {
   if (searchQuery === "") {
@@ -91,6 +110,10 @@ const loadProducts = async (pageNo, reset = false) => {
     setLoading(false);
   }
 };
+
+
+
+
 useEffect(() => {
   const loadFilters = async () => {
     try {
@@ -103,6 +126,21 @@ useEffect(() => {
 
   loadFilters();
 }, []);
+
+
+useEffect(() => {
+  const loadCategories = async () => {
+    try {
+      const res = await api.get("/categories");
+      setAllCategories(res.data || []);
+    } catch (err) {
+      console.error("Failed to load categories", err);
+    }
+  };
+
+  loadCategories();
+}, []);
+
 
 
 
@@ -123,14 +161,10 @@ useEffect(() => {
     }
   };
 
- const categories = Array.from(
-  new Map(
-    products.map(p => [
-      p.categoryId,
-      { categoryId: p.categoryId, categoryName: p.categoryName }
-    ])
-  ).values()
-);
+
+
+
+
 const toggleCategory = (categoryId) => {
   setSelectedCategories(prev =>
     prev.includes(categoryId)
@@ -150,11 +184,16 @@ const clearFilters = () => {
 
 
 const filteredProducts = products.filter(product => {
+  const name = product?.name?.toLowerCase() || "";
+  const category = product?.categoryName?.toLowerCase() || "";
+  const brand = product?.brandName?.toLowerCase() || "";
+
+  const search = searchQuery.toLowerCase();
+
   const matchesSearch =
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.categoryName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (product.brandName &&
-      product.brandName.toLowerCase().includes(searchQuery.toLowerCase()));
+    name.includes(search) ||
+    category.includes(search) ||
+    brand.includes(search);
 
   const matchesCategory =
     selectedCategories.length === 0 ||
@@ -167,6 +206,7 @@ const filteredProducts = products.filter(product => {
 });
 
 
+
   if (loading && products.length === 0) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white">
@@ -176,10 +216,12 @@ const filteredProducts = products.filter(product => {
   );
 }
 
+console.log(allCategories);
   return (
     <div className="min-h-screen bg-white pb-16 lg:pb-0">
 
     
+
 
      
 
@@ -246,30 +288,46 @@ const filteredProducts = products.filter(product => {
     )}
 
     <div className="space-y-1">
-      {categories
-        .filter(cat =>
-          cat.categoryName
-            .toLowerCase()
-            .includes(categorySearch.toLowerCase())
-        )
-        .map((cat) => (
-          <label
-            key={cat.categoryId}
-            className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer hover:text-teal-700 transition-colors"
-          >
-            <input
-              type="checkbox"
-              checked={selectedCategories.includes(cat.categoryId)}
-              onChange={() => toggleCategory(cat.categoryId)}
-              className="w-4 h-4 rounded border-gray-300 text-teal-600"
-            />
-            <span className="leading-snug">
-              {cat.categoryName}
-            </span>
-          </label>
-        ))}
-    </div>
-  </div>
+  {(showAllCategories
+    ? allCategories
+    : allCategories.slice(0, 8))
+    .filter(cat =>
+  (cat?.name || "")
+
+    .toLowerCase()
+    .includes(categorySearch.toLowerCase())
+)
+
+    .map((cat) => (
+      <label
+        key={cat.id}
+
+        className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer hover:text-teal-700 transition-colors"
+      >
+        <input
+          type="checkbox"
+          checked={selectedCategories.includes(cat.id)}
+          onChange={() => toggleCategory(cat.id)}
+          className="w-4 h-4 rounded border-gray-300 text-teal-600"
+        />
+        <span className="leading-snug">
+          {cat.name}
+        </span>
+      </label>
+    ))}
+
+  {/* 👇 ADD THIS BUTTON RIGHT HERE */}
+  {allCategories.length > 8 && (
+    <button
+      onClick={() => setShowAllCategories(!showAllCategories)}
+      className="text-xs font-semibold text-teal-600 mt-2"
+    >
+      {showAllCategories ? "Show Less" : "More"}
+    </button>
+  )}
+</div>
+</div>
+
 
   {/* BRAND */}
   <div className="mb-6">
@@ -380,16 +438,17 @@ const filteredProducts = products.filter(product => {
         <div>
           <h4 className="text-sm font-bold text-gray-900 mb-4">CATEGORIES</h4>
           <div className="grid grid-cols-1 gap-3">
-            {categories.map((cat) => (
-              <label key={cat.categoryId} className="flex items-center gap-3 text-sm">
-                <input
-                  type="checkbox"
-                  checked={selectedCategories.includes(cat.categoryId)}
-                  onChange={() => toggleCategory(cat.categoryId)}
-                  className="w-5 h-5 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
-                />
-                {cat.categoryName}
-              </label>
+            {allCategories.map((cat) => (
+              <label key={cat.id} className="flex items-center gap-3 text-sm">
+  <input
+    type="checkbox"
+    checked={selectedCategories.includes(cat.id)}
+    onChange={() => toggleCategory(cat.id)}
+    className="w-5 h-5 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+  />
+  {cat.name}
+</label>
+
             ))}
           </div>
         </div>
@@ -431,15 +490,9 @@ const filteredProducts = products.filter(product => {
 
 
 {/* MOBILE BOTTOM BAR */}
-<div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center py-3 lg:hidden z-50">
+<div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center py-1 lg:hidden z-50">
 
-  <button className="text-sm font-medium">
-    MEN
-  </button>
-
-  <button className="text-sm font-medium">
-    SORT
-  </button>
+ 
 
   <button
     onClick={() => setShowFilters(true)}

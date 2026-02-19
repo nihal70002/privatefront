@@ -7,10 +7,14 @@ import {
   ShieldCheck,
   User
 } from "lucide-react";
+import { useState } from "react";
+
 
 
 export default function SalesSidebar() {
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
+
 
   const linkClass = ({ isActive }) =>
     `flex items-center gap-4 px-6 py-4 transition-all border-l-4 ${
@@ -26,7 +30,18 @@ export default function SalesSidebar() {
   };
 
   return (
-    <aside className="w-60 bg-white border-r border-gray-200 h-screen flex flex-col shrink-0 sticky top-0">
+    <>
+    <aside
+  className={`
+     fixed md:sticky top-0 left-0 z-40
+    h-screen w-64
+    bg-white border-r border-gray-200
+    transform transition-transform duration-300 ease-in-out
+    ${isOpen ? "translate-x-0" : "-translate-x-full"}
+    md:translate-x-0
+  `}
+>
+
       
       {/* ================= LOGO SECTION ================= */}
       {/* Reduced padding from p-8 to py-6 px-4 to match smaller logo */}
@@ -55,25 +70,44 @@ export default function SalesSidebar() {
 
       {/* ================= NAVIGATION ================= */}
       <nav className="flex-1 py-4">
-        <NavLink to="/sales-executive" className={linkClass} end>
-          <LayoutDashboard size={18} />
-          <span className="text-sm">Dashboard</span>
-        </NavLink>
+  <NavLink
+    to="/sales-executive"
+    className={linkClass}
+    end
+    onClick={() => setIsOpen(false)}
+  >
+    <LayoutDashboard size={18} />
+    <span className="text-sm">Dashboard</span>
+  </NavLink>
 
-        <NavLink to="/sales/orders" className={linkClass}>
-          <ClipboardList size={18} />
-          <span className="text-sm">Orders</span>
-        </NavLink>
+  <NavLink
+    to="/sales/orders"
+    className={linkClass}
+    onClick={() => setIsOpen(false)}
+  >
+    <ClipboardList size={18} />
+    <span className="text-sm">Orders</span>
+  </NavLink>
 
-        <NavLink to="/sales/customers" className={linkClass}>
-          <Users size={18} />
-          <span className="text-sm">Customers</span>
-        </NavLink>
-         <NavLink to="/sales/profile" className={linkClass}>
-  <User size={18} />
-  <span className="text-sm">My Profile</span>
-</NavLink>
-      </nav>
+  <NavLink
+    to="/sales/customers"
+    className={linkClass}
+    onClick={() => setIsOpen(false)}
+  >
+    <Users size={18} />
+    <span className="text-sm">Customers</span>
+  </NavLink>
+
+  <NavLink
+    to="/sales/profile"
+    className={linkClass}
+    onClick={() => setIsOpen(false)}
+  >
+    <User size={18} />
+    <span className="text-sm">My Profile</span>
+  </NavLink>
+</nav>
+
      
 
 
@@ -88,5 +122,13 @@ export default function SalesSidebar() {
         </button>
       </div>
     </aside>
+    {isOpen && (
+  <div
+    onClick={() => setIsOpen(false)}
+    className="fixed inset-0 bg-black/40 z-30 md:hidden"
+  />
+)}
+</>
+
   );
 }

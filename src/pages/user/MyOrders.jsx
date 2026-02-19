@@ -40,13 +40,13 @@ export default function MyOrders() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 lg:px-6 py-4 flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-gray-600 hover:text-teal-600 transition-all hover:gap-3 group"
           >
             <ChevronLeft className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            <span className="font-semibold">Back</span>
+            <span className="font-semibold hidden sm:inline">Back</span>
           </button>
 
           <div className="flex items-center gap-3">
@@ -60,7 +60,7 @@ export default function MyOrders() {
 
       <div className="max-w-6xl mx-auto px-6 py-10">
         {orders.length === 0 ? (
-          <div className="text-center bg-white p-16 rounded-3xl shadow-lg border border-gray-200">
+          <div className="text-center bg-white p-8 lg:p-16 rounded-3xl shadow-lg border border-gray-200">
             <div className="bg-teal-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
               <ShoppingBag className="w-12 h-12 text-teal-600" />
             </div>
@@ -76,7 +76,7 @@ export default function MyOrders() {
         ) : (
           <>
             {/* Summary Card */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-8">
               <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-semibold text-gray-500">Total Orders</span>

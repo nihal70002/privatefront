@@ -69,7 +69,7 @@ setStats({
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-screen bg-[#F4F7F9]">
+      <div className="p-8 flex items-center justify-center min-h-[60vh] bg-[#F4F7F9]">
         <div className="text-[#718096] text-lg">Loading dashboard...</div>
       </div>
     );
@@ -78,17 +78,19 @@ setStats({
   return (
     <div className="flex-1 flex flex-col overflow-y-auto bg-[#F4F7F9]">
       {/* PAGE HEADER */}
-      <header className="flex flex-wrap items-center justify-between gap-4 p-8">
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 sm:px-8 py-6">
+
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-[#2A334E]">
             Sales Executive Dashboard
           </h2>
           
         </div>
-        <div className="flex items-center gap-3">
+       <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3">
+
           <button
             onClick={() => navigate("/sales/customers/create")}
-            className="flex items-center gap-2 bg-[#48BB78] hover:bg-[#38A169] text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-sm shadow-[#48BB78]/20"
+            className="flex items-center justify-center gap-2 bg-[#48BB78] hover:bg-[#38A169] text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-sm shadow-[#48BB78]/20"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -108,7 +110,8 @@ setStats({
       </header>
 
       {/* STATS ROW */}
-      <div className="px-8 pb-8 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5">
+      <div className="px-4 sm:px-8 pb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+
         {/* Pending Approval */}
         <div
           onClick={() => navigate("/sales/orders", { state: { tab: "" } })}
@@ -236,7 +239,8 @@ setStats({
       </div>
 
       {/* RECENT ORDERS SECTION */}
-      <div className="px-8 pb-12">
+      <div className="px-4 sm:px-8 pb-12">
+
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
           <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
             <h3 className="text-xl font-bold text-[#2A334E]">Recent Orders</h3>
@@ -254,7 +258,8 @@ setStats({
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left">
+              <table className="min-w-[600px] w-full text-left">
+
                 <thead className="bg-[#F4F7F9]">
                   <tr>
                     <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#718096]">
