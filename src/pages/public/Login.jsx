@@ -39,8 +39,8 @@ console.log("ROLE 👉", res.data.role);
   console.log("NAVIGATING TO 👉 /sales-executive");
   navigate("/sales-executive", { replace: true });
 } else if (role === "Customer") {
-  console.log("NAVIGATING TO 👉 /products");
-  navigate("/products", { replace: true });
+  console.log("NAVIGATING TO 👉 /landing");
+  navigate("/landing", { replace: true });
 } else if (role === "Warehouse") {
   console.log("NAVIGATING TO 👉 /warehouse/dashboard");
   navigate("/warehouse/dashboard", { replace: true });
