@@ -138,7 +138,9 @@ useEffect(() => {
     <SwiperSlide>
       <div
         onClick={() => navigate("/products/602")}
-        className="cursor-pointer w-full aspect-[1660/490]"
+        className="cursor-pointer w-full 
+
+lg:aspect-[1660/490]"
       >
         <img
           src="/posters/elbow.jpg"
@@ -174,41 +176,63 @@ useEffect(() => {
 
 
       {/* ================= CATEGORIES ================= */}
-     <section className="py-12 sm:py-16 bg-gray-100">
-
-
+    {/* ================= CATEGORIES ================= */}
+      <section className="py-12 sm:py-16 bg-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-10">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.2, ease: "easeOut" }} // Slowed title reveal
+            className="text-2xl sm:text-3xl font-bold text-center mb-10"
+          >
             Shop By Category
-          </h2>
+          </motion.h2>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
             {categories.map((cat, i) => (
-              <Link
-                key={i}
-                to={`/products?categoryId=${cat.id}`}
-                className="group bg-white rounded-2xl border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden"
-
-
+              <motion.div
+                key={cat.id}
+                initial={{ opacity: 0, x: -50 }} // Increased distance for a more noticeable slide
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-20px" }}
+                transition={{ 
+                  duration: 0.8,      // Increased duration (was 0.5)
+                  delay: i * 0.2,     // Increased stagger time (was 0.1)
+                  ease: [0.21, 0.45, 0.32, 0.9] // Custom cubic-bezier for a "smooth stop" feel
+                }}
               >
-                <img
-                  src={cat.img}
-                  alt={cat.name}
-                  className="h-32 sm:h-40 w-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="p-4 text-center font-semibold text-sm sm:text-base">
-                  {cat.name}
-                </div>
-              </Link>
+                <Link
+                  to={`/products?categoryId=${cat.id}`}
+                  className="group block bg-white rounded-2xl border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                >
+                  <img
+                    src={cat.img}
+                    alt={cat.name}
+                    className="h-32 sm:h-40 w-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="p-4 text-center font-semibold text-sm sm:text-base">
+                    {cat.name}
+                  </div>
+                </Link>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
       {/* ================= FEATURED PRODUCTS ================= */}
-      <section className="bg-gray-50 py-12 sm:py-16">
+      {/* ================= FEATURED PRODUCTS ================= */}
+      <section className="bg-gray-50 py-12 sm:py-16 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex justify-between items-center mb-10">
+          
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1 }}
+            className="flex justify-between items-center mb-10"
+          >
             <h2 className="text-2xl sm:text-3xl font-bold">
               Featured Products
             </h2>
@@ -218,67 +242,73 @@ useEffect(() => {
             >
               View All →
             </Link>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+            {/* Loading State */}
+            {loading && (
+              <p className="col-span-full text-center text-gray-500">
+                Loading products...
+              </p>
+            )}
 
-  {/* Loading State */}
-  {loading && (
-    <p className="col-span-full text-center text-gray-500">
-      Loading products...
-    </p>
-  )}
+            {/* Empty State */}
+            {!loading && featuredProducts.length === 0 && (
+              <p className="col-span-full text-center text-gray-500">
+                No featured products available.
+              </p>
+            )}
 
-  {/* Empty State */}
-  {!loading && featuredProducts.length === 0 && (
-    <p className="col-span-full text-center text-gray-500">
-      No featured products available.
-    </p>
-  )}
+            {/* Products with Alternating Slide Animation */}
+            {!loading &&
+              featuredProducts.map((product, index) => {
+                const price =
+                  product.variants?.find((v) => v.availableStock > 0)?.price ||
+                  product.variants?.[0]?.price ||
+                  0;
 
-  {/* Products */}
-  {!loading &&
-    featuredProducts.map((product) => {
-      const price =
-  product.variants?.find(v => v.availableStock > 0)?.price ||
-  product.variants?.[0]?.price ||
-  0;
+                // Animation logic: Index 0,1 slide from Left (-100), Index 2,3 slide from Right (100)
+                const direction = index < 2 ? -100 : 100;
 
+                return (
+                  <motion.div
+                    key={product.productId}
+                    initial={{ opacity: 0, x: direction }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ 
+                      duration: 1.2, 
+                      delay: index * 0.1, // Slight stagger so they don't hit at the exact same time
+                      ease: [0.22, 1, 0.36, 1] // Smooth "S-curve" easing
+                    }}
+                  >
+                    <Link
+                      to={`/products/${product.productId}`}
+                      className="group block bg-white rounded-2xl border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                    >
+                      <div className="bg-gray-50">
+                        <img
+                          src={product.primaryImageUrl || "/placeholder.jpg"}
+                          alt={product.name}
+                          className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      </div>
 
-      return (
-        <Link
-          key={product.productId}
-          to={`/products/${product.productId}`}
-          className="group bg-white rounded-2xl border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden"
-        >
-          <div className="bg-gray-50">
-            <img
-  src={product.primaryImageUrl || "/placeholder.jpg"}
-  alt={product.name}
-  className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
-/>
-
+                      <div className="p-4">
+                        <p className="font-semibold text-sm line-clamp-2">
+                          {product.name}
+                        </p>
+                        <p className="text-cyan-600 font-bold mt-2">
+                          ₹{price}
+                        </p>
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
           </div>
-
-          <div className="p-4">
-            <p className="font-semibold text-sm line-clamp-2">
-              {product.name}
-            </p>
-
-            <p className="text-cyan-600 font-bold mt-2">
-              ₹{price}
-            </p>
-          </div>
-        </Link>
-      );
-    })}
-      
-</div>
-
         </div>
       </section>
-
-
 
 
       {/* ================= NEW PRODUCTS ================= */}
