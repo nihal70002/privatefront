@@ -35,20 +35,61 @@ const [showAllCategories, setShowAllCategories] = useState(false);
 
 
 const observer = useRef();
+
+
+
+const loadProducts = useCallback(async (pageNo, reset = false) => {
+  try {
+    setLoading(true);
+
+    console.log("FETCHING PRODUCTS:", {
+      page: pageNo,
+      selectedCategories,
+      brand: selectedBrand,
+      search: searchQuery
+    });
+
+    const res = await getProducts(
+      pageNo,
+      PAGE_SIZE,
+      selectedCategories,
+      selectedBrand,
+      searchQuery
+    );
+
+    const items = res.data.items || [];
+
+    setProducts(prev =>
+      reset ? items : [...prev, ...items]
+    );
+
+    setHasMore(res.data.hasMore);
+    setPage(pageNo);
+
+  } catch (err) {
+    console.error("LOAD PRODUCTS ERROR:", err);
+  } finally {
+    setLoading(false);
+  }
+}, [selectedCategories, selectedBrand, searchQuery]);
+
+
+
+
+
 const lastProductRef = useCallback(node => {
   if (loading) return;
   if (observer.current) observer.current.disconnect();
-  
+
   observer.current = new IntersectionObserver(entries => {
     if (entries[0].isIntersecting && hasMore) {
-      // This automatically loads page 2, 3, etc. when you scroll to the last item
-      loadProducts(page + 1); 
+      const nextPage = page + 1;
+      loadProducts(nextPage);
     }
   });
-  
-  if (node) observer.current.observe(node);
-}, [loading, hasMore, page]);
 
+  if (node) observer.current.observe(node);
+}, [loading, hasMore, page, selectedCategories, selectedBrand, searchQuery]);
 
 
 
@@ -56,8 +97,10 @@ const lastProductRef = useCallback(node => {
 
 // This effect runs on mount AND whenever filters change
 useEffect(() => {
+  setPage(1);
+  setHasMore(true);
   loadProducts(1, true);
-}, [selectedCategories, selectedBrand, searchQuery]);
+}, [selectedCategories, selectedBrand, searchQuery, loadProducts]);
 
 
 
@@ -95,32 +138,10 @@ const loadCart = async () => {
   setCartCount(cartRes.data?.length || 0);
 };
 
-const loadProducts = async (pageNo, reset = false) => {
-  try {
-    setLoading(true);
 
-    const res = await getProducts(
-      pageNo,
-      PAGE_SIZE,
-      selectedCategories[0] || categoryIdFromUrl || null,
-      selectedBrand,
-      searchQuery
-    );
 
-    const items = res.data.items || [];
 
-    setProducts(prev =>
-      reset ? items : [...prev, ...items]
-    );
 
-    setHasMore(res.data.hasMore);
-    setPage(pageNo);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setLoading(false);
-  }
-};
 
 
 
@@ -153,11 +174,7 @@ useEffect(() => {
 
 
 
-useEffect(() => {
-  if (categoryIdFromUrl) {
-    setSelectedCategories([Number(categoryIdFromUrl)]);
-  }
-}, [categoryIdFromUrl]);
+
 
 
 
@@ -189,6 +206,8 @@ const toggleCategory = (categoryId) => {
       : [...prev, categoryId]
   );
 };
+
+
 const clearFilters = () => {
   setSelectedCategories([]);
   setSelectedBrand(null);

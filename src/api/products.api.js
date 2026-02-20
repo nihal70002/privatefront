@@ -3,17 +3,32 @@ import api from "./axios";
 export const getProducts = (
   page = 1,
   pageSize = 12,
-  categoryId = null,
+  categoryIds = [],
   brandId = null,
   search = ""
 ) => {
-  let url = `/products?page=${page}&pageSize=${pageSize}`;
+  const params = new URLSearchParams();
 
-  if (categoryId) url += `&categoryId=${categoryId}`;
-  if (brandId) url += `&brandId=${brandId}`;
-  if (search) url += `&search=${encodeURIComponent(search)}`;
+  params.append("page", page);
+  params.append("pageSize", pageSize);
 
-  return api.get(url);
+  // 🔥 MULTI CATEGORY SUPPORT
+  if (categoryIds && categoryIds.length > 0) {
+    categoryIds.forEach(id => {
+      params.append("categoryIds", id);
+    });
+  }
+
+  if (brandId) {
+    params.append("brandId", brandId);
+  }
+
+  if (search) {
+    params.append("search", search);
+  }
+
+  return api.get(`/products?${params.toString()}`);
 };
+
 export const getProductById = (id) =>
   api.get(`/products/${id}`);
