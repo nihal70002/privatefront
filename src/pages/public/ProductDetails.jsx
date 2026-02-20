@@ -14,6 +14,13 @@ import { useCart } from "../../context/CartContext"; // ✅ already there
 
 export default function ProductDetail() {
   const { id } = useParams();
+
+
+
+  useEffect(() => {
+  window.scrollTo(0, 0);
+}, [id]);
+
   const navigate = useNavigate();
   const { setCartFromApi } = useCart();
 

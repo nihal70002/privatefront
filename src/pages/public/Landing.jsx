@@ -64,17 +64,17 @@ useEffect(() => {
     }
   ];
 
-  const categories = [
-  { name: "Supports & Braces", img: "/categories/supports.jpg" },
-  { name: "Lumbo Sacral (Back) and Abdominal Supports", img: "/categories/lumbo.jpg" },
-  { name: "Cervical (Neck) Care", img: "/categories/cervical.jpg" },
-  { name: "Mobility Aids", img: "/categories/mobility.jpg" },
-  { name: "Traction Kits", img: "/categories/traction.jpg" },
-  { name: "Compression Therapy", img: "/categories/compression.jpg" },
-  { name: "Exercise Essentials", img: "/categories/exercise.jpg" },
-  { name: "Wound Care/Bandages", img: "/categories/wound.jpg" },
-  { name: "Casting Aids", img: "/categories/casting.jpg" },
-  { name: "Foot Care", img: "/categories/foot.jpg" },
+ const categories = [
+  { id: 1, name: "Supports & Braces", img: "/categories/supports.jpg" },
+  { id: 3, name: "Lumbo Sacral (Back) and Abdominal Supports", img: "/categories/lumbo.jpg" },
+  { id: 4, name: "Cervical (Neck) Care", img: "/categories/cervical.jpg" },
+  { id: 5, name: "Mobility Aids", img: "/categories/mobility.jpg" },
+  { id: 6, name: "Traction Kits", img: "/categories/traction.jpg" },
+  { id: 7, name: "Compression Therapy", img: "/categories/compression.jpg" },
+  { id: 8, name: "Exercise Essentials", img: "/categories/exercise.jpg" },
+  { id: 9, name: "Wound Care/Bandages", img: "/categories/wound.jpg" },
+  { id: 10, name: "Casting Aids", img: "/categories/casting.jpg" },
+  { id: 11, name: "Foot Care", img: "/categories/foot.jpg" },
 ];
 
 
@@ -132,29 +132,20 @@ useEffect(() => {
   >
 
     {/* VARICOSE */}
-    <SwiperSlide>
-      <div
-        onClick={() => navigate("/products/613")}
-        className="cursor-pointer w-full h-[260px] sm:h-[360px] lg:h-[420px]"
-      >
-        <img
-          src="/posters/varicose.jpg"
-          alt="Varicose Vein Stockings"
-          className="w-full h-full object-cover object-center"
-        />
-      </div>
-    </SwiperSlide>
+    
 
     {/* ELBOW */}
     <SwiperSlide>
       <div
         onClick={() => navigate("/products/602")}
-        className="cursor-pointer w-full h-[260px] sm:h-[360px] lg:h-[420px]"
+        className="cursor-pointer w-full aspect-[1660/490]"
       >
         <img
           src="/posters/elbow.jpg"
           alt="Elbow Binder"
-          className="w-full h-full object-cover object-center"
+          className="w-full h-auto object-cover"
+         
+
         />
       </div>
     </SwiperSlide>
@@ -163,12 +154,14 @@ useEffect(() => {
     <SwiperSlide>
       <div
         onClick={() => navigate("/products/512")}
-        className="cursor-pointer w-full h-[260px] sm:h-[360px] lg:h-[420px]"
+        className="cursor-pointer w-full aspect-[1660/490]"
       >
         <img
           src="/posters/knee.jpg"
           alt="Hinged Knee Brace"
-          className="w-full h-full object-cover object-center"
+          className="w-full h-auto object-cover"
+          
+
         />
       </div>
     </SwiperSlide>
@@ -193,7 +186,7 @@ useEffect(() => {
             {categories.map((cat, i) => (
               <Link
                 key={i}
-                to={`/products?category=${cat.name}`}
+                to={`/products?categoryId=${cat.id}`}
                 className="group bg-white rounded-2xl border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden"
 
 

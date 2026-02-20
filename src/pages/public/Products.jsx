@@ -11,6 +11,7 @@ import api from "../../api/axios";
 export default function Products() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const categoryIdFromUrl = searchParams.get("categoryId");
 
 
   const [products, setProducts] = useState([]);
@@ -58,6 +59,9 @@ useEffect(() => {
   loadProducts(1, true);
 }, [selectedCategories, selectedBrand, searchQuery]);
 
+
+
+
 // Keep loadCart separate so it only runs once on mount
 useEffect(() => {
   loadCart();
@@ -94,7 +98,14 @@ const loadCart = async () => {
 const loadProducts = async (pageNo, reset = false) => {
   try {
     setLoading(true);
-    const res = await getProducts(pageNo);
+
+    const res = await getProducts(
+      pageNo,
+      PAGE_SIZE,
+      selectedCategories[0] || categoryIdFromUrl || null,
+      selectedBrand,
+      searchQuery
+    );
 
     const items = res.data.items || [];
 
@@ -102,7 +113,7 @@ const loadProducts = async (pageNo, reset = false) => {
       reset ? items : [...prev, ...items]
     );
 
-    setHasMore(items.length === PAGE_SIZE);
+    setHasMore(res.data.hasMore);
     setPage(pageNo);
   } catch (err) {
     console.error(err);
@@ -110,7 +121,6 @@ const loadProducts = async (pageNo, reset = false) => {
     setLoading(false);
   }
 };
-
 
 
 
@@ -141,6 +151,13 @@ useEffect(() => {
   loadCategories();
 }, []);
 
+
+
+useEffect(() => {
+  if (categoryIdFromUrl) {
+    setSelectedCategories([Number(categoryIdFromUrl)]);
+  }
+}, [categoryIdFromUrl]);
 
 
 
@@ -182,29 +199,11 @@ const clearFilters = () => {
   setSearchQuery("");
 };
 
+useEffect(() => {
+  window.scrollTo({ top: 0, behavior: "instant" });
+}, [searchParams]);
 
-const filteredProducts = products.filter(product => {
-  const name = product?.name?.toLowerCase() || "";
-  const category = product?.categoryName?.toLowerCase() || "";
-  const brand = product?.brandName?.toLowerCase() || "";
-
-  const search = searchQuery.toLowerCase();
-
-  const matchesSearch =
-    name.includes(search) ||
-    category.includes(search) ||
-    brand.includes(search);
-
-  const matchesCategory =
-    selectedCategories.length === 0 ||
-    selectedCategories.includes(product.categoryId);
-
-  const matchesBrand =
-    !selectedBrand || product.brandId === selectedBrand;
-
-  return matchesSearch && matchesCategory && matchesBrand;
-});
-
+const filteredProducts = products;
 
 
   if (loading && products.length === 0) {
