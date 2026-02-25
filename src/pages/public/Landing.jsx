@@ -180,14 +180,15 @@ lg:aspect-[1660/490]"
       <section className="py-12 sm:py-16 bg-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.2, ease: "easeOut" }} // Slowed title reveal
-            className="text-2xl sm:text-3xl font-bold text-center mb-10"
-          >
-            Shop By Category
-          </motion.h2>
+  initial={{ opacity: 0, y: 20 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true }}
+  transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+  /* Use 'font-serif' or a specific font like 'Playfair Display' */
+  className="text-4xl sm:text-5xl font-serif italic text-center mb-16 text-slate-900 tracking-tight"
+>
+  Shop By <span className="font-normal border-b border-indigo-200">Category</span>
+</motion.h2>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
             {categories.map((cat, i) => (

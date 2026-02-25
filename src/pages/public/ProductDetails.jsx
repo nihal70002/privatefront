@@ -25,7 +25,8 @@ export default function ProductDetail() {
   const { setCartFromApi } = useCart();
 
 
-
+const [showMagnifier, setShowMagnifier] = useState(false);
+const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
   const [product, setProduct] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [quantity, setQuantity] = useState(1);
@@ -274,9 +275,19 @@ const decreaseQuantity = () => {
   >
     {product.images.map((img, index) => (
       <div
-        key={index}
-        className="h-full w-full flex-shrink-0 flex items-center justify-center"
-      >
+  key={index}
+  className="relative h-full w-full flex-shrink-0 flex items-center justify-center overflow-hidden"
+  onMouseEnter={() => setShowMagnifier(true)}
+  onMouseLeave={() => setShowMagnifier(false)}
+  onMouseMove={(e) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+
+    setMagnifierPosition({ x, y });
+  }}
+>
         <img
           src={img}
           alt={`${product.name} ${index + 1}`}

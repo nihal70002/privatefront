@@ -7,11 +7,16 @@ import {
   BarChart3,
   Warehouse,
   LogOut,
+  Menu,
+  X,
 } from "lucide-react";
+import { useState } from "react";
 
 export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [open, setOpen] = useState(false);
+
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -22,8 +27,22 @@ export default function AdminLayout() {
     <div className="flex h-screen bg-[#F8FAFC] text-slate-800 font-sans antialiased overflow-hidden">
       
       {/* SIDEBAR */}
-      <aside className="w-56 hidden lg:flex flex-col bg-[#F1F5FF] border-r border-blue-100 shrink-0">
-        
+      <aside
+      
+  className={`
+    fixed top-0 left-0 z-40 h-full w-56 bg-[#F1F5FF] border-r border-blue-100
+    transform transition-transform duration-300
+    ${open ? "translate-x-0" : "-translate-x-full"}
+    lg:static lg:translate-x-0 lg:flex
+  `}
+>
+  {/* MOBILE CLOSE BUTTON */}
+<div className="lg:hidden flex justify-end p-3">
+  <button onClick={() => setOpen(false)}>
+    <X size={18} />
+  </button>
+</div>
+
         {/* LOGO */}
         <div className="p-5 border-b border-blue-100">
           <img
@@ -34,57 +53,77 @@ export default function AdminLayout() {
         </div>
 
         {/* NAV */}
-        <nav className="flex-1 px-2 py-3 space-y-1">
-          <SidebarItem
-            icon={<LayoutDashboard size={16} />}
-            label="Dashboard"
-            active={location.pathname === "/admin/dashboard"}
-            onClick={() => navigate("/admin/dashboard")}
-          />
+       <nav className="flex-1 px-2 py-3 space-y-1">
+  <SidebarItem
+    icon={<LayoutDashboard size={16} />}
+    label="Dashboard"
+    active={location.pathname === "/admin/dashboard"}
+    onClick={() => {
+      navigate("/admin/dashboard");
+      setOpen(false);
+    }}
+  />
 
-          <SidebarItem
-            icon={<ShoppingCart size={16} />}
-            label="Orders"
-            active={location.pathname.startsWith("/admin/orders")}
-            onClick={() => navigate("/admin/orders")}
-          />
+  <SidebarItem
+    icon={<ShoppingCart size={16} />}
+    label="Orders"
+    active={location.pathname.startsWith("/admin/orders")}
+    onClick={() => {
+      navigate("/admin/orders");
+      setOpen(false);
+    }}
+  />
 
-          <SidebarItem
-            icon={<Package size={16} />}
-            label="Products"
-            active={location.pathname.startsWith("/admin/products")}
-            onClick={() => navigate("/admin/products")}
-          />
+  <SidebarItem
+    icon={<Package size={16} />}
+    label="Products"
+    active={location.pathname.startsWith("/admin/products")}
+    onClick={() => {
+      navigate("/admin/products");
+      setOpen(false);
+    }}
+  />
 
-          <SidebarItem
-            icon={<Users size={16} />}
-            label="Sales Executive"
-            active={location.pathname.startsWith("/admin/sales-executives")}
-            onClick={() => navigate("/admin/sales-executives")}
-          />
+  <SidebarItem
+    icon={<Users size={16} />}
+    label="Sales Executive"
+    active={location.pathname.startsWith("/admin/sales-executives")}
+    onClick={() => {
+      navigate("/admin/sales-executives");
+      setOpen(false);
+    }}
+  />
 
-          <SidebarItem
-            icon={<Users size={16} />}
-            label="Customers"
-            active={location.pathname.startsWith("/admin/customers")}
-            onClick={() => navigate("/admin/customers")}
-          />
+  <SidebarItem
+    icon={<Users size={16} />}
+    label="Customers"
+    active={location.pathname.startsWith("/admin/customers")}
+    onClick={() => {
+      navigate("/admin/customers");
+      setOpen(false);
+    }}
+  />
 
-          {/* ✅ WAREHOUSE (NEW) */}
-          <SidebarItem
-            icon={<Warehouse size={16} />}
-            label="Warehouse"
-            active={location.pathname.startsWith("/admin/warehouse")}
-            onClick={() => navigate("/admin/warehouse")}
-          />
+  <SidebarItem
+    icon={<Warehouse size={16} />}
+    label="Warehouse"
+    active={location.pathname.startsWith("/admin/warehouse")}
+    onClick={() => {
+      navigate("/admin/warehouse");
+      setOpen(false);
+    }}
+  />
 
-          <SidebarItem
-            icon={<BarChart3 size={16} />}
-            label="Reports"
-            active={location.pathname.startsWith("/admin/reports")}
-            onClick={() => navigate("/admin/reports")}
-          />
-        </nav>
+  <SidebarItem
+    icon={<BarChart3 size={16} />}
+    label="Reports"
+    active={location.pathname.startsWith("/admin/reports")}
+    onClick={() => {
+      navigate("/admin/reports");
+      setOpen(false);
+    }}
+  />
+</nav>
 
         {/* LOGOUT */}
         <div className="p-3 border-t border-blue-100">
@@ -98,8 +137,25 @@ export default function AdminLayout() {
         </div>
       </aside>
 
+
+      {open && (
+  <div
+    onClick={() => setOpen(false)}
+    className="fixed inset-0 bg-black/30 z-30 lg:hidden"
+  />
+)}
+
       {/* MAIN */}
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col overflow-hidden relative">
+
+
+        {/* MOBILE MENU BUTTON */}
+<div className="lg:hidden p-3">
+  <button onClick={() => setOpen(true)}>
+    <Menu size={22} />
+  </button>
+</div>
+
         <Outlet />
       </main>
     </div>

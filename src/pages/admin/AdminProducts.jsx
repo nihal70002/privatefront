@@ -459,7 +459,7 @@ export default function AdminProducts() {
           </div>
 
           {/* STATS CARDS */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-semibold text-slate-600">Total Products</span>
