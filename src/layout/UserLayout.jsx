@@ -57,10 +57,10 @@ export default function UserLayout() {
         setLoading(true);
 
         const res = await api.get(
-          `/products?search=${encodeURIComponent(searchQuery)}`
+          `/products/search-suggestions?query=${encodeURIComponent(searchQuery)}`
         );
 
-        setSuggestions(res.data.items.slice(0, 5));
+        setSuggestions(res.data);
       } catch (err) {
         console.error("Suggestion fetch error", err);
         setSuggestions([]);
@@ -112,7 +112,7 @@ export default function UserLayout() {
 
             {/* DROPDOWN */}
             {showDropdown && searchQuery.trim().length > 0 && (
-              <div className="absolute top-full mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+              <div className="absolute top-full mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-72 overflow-y-auto">
 
                 {loading && (
                   <div className="p-3 text-xs text-gray-500">
@@ -129,15 +129,28 @@ export default function UserLayout() {
                 {!loading &&
                   suggestions.map((item) => (
                     <div
-                      key={item._id}
+                      key={item.productId}
                       onClick={() => {
-                        navigate(`/products/${item._id}`);
+                        navigate(`/products/${item.productId}`);
                         setSearchQuery("");
                         setShowDropdown(false);
                       }}
-                      className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                      className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 cursor-pointer transition"
                     >
-                      {item.name}
+                      <img
+                        src={item.primaryImageUrl}
+                        alt={item.name}
+                        className="w-10 h-10 object-cover rounded"
+                      />
+
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">
+                          {item.name}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {item.brandName} • ₹{item.startingPrice}
+                        </span>
+                      </div>
                     </div>
                   ))}
               </div>
