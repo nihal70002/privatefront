@@ -22,6 +22,10 @@ export default function Landing() {
 
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+const [suggestions, setSuggestions] = useState([]);
+const [showDropdown, setShowDropdown] = useState(false);
+const [loadingSearch, setLoadingSearch] = useState(false);
 
 
 useEffect(() => {
@@ -45,6 +49,35 @@ useEffect(() => {
 
 
 
+useEffect(() => {
+  if (!searchQuery.trim()) {
+    setSuggestions([]);
+    return;
+  }
+
+  const delayDebounce = setTimeout(async () => {
+    try {
+      setLoadingSearch(true);
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/products/search-suggestions?query=${encodeURIComponent(searchQuery)}`
+      );
+
+      const data = await res.json();
+      setSuggestions(data);
+    } catch (err) {
+      console.error("Search suggestion error:", err);
+      setSuggestions([]);
+    } finally {
+      setLoadingSearch(false);
+    }
+  }, 300);
+
+  return () => clearTimeout(delayDebounce);
+}, [searchQuery]);
+
+
+
 
   
   const newArrivals = [
@@ -63,6 +96,19 @@ useEffect(() => {
       link: "/products/knee-brace"
     }
   ];
+
+
+
+  const clientLogos = [
+  { id: 1, img: "/clients/2013158.png", name: "Abeer Medical Group" },
+  { id: 2, img: "/clients/agh.png", name: "AGH" },
+  { id: 3, img: "/clients/bugshan.png", name: "Bugshan Hospital" },
+  { id: 4, img: "/clients/erfan.png", name: "Dr. Erfan & Bagedo" },
+  { id: 5, img: "/clients/medical.png", name: "International Medical Center" },
+  { id: 6, img: "/clients/saudi.png", name: "Saudi German Health" },
+  { id: 7, img: "/clients/special.png", name: "Specialized Medical Center" },
+  { id: 8, img: "/clients/sulaiman.png", name: "Dr. Sulaiman Al Habib" },
+];
 
  const categories = [
   { id: 1, name: "Supports & Braces", img: "/categories/supports.jpg" },
@@ -96,18 +142,66 @@ useEffect(() => {
           {/* Search Bar */}
           <div className="flex-1 max-w-xl hidden md:flex">
             <div className="w-full relative">
-              <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
-              <input
-                type="text"
-                placeholder="Search products..."
-                className="w-full pl-10 pr-4 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    navigate(`/products?search=${e.target.value}`);
-                  }
-                }}
-              />
+  <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+
+  <input
+    type="text"
+    placeholder="Search products..."
+    value={searchQuery}
+    onFocus={() => setShowDropdown(true)}
+    onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+    onChange={(e) => setSearchQuery(e.target.value)}
+    onKeyDown={(e) => {
+      if (e.key === "Enter") {
+        navigate(`/products?search=${searchQuery}`);
+        setShowDropdown(false);
+      }
+    }}
+    className="w-full pl-10 pr-4 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+  />
+
+  {/* DROPDOWN */}
+  {showDropdown && searchQuery.trim().length > 0 && (
+    <div className="absolute top-full mt-2 w-full bg-white border rounded-xl shadow-lg z-50 max-h-72 overflow-y-auto">
+
+      {loadingSearch && (
+        <div className="p-3 text-sm text-gray-500">Searching...</div>
+      )}
+
+      {!loadingSearch && suggestions.length === 0 && (
+        <div className="p-3 text-sm text-gray-500">No results found</div>
+      )}
+
+      {!loadingSearch &&
+        suggestions.map((item) => (
+          <div
+            key={item.productId}
+            onClick={() => {
+              navigate(`/products/${item.productId}`);
+              setSearchQuery("");
+              setShowDropdown(false);
+            }}
+            className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+          >
+            <img
+              src={item.primaryImageUrl || "/placeholder.jpg"}
+              alt={item.name}
+              className="w-10 h-10 rounded object-cover"
+            />
+
+            <div>
+              <div className="text-sm font-medium">
+                {item.name}
+              </div>
+              <div className="text-xs text-gray-500">
+                {item.brandName} • ₹{item.startingPrice}
+              </div>
             </div>
+          </div>
+        ))}
+    </div>
+  )}
+</div>
           </div>
 
           {/* Icons */}
@@ -177,50 +271,63 @@ lg:aspect-[1660/490]"
 
       {/* ================= CATEGORIES ================= */}
     {/* ================= CATEGORIES ================= */}
-      <section className="py-12 sm:py-16 bg-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <motion.h2 
-  initial={{ opacity: 0, y: 20 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  viewport={{ once: true }}
-  transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-  /* Use 'font-serif' or a specific font like 'Playfair Display' */
-  className="text-4xl sm:text-5xl font-serif italic text-center mb-16 text-slate-900 tracking-tight"
->
-  Shop By <span className="font-normal border-b border-indigo-200">Category</span>
-</motion.h2>
+      <section className="py-20 bg-white">
+  <div className="max-w-7xl mx-auto px-6">
+    
+    {/* Section Header */}
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="text-center mb-16"
+    >
+      <h2 className="text-4xl md:text-5xl font-serif italic text-slate-900 tracking-tight">
+        Shop By <span className="font-normal text-cyan-600 border-b-4 border-cyan-100">Category</span>
+      </h2>
+    </motion.div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
-            {categories.map((cat, i) => (
-              <motion.div
-                key={cat.id}
-                initial={{ opacity: 0, x: -50 }} // Increased distance for a more noticeable slide
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: "-20px" }}
-                transition={{ 
-                  duration: 0.8,      // Increased duration (was 0.5)
-                  delay: i * 0.2,     // Increased stagger time (was 0.1)
-                  ease: [0.21, 0.45, 0.32, 0.9] // Custom cubic-bezier for a "smooth stop" feel
-                }}
-              >
-                <Link
-                  to={`/products?categoryId=${cat.id}`}
-                  className="group block bg-white rounded-2xl border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden"
-                >
-                  <img
-                    src={cat.img}
-                    alt={cat.name}
-                    className="h-32 sm:h-40 w-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-                  <div className="p-4 text-center font-semibold text-sm sm:text-base">
-                    {cat.name}
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+    {/* Uniform Grid with Colored Borders */}
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 items-stretch">
+      {categories.map((cat, i) => (
+        <motion.div
+          key={cat.id}
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: i * 0.1 }}
+          className="flex"
+        >
+          <Link
+            to={`/products?categoryId=${cat.id}`}
+            className="group flex flex-col w-full bg-white rounded-[2.5rem] 
+                       border-2 border-cyan-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] 
+                       hover:border-cyan-400 hover:shadow-[0_20px_40px_rgba(6,182,212,0.15)] 
+                       hover:-translate-y-3 transition-all duration-500 overflow-hidden"
+          >
+            {/* 1. Zoomed Image Container with Light Cyan Backdrop */}
+            <div className="relative aspect-square w-full overflow-hidden bg-gradient-to-br from-cyan-50/50 to-transparent p-4">
+              <img
+                src={cat.img}
+                alt={cat.name}
+                className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-125"
+              />
+            </div>
+
+            {/* 2. Fixed Height Text Area (Uniformity Fix) */}
+            <div className="p-6 flex flex-col items-center justify-between text-center flex-grow bg-white">
+              <h3 className="text-sm md:text-base font-bold text-slate-800 group-hover:text-cyan-600 transition-colors line-clamp-2 min-h-[3rem] flex items-center justify-center">
+                {cat.name}
+              </h3>
+              
+              {/* Bottom Decorative Pill Border */}
+              <div className="w-10 h-1.5 bg-slate-100 group-hover:bg-cyan-400 group-hover:w-16 transition-all duration-500 mt-4 rounded-full" />
+            </div>
+          </Link>
+        </motion.div>
+      ))}
+    </div>
+  </div>
+</section>
 
       {/* ================= FEATURED PRODUCTS ================= */}
       {/* ================= FEATURED PRODUCTS ================= */}
@@ -369,8 +476,148 @@ lg:aspect-[1660/490]"
           </Link>
         </motion.div>
       ))}
+      {/* ================= OUR CLIENTS ================= */}
 
     </div>
+
+<section className="py-24 bg-white overflow-hidden">
+  <div className="max-w-7xl mx-auto px-6">
+    <div className="flex flex-col lg:flex-row items-center gap-16">
+      
+      {/* LEFT SIDE: IMAGE WITH DECORATIVE BORDER */}
+      <motion.div 
+        initial={{ opacity: 0, x: -50 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+        className="flex-1 relative"
+      >
+        <div className="relative z-10 rounded-[3rem] overflow-hidden border-8 border-slate-50 shadow-2xl">
+          <img 
+            src="/posters/about-poster.jpg" // Replace with your actual image path
+            alt="Healthcare Excellence" 
+            className="w-full h-[500px] object-cover"
+          />
+        </div>
+        {/* Decorative Cyan Element */}
+        <div className="absolute -bottom-6 -right-6 w-64 h-64 bg-cyan-100 rounded-full -z-0 opacity-50 blur-3xl" />
+        <div className="absolute -top-10 -left-10 w-32 h-32 border-t-4 border-l-4 border-cyan-400 rounded-tl-3xl" />
+      </motion.div>
+
+      {/* RIGHT SIDE: CONTENT */}
+      <motion.div 
+        initial={{ opacity: 0, x: 50 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        className="flex-1 space-y-8"
+      >
+        <div className="space-y-4">
+          <span className="text-cyan-600 font-bold tracking-widest text-sm uppercase">
+            Since 2026
+          </span>
+          <h2 className="text-4xl md:text-5xl font-serif italic text-slate-900">
+            About <span className="text-cyan-600 font-normal border-b-4 border-cyan-100">Medico Aid</span>
+          </h2>
+          <p className="text-lg text-slate-600 leading-relaxed pt-4">
+            Safa Al-Tamayyuz Trading Co. (Medico Aid) stands at the forefront of healthcare distribution in Saudi Arabia. 
+            We specialize in providing high-grade orthopedic, surgical, and rehabilitation supplies that empower patients 
+            and support medical professionals.
+          </p>
+        </div>
+
+        {/* Feature Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-cyan-50 rounded-2xl text-cyan-600">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-800">KSA Wide Delivery</h4>
+              <p className="text-sm text-slate-500">Fast and reliable logistics across the Kingdom.</p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-cyan-50 rounded-2xl text-cyan-600">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-800">Premium Quality</h4>
+              <p className="text-sm text-slate-500">Sourced from globally recognized medical brands.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-6">
+          <button className="bg-slate-900 text-white px-10 py-4 rounded-2xl font-bold hover:bg-cyan-600 transition-all duration-300 shadow-xl shadow-slate-200 hover:shadow-cyan-100">
+            Learn More
+          </button>
+        </div>
+      </motion.div>
+
+    </div>
+  </div>
+</section>
+
+
+
+
+    {/* ================= OUR CLIENTS ================= */}
+<section className="py-16 bg-white w-full">
+  <div className="max-w-7xl mx-auto px-6">
+    
+    {/* Section Header */}
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8 }}
+      className="text-center mb-16"
+    >
+      <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+        Our <span className="text-cyan-600">Clients</span>
+      </h2>
+      {/* The cyan underline from your image */}
+      <div className="w-20 h-1.5 bg-cyan-400 mx-auto mt-2"></div>
+    </motion.div>
+
+    {/* Two-Row Grid Layout */}
+    {/* grid-cols-2 on mobile, grid-cols-4 on desktop (8 logos total = 2 perfect rows) */}
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-16 gap-x-8 items-center justify-items-center">
+      {clientLogos.map((client, index) => (
+        <motion.div
+          key={client.id}
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ 
+            duration: 0.9, 
+            delay: index * 0.1, // Staggered entry for "lazy" feel
+            ease: [0.21, 0.45, 0.32, 0.9] 
+          }}
+          className="w-full flex justify-center px-4"
+        >
+          <img
+            src={client.img}
+            alt={client.name}
+            loading="lazy"
+            /* No grayscale here - original colors only */
+            className="max-h-14 md:max-h-20 w-auto object-contain hover:scale-110 transition-transform duration-500"
+          />
+        </motion.div>
+      ))}
+    </div>
+  </div>
+</section>
+    
+
+
+
   </div>
 </section>
 
@@ -383,46 +630,76 @@ lg:aspect-[1660/490]"
 
 
       {/* ================= FOOTER ================= */}
-      <footer className="bg-gray-900 text-white py-12 mt-16">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-          <div>
-            <h3 className="font-bold mb-4">Safa Store</h3>
-            <p className="text-sm text-gray-400">
-              Premium medical and orthopedic supplies delivered across KSA.
-            </p>
-          </div>
+    <footer className="bg-[#1a1f2e] text-white py-16 mt-16 border-t border-slate-800">
+  <div className="max-w-7xl mx-auto px-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+      
+      {/* 1. BRAND LOGO & DESCRIPTION */}
+      <div className="space-y-6">
+        <img 
+          src="/logo/logo.png" 
+          alt="Medico Aid Logo" 
+          className="h-16 w-auto brightness-0 invert" 
+        />
+        <p className="text-sm text-slate-400 leading-relaxed max-w-xs">
+          Safa Al-Tamayyuz Trading Co. provides premium medical and orthopedic supplies 
+          tailored for healthcare excellence across the Kingdom.
+        </p>
+      </div>
 
-          <div>
-            <h4 className="font-semibold mb-4">Shop</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li><Link to="/products">All Products</Link></li>
-              <li><Link to="/products?category=Orthopedic">Orthopedic</Link></li>
-              <li><Link to="/products?category=Surgical">Surgical</Link></li>
-            </ul>
-          </div>
+      {/* 2. IMPORTANT LINKS (TEXT ONLY) */}
+      <div>
+        <h4 className="text-lg font-bold mb-6 text-white tracking-wide">Important Links</h4>
+        <ul className="space-y-3 text-sm text-slate-400">
+          <li>Products</li>
+          <li>About us</li>
+          <li>News</li>
+          <li>Contact us</li>
+        </ul>
+      </div>
 
-          <div>
-            <h4 className="font-semibold mb-4">Support</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li>Contact Us</li>
-              <li>Shipping Policy</li>
-              <li>Returns</li>
-            </ul>
-          </div>
+      {/* 3. PRODUCT CATEGORIES (TEXT ONLY) */}
+      <div>
+        <h4 className="text-lg font-bold mb-6 text-white tracking-wide">Products</h4>
+        <ul className="space-y-3 text-sm text-slate-400 uppercase tracking-tighter">
+          <li>Supports & Braces</li>
+          <li>Cervical (Neck) Care</li>
+          <li>Lumbo Sacral (Back) Supports</li>
+          <li>Mobility Aids</li>
+          <li>Foot Care</li>
+          <li>Traction Kits</li>
+          <li>Compression Therapy</li>
+        </ul>
+      </div>
 
-          <div>
-            <h4 className="font-semibold mb-4">Contact</h4>
-            <p className="text-sm text-gray-400">
-              Jeddah, Saudi Arabia <br />
-              +966 12 6513490
-            </p>
-          </div>
+      {/* 4. ADDRESS & CONTACT */}
+      <div>
+        <h4 className="text-lg font-bold mb-6 text-white tracking-wide">Address</h4>
+        <p className="text-sm text-slate-400 leading-loose">
+          Safa Al-Tamayyuz Trading Co., Tauba Street, <br />
+          Al Askan Building, Sharafia District, <br />
+          Jeddah, KSA <br />
+          P.O. Box : 6368, Jeddah 6368, Saudi Arabia
+        </p>
+        <div className="mt-6 p-4 bg-slate-800/50 rounded-xl border border-slate-700 inline-block">
+           <p className="text-cyan-400 font-mono text-sm font-bold">+966 12 6513490</p>
         </div>
+      </div>
+    </div>
 
-        <div className="text-center text-xs text-gray-500 mt-10">
-          © 2026 Safa Store. All rights reserved.
-        </div>
-      </footer>
+    {/* BOTTOM BAR */}
+    <div className="mt-16 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="flex gap-6 text-xs text-slate-500 font-medium">
+        <span>Terms & Condition</span>
+        <span>Privacy Policy</span>
+        <span>Refund Policy</span>
+      </div>
+      <p className="text-xs text-slate-500">
+        © 2026 Medico Aid. All rights reserved.
+      </p>
+    </div>
+  </div>
+</footer>
 
     </div>
   );
