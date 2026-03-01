@@ -256,14 +256,14 @@ console.log(allCategories);
 
       {/* MAIN CONTENT */}
       {/* MAIN CONTENT */}
-<div className="flex flex-col lg:flex-row w-full max-w-screen-2xl mx-auto overflow-x-hidden">
+<div className="flex flex-col lg:flex-row w-full max-w-screen-2xl mx-auto bg-white">
 
 
 
 
         {/* SIDEBAR FILTERS */}
         
- <aside className="hidden lg:block w-64 bg-white border-r border-gray-200 p-4 sticky top-24">
+ <aside className="hidden lg:block w-64 bg-white border-r border-gray-200 p-4 sticky top-[72px] self-start h-fit">
 
 
 
@@ -407,7 +407,7 @@ console.log(allCategories);
 
 
 {/* PRODUCTS SECTION */}
-<main className="flex-1 lg:pl-6 mt-6 lg:mt-0">
+<main className="flex-1 lg:pl-6">
   {/* Header Bar */}
   <div className="flex items-center justify-between mb-4 px-2 py-2 border-b border-gray-200">
     <h1 className="text-base font-bold text-gray-900">
@@ -508,7 +508,7 @@ console.log(allCategories);
 
 
 {/* MOBILE BOTTOM BAR */}
-<div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center py-1 lg:hidden z-50">
+<div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-center items-center py-3 lg:hidden z-50">
 
  
 

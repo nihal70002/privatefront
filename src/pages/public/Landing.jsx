@@ -64,7 +64,7 @@ useEffect(() => {
       );
 
       const data = await res.json();
-      setSuggestions(data);
+      setSuggestions(data.slice(0, 6));
     } catch (err) {
       console.error("Search suggestion error:", err);
       setSuggestions([]);
@@ -140,7 +140,7 @@ useEffect(() => {
           </Link>
 
           {/* Search Bar */}
-          <div className="flex-1 max-w-xl hidden md:flex">
+          <div className="flex-1 max-w-xl w-full hidden sm:flex">
             <div className="w-full relative">
   <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
 
@@ -161,19 +161,25 @@ useEffect(() => {
   />
 
   {/* DROPDOWN */}
-  {showDropdown && searchQuery.trim().length > 0 && (
-    <div className="absolute top-full mt-2 w-full bg-white border rounded-xl shadow-lg z-50 max-h-72 overflow-y-auto">
+{showDropdown && searchQuery.trim().length > 0 && (
+  <div className="absolute top-full mt-3 w-full bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-4">
 
-      {loadingSearch && (
-        <div className="p-3 text-sm text-gray-500">Searching...</div>
-      )}
+    {loadingSearch && (
+      <div className="text-sm text-gray-500 px-2 py-2">
+        Searching...
+      </div>
+    )}
 
-      {!loadingSearch && suggestions.length === 0 && (
-        <div className="p-3 text-sm text-gray-500">No results found</div>
-      )}
+    {!loadingSearch && suggestions.length === 0 && (
+      <div className="text-sm text-gray-500 px-2 py-2">
+        No results found
+      </div>
+    )}
 
-      {!loadingSearch &&
-        suggestions.map((item) => (
+    {!loadingSearch && suggestions.length > 0 && (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+
+        {suggestions.slice(0, 6).map((item) => (
           <div
             key={item.productId}
             onClick={() => {
@@ -181,26 +187,49 @@ useEffect(() => {
               setSearchQuery("");
               setShowDropdown(false);
             }}
-            className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+            className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition"
           >
             <img
               src={item.primaryImageUrl || "/placeholder.jpg"}
               alt={item.name}
-              className="w-10 h-10 rounded object-cover"
+              className="w-10 h-10 md:w-12 md:h-12 rounded-md object-cover border border-gray-100"
             />
 
-            <div>
-              <div className="text-sm font-medium">
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-gray-800 line-clamp-1">
                 {item.name}
-              </div>
-              <div className="text-xs text-gray-500">
-                {item.brandName} • ₹{item.startingPrice}
-              </div>
+              </span>
+
+              <span className="text-xs text-gray-500">
+                {item.brandName}
+              </span>
+
+              <span className="text-sm font-semibold text-cyan-600">
+                ₹{item.startingPrice}
+              </span>
             </div>
           </div>
         ))}
-    </div>
-  )}
+
+      </div>
+    )}
+
+    {!loadingSearch && suggestions.length > 6 && (
+      <div
+        onClick={() => {
+          navigate(`/products?search=${searchQuery}`);
+          setShowDropdown(false);
+        }}
+        className="text-center mt-4 pt-3 border-t text-sm font-semibold text-cyan-600 hover:text-cyan-700 cursor-pointer"
+      >
+        View all results →
+      </div>
+    )}
+
+  </div>
+)}
+
+
 </div>
           </div>
 

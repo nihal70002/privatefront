@@ -84,14 +84,14 @@ export default function UserLayout() {
             className="cursor-pointer hover:scale-105 transition-transform"
           >
             <img
-              src="/logo/logo.png"
-              alt="Safa Store"
-              className="h-12 w-auto object-contain"
-            />
+  src="/logo/logo.png"
+  alt="Safa Store"
+  className="h-8 sm:h-10 md:h-12 w-auto object-contain transition-all duration-200"
+/>
           </div>
 
           {/* SEARCH */}
-          <div className="w-[320px] ml-auto mr-6 relative">
+          <div className="flex-1 max-w-md mx-4 relative hidden sm:block">
             <div className="relative">
               <Search
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
@@ -112,57 +112,80 @@ export default function UserLayout() {
 
             {/* DROPDOWN */}
             {showDropdown && searchQuery.trim().length > 0 && (
-              <div className="absolute top-full mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-72 overflow-y-auto">
+  <div className="absolute top-full left-0 mt-3 w-full bg-white rounded-2xl shadow-2xl border border-emerald-100 z-50 p-4">
 
-                {loading && (
-                  <div className="p-3 text-xs text-gray-500">
-                    Searching...
-                  </div>
-                )}
+    {loading && (
+      <div className="text-sm text-gray-500 px-2 py-2">
+        Searching...
+      </div>
+    )}
 
-                {!loading && suggestions.length === 0 && (
-                  <div className="p-3 text-xs text-gray-500">
-                    No results found
-                  </div>
-                )}
+    {!loading && suggestions.length === 0 && (
+      <div className="text-sm text-gray-500 px-2 py-2">
+        No results found
+      </div>
+    )}
 
-                {!loading &&
-                  suggestions.map((item) => (
-                    <div
-                      key={item.productId}
-                      onClick={() => {
-                        navigate(`/products/${item.productId}`);
-                        setSearchQuery("");
-                        setShowDropdown(false);
-                      }}
-                      className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 cursor-pointer transition"
-                    >
-                      <img
-                        src={item.primaryImageUrl}
-                        alt={item.name}
-                        className="w-10 h-10 object-cover rounded"
-                      />
+    {!loading && suggestions.length > 0 && (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
 
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium">
-                          {item.name}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {item.brandName} • ₹{item.startingPrice}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            )}
+        {suggestions.slice(0, 6).map((item) => (
+          <div
+            key={item.productId}
+            onClick={() => {
+              navigate(`/products/${item.productId}`);
+              setSearchQuery("");
+              setShowDropdown(false);
+            }}
+            className="flex items-center gap-3 cursor-pointer hover:bg-emerald-50 p-2 rounded-lg transition"
+          >
+            <img
+              src={item.primaryImageUrl}
+              alt={item.name}
+              className="w-10 h-10 md:w-12 md:h-12 rounded-md object-cover border border-gray-100"
+            />
+
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-gray-800 line-clamp-1">
+                {item.name}
+              </span>
+
+              <span className="text-xs text-gray-500">
+                {item.brandName}
+              </span>
+
+              <span className="text-sm font-semibold text-emerald-600">
+                ₹{item.startingPrice}
+              </span>
+            </div>
           </div>
+        ))}
+
+      </div>
+    )}
+  </div>
+)}
+</div>
 
           {/* ACTIONS */}
           <div className="flex items-center gap-6 text-gray-600">
+             <button
+  onClick={() => setShowDropdown(true)}
+  className="sm:hidden flex flex-col items-center gap-1 hover:text-gray-900 transition-colors"
+>
+  <Search size={22} />
+  <span className="text-xs">Search</span>
+</button>
+
+
+
             <button
               onClick={() => navigate("/orders")}
               className="flex flex-col items-center gap-1 hover:text-gray-900 transition-colors"
             >
+
+             
+
               <Package size={22} />
               <span className="text-xs">Orders</span>
             </button>
