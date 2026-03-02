@@ -14,6 +14,7 @@ export default function UserLayout() {
   const [suggestions, setSuggestions] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   // 🛒 Cart Context
   const { cartCount, setCartFromApi } = useCart();
@@ -170,7 +171,7 @@ export default function UserLayout() {
           {/* ACTIONS */}
           <div className="flex items-center gap-6 text-gray-600">
              <button
-  onClick={() => setShowDropdown(true)}
+  onClick={() => setShowMobileSearch(prev => !prev)}
   className="sm:hidden flex flex-col items-center gap-1 hover:text-gray-900 transition-colors"
 >
   <Search size={22} />
@@ -179,16 +180,7 @@ export default function UserLayout() {
 
 
 
-            <button
-              onClick={() => navigate("/orders")}
-              className="flex flex-col items-center gap-1 hover:text-gray-900 transition-colors"
-            >
-
-             
-
-              <Package size={22} />
-              <span className="text-xs">Orders</span>
-            </button>
+        
 
             <button
               onClick={() => navigate("/profile")}
@@ -215,6 +207,74 @@ export default function UserLayout() {
 
         </div>
       </nav>
+
+ {/* MOBILE SEARCH BAR (UNDER NAVBAR) */}
+{showMobileSearch && (
+  <div className="sm:hidden border-b border-gray-200 bg-white px-4 py-3 shadow-sm">
+    
+    <div className="relative">
+      <Search
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+        size={18}
+      />
+
+      <input
+        autoFocus
+        type="text"
+        placeholder="Search for products..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        onKeyDown={handleSearch}
+        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-teal-600"
+      />
+    </div>
+
+    {/* Suggestions */}
+    {searchQuery && (
+      <div className="mt-3 space-y-2">
+        {loading && (
+          <div className="text-sm text-gray-500">
+            Searching...
+          </div>
+        )}
+
+        {!loading && suggestions.length === 0 && (
+          <div className="text-sm text-gray-500">
+            No results found
+          </div>
+        )}
+
+        {!loading &&
+          suggestions.slice(0, 5).map((item) => (
+            <div
+              key={item.productId}
+              onClick={() => {
+                navigate(`/products/${item.productId}`);
+                setSearchQuery("");
+                setShowMobileSearch(false);
+              }}
+              className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer"
+            >
+              <img
+                src={item.primaryImageUrl}
+                alt={item.name}
+                className="w-10 h-10 rounded-md object-cover border"
+              />
+
+              <div>
+                <p className="text-sm font-medium line-clamp-1">
+                  {item.name}
+                </p>
+                <p className="text-xs text-gray-500">
+                  ₹{item.startingPrice}
+                </p>
+              </div>
+            </div>
+          ))}
+      </div>
+    )}
+  </div>
+)}
 
       <main className="flex-grow">
         <Outlet />

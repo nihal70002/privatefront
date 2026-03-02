@@ -34,14 +34,14 @@ export default function ProductCard({ product }) {
       {/* CONTENT SECTION */}
       <div className="p-2.5 space-y-0.5">
         {/* Brand Name - Bold and slightly larger */}
-        <h3 className="text-[14px] font-bold text-gray-900 truncate tracking-tight">
-          {product?.brandName || "Brand Name"}
-        </h3>
+       <h3 className="text-[12px] text-gray-500 truncate leading-tight font-light">
+  {product?.brandName || "Brand Name"}
+</h3>
 
         {/* Product Name - Soft gray and smaller */}
-        <p className="text-[12px] text-gray-500 truncate leading-tight font-light">
-          {product?.name}
-        </p>
+       <p className="text-[12px] font-semibold text-gray-800 truncate leading-tight">
+  {product?.name}
+</p>
 
         {/* Price Row */}
         <div className="flex items-center gap-1.5 mt-0.5">

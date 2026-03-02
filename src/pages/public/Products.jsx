@@ -263,7 +263,7 @@ console.log(allCategories);
 
         {/* SIDEBAR FILTERS */}
         
- <aside className="hidden lg:block w-64 bg-white border-r border-gray-200 p-4 sticky top-[72px] self-start h-fit">
+ <aside className="hidden lg:block w-52 bg-white border-r border-gray-200 p-4 sticky top-[72px] self-start h-fit">
 
 
 

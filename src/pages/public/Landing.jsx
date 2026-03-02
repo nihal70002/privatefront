@@ -112,7 +112,7 @@ useEffect(() => {
 
  const categories = [
   { id: 1, name: "Supports & Braces", img: "/categories/supports.jpg" },
-  { id: 3, name: "Lumbo Sacral (Back) and Abdominal Supports", img: "/categories/lumbo.jpg" },
+  { id: 3, name: "Lumbo Sacral and Abdominal Supports", img: "/categories/lumbo.jpg" },
   { id: 4, name: "Cervical (Neck) Care", img: "/categories/cervical.jpg" },
   { id: 5, name: "Mobility Aids", img: "/categories/mobility.jpg" },
   { id: 6, name: "Traction Kits", img: "/categories/traction.jpg" },
@@ -300,59 +300,49 @@ lg:aspect-[1660/490]"
 
       {/* ================= CATEGORIES ================= */}
     {/* ================= CATEGORIES ================= */}
-      <section className="py-20 bg-white">
-  <div className="max-w-7xl mx-auto px-6">
-    
-    {/* Section Header */}
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className="text-center mb-16"
-    >
-      <h2 className="text-4xl md:text-5xl font-serif italic text-slate-900 tracking-tight">
-        Shop By <span className="font-normal text-cyan-600 border-b-4 border-cyan-100">Category</span>
+    <section className="relative py-28 bg-gradient-to-br from-slate-50 via-white to-slate-100 overflow-hidden">
+
+  <div className="absolute -top-40 -left-40 w-[35rem] h-[35rem] bg-slate-300/20 rounded-full blur-3xl"></div>  <div className="absolute bottom-0 right-0 w-[30rem] h-[30rem] bg-slate-400/15 rounded-full blur-3xl"></div>
+
+  <div className="relative max-w-7xl mx-auto px-6">
+
+    <div className="text-center mb-20">
+      <h2 className="text-4xl md:text-5xl font-serif text-slate-900">
+        Shop By <span className="text-cyan-600">Category</span>
       </h2>
-    </motion.div>
+      <p className="mt-4 text-slate-500 max-w-xl mx-auto">
+        Explore our curated product collections
+      </p>
+    </div>
 
-    {/* Uniform Grid with Colored Borders */}
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 items-stretch">
-      {categories.map((cat, i) => (
-        <motion.div
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-12">
+
+      {categories.map((cat) => (
+        <Link
           key={cat.id}
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: i * 0.1 }}
-          className="flex"
+          to={`/products?categoryId=${cat.id}`}
+          className="group flex flex-col items-center text-center transition-all duration-500 hover:-translate-y-3"
         >
-          <Link
-            to={`/products?categoryId=${cat.id}`}
-            className="group flex flex-col w-full bg-white rounded-[2.5rem] 
-                       border-2 border-cyan-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] 
-                       hover:border-cyan-400 hover:shadow-[0_20px_40px_rgba(6,182,212,0.15)] 
-                       hover:-translate-y-3 transition-all duration-500 overflow-hidden"
-          >
-            {/* 1. Zoomed Image Container with Light Cyan Backdrop */}
-            <div className="relative aspect-square w-full overflow-hidden bg-gradient-to-br from-cyan-50/50 to-transparent p-4">
-              <img
-                src={cat.img}
-                alt={cat.name}
-                className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-125"
-              />
-            </div>
+          <div className="w-40 h-40 rounded-full 
+                          backdrop-blur-xl 
+                          bg-white/60 
+                          border border-white/50 
+                          shadow-lg
+                          flex items-center justify-center
+                          transition-all duration-500
+                          group-hover:shadow-2xl group-hover:scale-105">
 
-            {/* 2. Fixed Height Text Area (Uniformity Fix) */}
-            <div className="p-6 flex flex-col items-center justify-between text-center flex-grow bg-white">
-              <h3 className="text-sm md:text-base font-bold text-slate-800 group-hover:text-cyan-600 transition-colors line-clamp-2 min-h-[3rem] flex items-center justify-center">
-                {cat.name}
-              </h3>
-              
-              {/* Bottom Decorative Pill Border */}
-              <div className="w-10 h-1.5 bg-slate-100 group-hover:bg-cyan-400 group-hover:w-16 transition-all duration-500 mt-4 rounded-full" />
-            </div>
-          </Link>
-        </motion.div>
+            <img
+              src={cat.img}
+              alt={cat.name}
+              className="object-contain w-4/5 h-4/5 transition-transform duration-700 group-hover:scale-110"
+            />
+          </div>
+
+          <h3 className="mt-6 text-base font-semibold text-slate-800">
+            {cat.name}
+          </h3>
+        </Link>
       ))}
     </div>
   </div>
@@ -693,7 +683,7 @@ lg:aspect-[1660/490]"
         <ul className="space-y-3 text-sm text-slate-400 uppercase tracking-tighter">
           <li>Supports & Braces</li>
           <li>Cervical (Neck) Care</li>
-          <li>Lumbo Sacral (Back) Supports</li>
+          <li>Lumbo Sacral Supports</li>
           <li>Mobility Aids</li>
           <li>Foot Care</li>
           <li>Traction Kits</li>

@@ -361,9 +361,9 @@ const decreaseQuantity = () => {
           {/* Price */}
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-2">
-              <span className="text-2xl font-bold text-gray-900">₹{selectedVariant?.price ?? "--"}
+             <span className="text-2xl font-bold text-gray-900">
+  SAR {selectedVariant?.price ?? "--"}
 </span>
-             
             </div>
             <p className="text-sm font-semibold text-teal-700">inclusive of all taxes</p>
           </div>
@@ -436,11 +436,12 @@ const decreaseQuantity = () => {
             setSelectedVariant(v);
             setQuantity(1);
           }}
-          className={`w-14 h-14 rounded-full border-2 font-bold text-sm transition ${
-            selectedVariant?.id === v.id
-              ? "border-teal-600 text-teal-600 bg-teal-50"
-              : "border-gray-300 text-gray-900 hover:border-teal-400"
-          }`}
+          className={`min-w-[56px] h-14 px-4 rounded-full border-2 font-bold text-sm 
+flex items-center justify-center transition ${
+  selectedVariant?.id === v.id
+    ? "border-teal-600 text-teal-600 bg-teal-50"
+    : "border-gray-300 text-gray-900 hover:border-teal-400"
+}`}
         >
           {v.size}
         </button>
