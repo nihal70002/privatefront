@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Heart } from "lucide-react"; // Import for the wishlist icon
+
 
 export default function ProductCard({ product }) {
   const navigate = useNavigate();
@@ -26,9 +26,7 @@ export default function ProductCard({ product }) {
        
 
         {/* Wishlist Icon - Hidden on mobile usually, or top right */}
-        <button className="absolute top-2 right-2 p-1.5 rounded-full bg-white/20 hover:bg-white transition-colors lg:opacity-0 lg:group-hover:opacity-100">
-           <Heart size={16} className="text-gray-600" />
-        </button>
+        
       </div>
 
       {/* CONTENT SECTION */}

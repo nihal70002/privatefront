@@ -140,7 +140,7 @@ useEffect(() => {
           </Link>
 
           {/* Search Bar */}
-          <div className="flex-1 max-w-xl w-full hidden sm:flex">
+          <div className="flex-1 max-w-xl w-full flex mx-2">
             <div className="w-full relative">
   <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
 
@@ -300,7 +300,7 @@ lg:aspect-[1660/490]"
 
       {/* ================= CATEGORIES ================= */}
     {/* ================= CATEGORIES ================= */}
-    <section className="relative py-28 bg-gradient-to-br from-slate-50 via-white to-slate-100 overflow-hidden">
+    <section className="relative py-14 md:py-28 bg-gradient-to-br from-slate-50 via-white to-slate-100 overflow-hidden">
 
   <div className="absolute -top-40 -left-40 w-[35rem] h-[35rem] bg-slate-300/20 rounded-full blur-3xl"></div>  <div className="absolute bottom-0 right-0 w-[30rem] h-[30rem] bg-slate-400/15 rounded-full blur-3xl"></div>
 
@@ -501,83 +501,107 @@ lg:aspect-[1660/490]"
 
 <section className="py-24 bg-white overflow-hidden">
   <div className="max-w-7xl mx-auto px-6">
-    <div className="flex flex-col lg:flex-row items-center gap-16">
+    <div className="flex justify-center">
       
       {/* LEFT SIDE: IMAGE WITH DECORATIVE BORDER */}
-      <motion.div 
-        initial={{ opacity: 0, x: -50 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
-        className="flex-1 relative"
-      >
-        <div className="relative z-10 rounded-[3rem] overflow-hidden border-8 border-slate-50 shadow-2xl">
-          <img 
-            src="/posters/about-poster.jpg" // Replace with your actual image path
-            alt="Healthcare Excellence" 
-            className="w-full h-[500px] object-cover"
-          />
-        </div>
-        {/* Decorative Cyan Element */}
-        <div className="absolute -bottom-6 -right-6 w-64 h-64 bg-cyan-100 rounded-full -z-0 opacity-50 blur-3xl" />
-        <div className="absolute -top-10 -left-10 w-32 h-32 border-t-4 border-l-4 border-cyan-400 rounded-tl-3xl" />
-      </motion.div>
+    
 
       {/* RIGHT SIDE: CONTENT */}
       <motion.div 
-        initial={{ opacity: 0, x: 50 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay: 0.2 }}
-        className="flex-1 space-y-8"
-      >
-        <div className="space-y-4">
-          <span className="text-cyan-600 font-bold tracking-widest text-sm uppercase">
-            Since 2026
-          </span>
-          <h2 className="text-4xl md:text-5xl font-serif italic text-slate-900">
-            About <span className="text-cyan-600 font-normal border-b-4 border-cyan-100">Medico Aid</span>
-          </h2>
-          <p className="text-lg text-slate-600 leading-relaxed pt-4">
-            Safa Al-Tamayyuz Trading Co. (Medico Aid) stands at the forefront of healthcare distribution in Saudi Arabia. 
-            We specialize in providing high-grade orthopedic, surgical, and rehabilitation supplies that empower patients 
-            and support medical professionals.
-          </p>
-        </div>
+  initial={{ opacity: 0, x: 50 }}
+  whileInView={{ opacity: 1, x: 0 }}
+  viewport={{ once: true }}
+  transition={{ duration: 0.8, delay: 0.2 }}
+  className="w-full max-w-5xl mx-auto space-y-10 text-center"
+>
 
-        {/* Feature Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-cyan-50 rounded-2xl text-cyan-600">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div>
-              <h4 className="font-bold text-slate-800">KSA Wide Delivery</h4>
-              <p className="text-sm text-slate-500">Fast and reliable logistics across the Kingdom.</p>
-            </div>
-          </div>
+  <div className="space-y-4">
+    <span className="text-cyan-600 font-bold tracking-widest text-sm uppercase">
+      Since 1984
+    </span>
 
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-cyan-50 rounded-2xl text-cyan-600">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <div>
-              <h4 className="font-bold text-slate-800">Premium Quality</h4>
-              <p className="text-sm text-slate-500">Sourced from globally recognized medical brands.</p>
-            </div>
-          </div>
-        </div>
+    <h2 className="text-4xl md:text-5xl font-serif italic text-slate-900">
+      About <span className="text-cyan-600 font-normal border-b-4 border-cyan-100">Medico Aid</span>
+    </h2>
 
-        <div className="pt-6">
-          <button className="bg-slate-900 text-white px-10 py-4 rounded-2xl font-bold hover:bg-cyan-600 transition-all duration-300 shadow-xl shadow-slate-200 hover:shadow-cyan-100">
-            Learn More
-          </button>
-        </div>
-      </motion.div>
+    <p className="text-lg text-slate-600 leading-relaxed pt-4">
+      Safa Al-Tamayyuz Trading Co. (Medico Aid) stands at the forefront of healthcare distribution in Saudi Arabia. 
+      We specialize in providing high-grade orthopedic, surgical, and rehabilitation supplies that empower patients 
+      and support medical professionals.
+    </p>
+
+    <p className="text-lg text-slate-600 leading-relaxed">
+      With a strong commitment to innovation and reliability, Medico Aid partners with hospitals, clinics, and 
+      healthcare providers to deliver trusted medical solutions. Our goal is to ensure consistent access to 
+      quality healthcare products that improve patient recovery and support modern medical practice.
+    </p>
+  </div>
+
+  {/* Feature Grid */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-4 text-left">
+    
+    <div className="flex items-start gap-4">
+      <div className="p-3 bg-cyan-50 rounded-2xl text-cyan-600">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+
+      <div>
+        <h4 className="font-bold text-slate-800">KSA Wide Delivery</h4>
+        <p className="text-sm text-slate-500">
+          Fast and reliable logistics across the Kingdom ensuring quick product availability.
+        </p>
+      </div>
+    </div>
+
+    <div className="flex items-start gap-4">
+      <div className="p-3 bg-cyan-50 rounded-2xl text-cyan-600">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      </div>
+
+      <div>
+        <h4 className="font-bold text-slate-800">Premium Quality</h4>
+        <p className="text-sm text-slate-500">
+          Sourced from globally recognized medical brands to ensure superior reliability.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  {/* Stats */}
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-8">
+
+    <div>
+      <h3 className="text-3xl font-bold text-cyan-600">500+</h3>
+      <p className="text-sm text-slate-500 mt-1">Medical Products</p>
+    </div>
+
+    <div>
+      <h3 className="text-3xl font-bold text-cyan-600">120+</h3>
+      <p className="text-sm text-slate-500 mt-1">Hospital Clients</p>
+    </div>
+
+    <div>
+      <h3 className="text-3xl font-bold text-cyan-600">10+</h3>
+      <p className="text-sm text-slate-500 mt-1">Global Brands</p>
+    </div>
+
+    <div>
+      <h3 className="text-3xl font-bold text-cyan-600">99%</h3>
+      <p className="text-sm text-slate-500 mt-1">Customer Satisfaction</p>
+    </div>
+
+  </div>
+
+  {/* CTA */}
+  
+  
+
+</motion.div>
 
     </div>
   </div>
@@ -649,7 +673,7 @@ lg:aspect-[1660/490]"
 
 
       {/* ================= FOOTER ================= */}
-    <footer className="bg-[#1a1f2e] text-white py-16 mt-16 border-t border-slate-800">
+    <footer className="bg-[#1a1f2e] text-white py-5 md:py-8 mt-16 border-t border-slate-800">
   <div className="max-w-7xl mx-auto px-6">
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
       

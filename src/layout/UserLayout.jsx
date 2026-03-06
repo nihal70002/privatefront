@@ -87,7 +87,7 @@ export default function UserLayout() {
             <img
   src="/logo/logo.png"
   alt="Safa Store"
-  className="h-8 sm:h-10 md:h-12 w-auto object-contain transition-all duration-200"
+  className="h-7 sm:h-9 md:h-11 lg:h-14 w-auto object-contain transition-all duration-200"
 />
           </div>
 
