@@ -12,7 +12,11 @@ export default function Products() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const categoryIdFromUrl = searchParams.get("categoryId");
-
+useEffect(() => {
+  if (categoryIdFromUrl) {
+    setSelectedCategories([Number(categoryIdFromUrl)]);
+  }
+}, [categoryIdFromUrl]);
 
   const [products, setProducts] = useState([]);
   const [cartCount, setCartCount] = useState(0);
@@ -126,11 +130,7 @@ useEffect(() => {
 
 
 
-useEffect(() => {
-  if (searchQuery === "") {
-    navigate("/products", { replace: true });
-  }
-}, [searchQuery]);
+
 
 
 const loadCart = async () => {

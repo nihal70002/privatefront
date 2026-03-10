@@ -156,7 +156,7 @@ export default function UserLayout() {
               </span>
 
               <span className="text-sm font-semibold text-emerald-600">
-                ₹{item.startingPrice}
+                SAR {item.startingPrice}
               </span>
             </div>
           </div>
@@ -266,7 +266,7 @@ export default function UserLayout() {
                   {item.name}
                 </p>
                 <p className="text-xs text-gray-500">
-                  ₹{item.startingPrice}
+                  SAR {item.startingPrice}
                 </p>
               </div>
             </div>

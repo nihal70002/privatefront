@@ -320,7 +320,7 @@ lg:aspect-[1660/490]"
       {categories.map((cat) => (
         <Link
           key={cat.id}
-          to={`/products?categoryId=${cat.id}`}
+          to={`/products?categoryId=${encodeURIComponent(cat.id)}`}
           className="group flex flex-col items-center text-center transition-all duration-500 hover:-translate-y-3"
         >
           <div className="w-40 h-40 rounded-full 

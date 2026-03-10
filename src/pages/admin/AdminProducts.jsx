@@ -402,9 +402,9 @@ export default function AdminProducts() {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
 
-      <div className="max-w-[1800px] mx-auto px-6 py-8 h-full overflow-y-auto">
+      <div className="w-full px-6 py-8">
 
         
         {/* HEADER SECTION */}
