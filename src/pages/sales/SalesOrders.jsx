@@ -80,12 +80,13 @@ const filteredOrders = useMemo(() => {
     }
 
     if (activeTab === "APPROVED") {
-      const approvedStatuses = [
-        "PendingWarehouseApproval",
-        "Confirmed",
-        "Dispatched",
-        "Delivered",
-      ];
+  const approvedStatuses = [
+    "PendingWarehouseApproval",
+    "Confirmed",
+    "Processing",
+    "Dispatched",
+    "Delivered",
+  ];
       if (!approvedStatuses.includes(o.status)) {
         return false;
       }
@@ -354,6 +355,11 @@ function StatusBadge({ status }) {
   const config = {
     PendingSalesApproval: { bg: "bg-amber-100", text: "text-amber-700", label: "PENDING" },
     Cancelled: { bg: "bg-red-100", text: "text-red-700", label: "REJECTED" },
+    PendingWarehouseApproval: { 
+    bg: "bg-blue-100", 
+    text: "text-blue-700", 
+    label: "WAITING WAREHOUSE" 
+  },
     PendingAdminApproval: { bg: "bg-blue-100", text: "text-blue-700", label: "APPROVED" },
     Confirmed: { bg: "bg-blue-50", text: "text-blue-600", label: "CONFIRMED" },
     Processing: { bg: "bg-indigo-50", text: "text-indigo-600", label: "PROCESSING" },
