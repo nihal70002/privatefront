@@ -43,7 +43,7 @@ export default function ProductCard({ product }) {
 
         {/* Price Row */}
         <div className="flex items-center gap-1.5 mt-0.5">
-          <span className="text-[13px] font-bold text-gray-900">SAR {price}</span>
+          <span className="text-sm font-semibold text-emerald-600">SAR {price}</span>
          
          
         </div>

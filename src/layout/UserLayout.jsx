@@ -92,7 +92,7 @@ export default function UserLayout() {
           </div>
 
           {/* SEARCH */}
-          <div className="flex-1 max-w-md mx-4 relative hidden sm:block">
+          <div className="flex-1 max-w-xl mx-4 relative hidden sm:block">
             <div className="relative">
               <Search
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
@@ -146,10 +146,10 @@ export default function UserLayout() {
               className="w-10 h-10 md:w-12 md:h-12 rounded-md object-cover border border-gray-100"
             />
 
-            <div className="flex flex-col">
-              <span className="text-sm font-medium text-gray-800 line-clamp-1">
-                {item.name}
-              </span>
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-medium text-gray-800 line-clamp-2 leading-tight">
+  {item.name}
+</span>
 
               <span className="text-xs text-gray-500">
                 {item.brandName}

@@ -247,7 +247,7 @@ const decreaseQuantity = () => {
       )}
         {/* LEFT: IMAGES */}
         <div className="w-full lg:w-[60%] p-0 lg:p-4 border-b lg:border-b-0 lg:border-r border-gray-100">
-          <div className="relative overflow-hidden lg:rounded-lg border-b lg:border border-gray-200 bg-white h-[65vh] lg:h-[700px] w-full">
+          <div className="relative overflow-hidden lg:rounded-lg border-b lg:border border-gray-200 bg-white h-[420px] lg:h-[460px] w-full">
  <div className="relative overflow-hidden rounded-lg border border-gray-200 bg-white group">
   
   {/* LEFT ARROW */}
@@ -263,7 +263,7 @@ const decreaseQuantity = () => {
   )}
 
   {/* IMAGE WITH ZOOM */}
-  <div className="relative overflow-hidden rounded-lg border border-gray-200 bg-white h-[550px] w-full">
+  <div className="relative overflow-hidden rounded-lg border border-gray-200 bg-white h-[420px] lg:h-[460px] w-full">
 
   {/* TRACK */}
   <div
@@ -291,7 +291,7 @@ const decreaseQuantity = () => {
         <img
           src={img}
           alt={`${product.name} ${index + 1}`}
-          className="h-full w-full object-contain"
+          className="max-h-[420px] w-auto object-contain"
         />
       </div>
     ))}
@@ -317,7 +317,7 @@ const decreaseQuantity = () => {
 
 
 </div>
-<div className="flex gap-3 p-3 justify-center bg-white ">
+<div className="flex gap-2 p-2 justify-center bg-white ">
   {product.images.map((img, index) => (
     <button
       key={index}
@@ -342,7 +342,7 @@ const decreaseQuantity = () => {
         </div>
 
         {/* RIGHT: PRODUCT INFO */}
-        <div className="w-full lg:w-[40%] px-4 py-6 lg:px-8 lg:py-10">
+        <div className="w-full lg:w-[40%] px-4 py-6 lg:px-6 lg:py-6">
           {/* Brand & Name */}
           <div className="mb-1">
             <h2 className="text-xl font-bold text-gray-900">{product.category}</h2>
@@ -359,8 +359,8 @@ const decreaseQuantity = () => {
           </div>
 
           {/* Price */}
-          <div className="mb-6">
-            <div className="flex items-center gap-3 mb-2">
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
              <span className="text-2xl font-bold text-gray-900">
   SAR {selectedVariant?.price ?? "--"}
 </span>
@@ -369,9 +369,9 @@ const decreaseQuantity = () => {
           </div>
 
           {classOptions.length > 0 && (
-  <div className="mb-6">
+  <div className="mb-4">
     <h3 className="text-sm font-bold uppercase mb-3">Select Class</h3>
-    <div className="flex gap-3 flex-wrap">
+    <div className="flex gap-2 flex-wrap">
       {classOptions.map(option => (
         <button
           key={option}
@@ -392,9 +392,9 @@ const decreaseQuantity = () => {
 
 
 {styleOptions.length > 0 && (
-  <div className="mb-6">
+  <div className="mb-4">
     <h3 className="text-sm font-bold uppercase mb-3">Select Style</h3>
-    <div className="flex gap-3 flex-wrap">
+    <div className="flex gap-2 flex-wrap">
       {styleOptions.map(option => (
         <button
           key={option}
@@ -416,7 +416,7 @@ const decreaseQuantity = () => {
           
 
           {/* Select Size */}
-         <div className="mb-6 pb-6 border-b border-gray-200">
+         <div className="mb-4 pb-4 border-b border-gray-200">
   <div className="flex items-center justify-between mb-3">
     <h3 className="text-sm font-bold text-gray-900 uppercase">
       Select Size
@@ -428,7 +428,7 @@ const decreaseQuantity = () => {
       This combination is not available.
     </p>
   ) : (
-    <div className="flex gap-3">
+    <div className="flex gap-2">
       {filteredVariants.map(v => (
         <button
           key={v.id}
@@ -436,7 +436,7 @@ const decreaseQuantity = () => {
             setSelectedVariant(v);
             setQuantity(1);
           }}
-          className={`min-w-[56px] h-14 px-4 rounded-full border-2 font-bold text-sm 
+          className={`min-w-[56px] h-10 px-4 rounded-full border-2 font-bold text-sm 
 flex items-center justify-center transition ${
   selectedVariant?.id === v.id
     ? "border-teal-600 text-teal-600 bg-teal-50"
@@ -452,14 +452,14 @@ flex items-center justify-center transition ${
 
 
           {/* Quantity Selector */}
-          <div className="mb-6">
+          <div className="mb-4">
             <h3 className="text-sm font-bold text-gray-900 uppercase mb-3">Quantity</h3>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <div className="flex items-center border-2 border-gray-300 rounded-md">
                 <button
                   onClick={decreaseQuantity}
                   disabled={quantity <= 1}
-                  className="p-3 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="p-2 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
                 >
                   <Minus size={16} className="text-gray-700" />
                 </button>
@@ -470,7 +470,7 @@ flex items-center justify-center transition ${
                   onClick={increaseQuantity}
                   disabled={quantity >= MAX_QTY}
 
-                  className="p-3 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="p-2 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
                 >
                   <Plus size={16} className="text-gray-700" />
                 </button>
@@ -481,7 +481,7 @@ flex items-center justify-center transition ${
 
           {/* Action Buttons */}
          {/* Action Buttons - Sticky for Mobile, Static for Desktop */}
-<div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t flex gap-3 z-[50] lg:static lg:p-0 lg:border-0 lg:mb-6">
+<div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t flex gap-2 z-[50] lg:static lg:p-0 lg:border-0 lg:mb-4">
   <button
     disabled={addingToCart}
     onClick={handleAddToCart}
@@ -503,7 +503,7 @@ flex items-center justify-center transition ${
    
 
           {/* Product Details */}
-          <div className="mb-6">
+          <div className="mb-4">
             <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase">Product Details</h3>
             <ul className="list-disc pl-5 text-sm text-gray-700 space-y-2 mb-4">
   {(product.description || "")

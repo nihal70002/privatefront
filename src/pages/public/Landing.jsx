@@ -195,8 +195,8 @@ useEffect(() => {
               className="w-10 h-10 md:w-12 md:h-12 rounded-md object-cover border border-gray-100"
             />
 
-            <div className="flex flex-col">
-              <span className="text-sm font-medium text-gray-800 line-clamp-1">
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-medium text-gray-800 truncate max-w-[200PX]">
                 {item.name}
               </span>
 
@@ -300,51 +300,72 @@ lg:aspect-[1660/490]"
 
       {/* ================= CATEGORIES ================= */}
     {/* ================= CATEGORIES ================= */}
-    <section className="relative py-14 md:py-28 bg-gradient-to-br from-slate-50 via-white to-slate-100 overflow-hidden">
+   <section className="relative py-24 bg-gradient-to-b from-slate-50 via-white to-slate-100 overflow-hidden">
 
-  <div className="absolute -top-40 -left-40 w-[35rem] h-[35rem] bg-slate-300/20 rounded-full blur-3xl"></div>  <div className="absolute bottom-0 right-0 w-[30rem] h-[30rem] bg-slate-400/15 rounded-full blur-3xl"></div>
+  <div className="max-w-7xl mx-auto px-6">
 
-  <div className="relative max-w-7xl mx-auto px-6">
-
-    <div className="text-center mb-20">
+    {/* Title */}
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6 }}
+      className="text-center mb-16"
+    >
       <h2 className="text-4xl md:text-5xl font-serif text-slate-900">
-        Shop By <span className="text-cyan-600">Category</span>
+        Shop By <span className="text-cyan-600 font-normal border-b-4 border-cyan-100">Category</span>
       </h2>
-      <p className="mt-4 text-slate-500 max-w-xl mx-auto">
-        Explore our curated product collections
-      </p>
-    </div>
 
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-12">
+      <p className="mt-4 text-slate-500 italic max-w-xl mx-auto text-sm md:text-base">
+  Explore our curated product collections
+</p>
+    </motion.div>
 
-      {categories.map((cat) => (
-        <Link
+    {/* Category Grid */}
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+
+      {categories.map((cat, index) => (
+        <motion.div
           key={cat.id}
-          to={`/products?categoryId=${encodeURIComponent(cat.id)}`}
-          className="group flex flex-col items-center text-center transition-all duration-500 hover:-translate-y-3"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: index * 0.08 }}
         >
-          <div className="w-40 h-40 rounded-full 
-                          backdrop-blur-xl 
-                          bg-white/60 
-                          border border-white/50 
-                          shadow-lg
-                          flex items-center justify-center
-                          transition-all duration-500
-                          group-hover:shadow-2xl group-hover:scale-105">
+          <Link
+            to={`/products?categoryId=${encodeURIComponent(cat.id)}`}
+            className="group relative block overflow-hidden rounded-2xl shadow-md bg-white"
+          >
 
-            <img
-              src={cat.img}
-              alt={cat.name}
-              className="object-contain w-4/5 h-4/5 transition-transform duration-700 group-hover:scale-110"
-            />
-          </div>
+            {/* Image */}
+            <div className="aspect-[4/3] overflow-hidden">
+              <img
+                src={cat.img}
+                alt={cat.name}
+                className="w-full h-full object-cover transition duration-700 group-hover:scale-110"
+              />
+            </div>
 
-          <h3 className="mt-6 text-base font-semibold text-slate-800">
-            {cat.name}
-          </h3>
-        </Link>
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition"></div>
+
+            {/* Text */}
+            <div className="absolute bottom-4 left-4 right-4 text-white">
+              <h3 className="text-sm md:text-base font-semibold">
+                {cat.name}
+              </h3>
+
+              <span className="text-xs text-white/80 opacity-0 group-hover:opacity-100 transition">
+                Explore →
+              </span>
+            </div>
+
+          </Link>
+        </motion.div>
       ))}
+
     </div>
+
   </div>
 </section>
 
@@ -360,9 +381,9 @@ lg:aspect-[1660/490]"
             transition={{ duration: 1 }}
             className="flex justify-between items-center mb-10"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold">
-              Featured Products
-            </h2>
+           <h2 className="text-3xl md:text-4xl font-serif text-slate-900 text-center">
+  Featured <span className="text-cyan-600 border-b-4 border-cyan-100 font-normal">Products</span>
+</h2>
             <Link
               to="/products"
               className="text-cyan-600 font-semibold hover:underline"
