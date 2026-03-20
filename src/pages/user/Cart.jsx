@@ -266,13 +266,25 @@ export default function Cart() {
                   <span className="text-2xl font-black text-teal-600 tracking-tight">₹{subtotal.toLocaleString()}</span>
                 </div>
 
-                <button
-                  onClick={handleCheckout}
-                  disabled={placingOrder}
-                  className="w-full bg-teal-600 text-white py-4 rounded-2xl font-bold hover:bg-teal-700 shadow-lg shadow-teal-600/20 active:scale-[0.98] transition-all disabled:bg-slate-300 disabled:shadow-none"
-                >
-                  {placingOrder ? "Processing..." : "Confirm & Place Order"}
-                </button>
+        <button
+  onClick={handleCheckout}
+  disabled={placingOrder}
+  className="relative overflow-hidden w-full bg-teal-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-teal-600/20 active:scale-[0.98] transition-all disabled:bg-slate-300 disabled:shadow-none"
+>
+  <span className={placingOrder ? "opacity-70" : ""}>
+    {placingOrder ? "Processing..." : "Confirm & Place Order"}
+  </span>
+
+  {/* Always shimmer */}
+  {!placingOrder && (
+    <span className="absolute inset-0 shimmer-loop pointer-events-none"></span>
+  )}
+
+  {/* Strong shimmer when processing */}
+  {placingOrder && (
+    <span className="absolute inset-0 shimmer-click"></span>
+  )}
+</button>
 
                 <div className="mt-6 space-y-3">
                   <div className="flex items-center gap-3 text-[11px] text-slate-400 font-medium px-2">

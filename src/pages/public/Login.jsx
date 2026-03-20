@@ -181,12 +181,16 @@ if (typeof backendError === "string") {
             </div>
 
             <button
-              type="submit"
-              disabled={loading}
-              className="w-full h-15 py-4 bg-[#004d40] text-white rounded-2xl font-bold text-lg shadow-xl shadow-[#004d40]/20 hover:bg-[#00332b] hover:-translate-y-1 transition-all active:scale-95 disabled:opacity-50"
-            >
-              {loading ? "Authenticating..." : "Login to Dashboard"}
-            </button>
+  type="submit"
+  disabled={loading}
+  className="relative overflow-hidden w-full h-[60px] bg-[#004d40] text-white rounded-2xl font-bold text-lg shadow-xl shadow-[#004d40]/20 transition-all flex items-center justify-center"
+>
+  <span className={loading ? "opacity-70" : ""}>
+    {loading ? "Authenticating..." : "Login to Dashboard"}
+  </span>
+
+  {loading && <span className="shimmer absolute inset-0"></span>}
+</button>
           </form>
 
           <footer className="mt-12 pt-8 border-t border-slate-100 flex items-center justify-center gap-2">

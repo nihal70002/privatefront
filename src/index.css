@@ -1,12 +1,76 @@
 @import "tailwindcss";
-@keyframes loading {
-  0% { transform: translateX(-100%); width: 20%; }
-  50% { width: 60%; }
-  100% { transform: translateX(300%); width: 20%; }
+
+/* ================= SHIMMER ANIMATION ================= */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-150%);
+  }
+  100% {
+    transform: translateX(150%);
+  }
 }
 
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.shimmer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* Continuous subtle shimmer */
+.shimmer-loop {
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.25),
+    transparent
+  );
+  animation: shimmerLoop 2.5s linear infinite;
+}
+
+/* Faster shimmer when clicked */
+.shimmer-click {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.5),
+    transparent
+  );
+  animation: shimmerClick 1.2s linear infinite;
+}
+
+@keyframes shimmerLoop {
+  0% { left: -120%; }
+  100% { left: 120%; }
+}
+
+@keyframes shimmerClick {
+  0% { left: -100%; }
+  100% { left: 120%; }
+}
+
+.group:hover .shimmer-effect {
+  left: 120%;
+}
+
+/* ================= UTILITIES ================= */
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 
 .dashboard-scale {
   transform: scale(0.75);
@@ -14,12 +78,14 @@
   width: 133.3333%;
   height: 133.3333%;
 }
+
 .zoom-80 {
-  zoom: 0.8; /* Works in Chrome, Edge, Safari */
-  -moz-transform: scale(0.8); /* Support for Firefox */
+  zoom: 0.8;
+  -moz-transform: scale(0.8);
   -moz-transform-origin: top left;
-  width: 125%; /* Offsets the scale so it still fills the screen */
+  width: 125%;
 }
+
 button,
 [role="button"],
 .cursor-pointer {
