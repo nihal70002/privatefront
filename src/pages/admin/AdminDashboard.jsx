@@ -41,6 +41,7 @@ export default function AdminDashboard() {
           api.get("/admin/reports/top-customers"),
           api.get(`/admin/reports/monthly?year=${year}`)
         ]);
+        console.log("Monthly Raw Data:", monthlyRes.data);
 
 
 
@@ -48,7 +49,14 @@ export default function AdminDashboard() {
  
 
 
-        setMonthlyData(monthlyRes.data || []);
+       const formatted = (monthlyRes.data || []).map(item => ({
+  month: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][Number(item.period) - 1],
+  revenue: Number(item.revenue) || 0
+}));
+
+console.log("Formatted Data:", formatted);
+
+setMonthlyData(formatted);
         const orders = ordersRes.data.items || [];
         const counts = orders.reduce((acc, order) => {
           const status = order.status?.trim();
@@ -90,8 +98,9 @@ export default function AdminDashboard() {
   );
 
   return (
-    <div className="h-screen bg-[#F8FAFC] text-slate-900 font-sans antialiased overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans antialiased flex flex-col">
       {/* TIGHTER HEADER */}
+      
     <header className="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 shadow-sm">
   <div className="flex items-center gap-4">
     {/* Company Name Container - Styled to match Medico Aid Branding */}
@@ -121,8 +130,8 @@ export default function AdminDashboard() {
 </header>
 
       {/* COMPACT MAIN CONTENT */}
-      <div className="flex-1 overflow-y-auto p-4 lg:p-6 bg-[#F8FAFC]">
-        <div className="max-w-[1300px] mx-auto space-y-4">
+      <div className="flex-1 px-4 lg:px-6 py-4 bg-[#F8FAFC]">
+        <div className="w-full space-y-4">
           
           {/* STATS SECTION - Smaller Cards */}
           <section className="grid grid-cols-2 lg:grid-cols-3 gap-3">
@@ -153,18 +162,28 @@ export default function AdminDashboard() {
     </div>
     
     {/* REMOVED fixed height h-[180px], ADDED flex-1 */}
-    <div className="w-full flex-1"> 
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={monthlyData}>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-          <XAxis dataKey="month" fontSize={10} tickLine={false} axisLine={false} tick={{fill: '#94a3b8'}} />
-          <YAxis fontSize={10} tickLine={false} axisLine={false} tick={{fill: '#94a3b8'}} />
-          <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: '10px' }} />
-          <Line type="monotone" dataKey="orders" stroke="#6366f1" strokeWidth={2} dot={false} />
-          <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} dot={false} />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+    <div className="w-full h-[220px]">
+  {monthlyData.length < 2 ? (
+    <p className="text-center text-xs text-slate-400">
+      Not enough data to show analytics
+    </p>
+  ) : (
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart data={monthlyData}>
+        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+        <XAxis dataKey="month" />
+        <YAxis />
+        <Tooltip formatter={(value) => `SAR ${value}`} />
+        <Line
+          type="monotone"
+          dataKey="revenue"
+          stroke="#10b981"
+          strokeWidth={2}
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  )}
+</div>
   </div>
 
   {/* TOP PRODUCTS - UNCHANGED */}

@@ -114,7 +114,7 @@ useEffect(() => {
   { id: 1, name: "Supports & Braces", img: "/categories/supports.jpg" },
   { id: 3, name: "Lumbo Sacral and Abdominal Supports", img: "/categories/lumbo.jpg" },
   { id: 4, name: "Cervical (Neck) Care", img: "/categories/cervical.jpg" },
-  { id: 5, name: "Mobility Aids", img: "/categories/mobility.jpg" },
+  
   { id: 6, name: "Traction Kits", img: "/categories/traction.jpg" },
   { id: 7, name: "Compression Therapy", img: "/categories/compression.jpg" },
   { id: 8, name: "Exercise Essentials", img: "/categories/exercise.jpg" },
@@ -733,7 +733,7 @@ lg:aspect-[1660/490]"
           <li>Supports & Braces</li>
           <li>Cervical (Neck) Care</li>
           <li>Lumbo Sacral Supports</li>
-          <li>Mobility Aids</li>
+          
           <li>Foot Care</li>
           <li>Traction Kits</li>
           <li>Compression Therapy</li>
