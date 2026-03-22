@@ -7,7 +7,7 @@ const api = axios.create({
   },
 });
 
-// ✅ THIS IS THE MISSING PIECE
+// ✅ Attach token automatically if exists
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -21,6 +21,17 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-console.log("API URL 👉", import.meta.env.VITE_API_URL);
+// ✅ Auto logout if token expired / invalid
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 export default api;

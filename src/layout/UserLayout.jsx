@@ -179,6 +179,20 @@ export default function UserLayout() {
 </button>
 
 
+<button
+  onClick={() => {
+    const current = localStorage.getItem("lang") || "en";
+    localStorage.setItem("lang", current === "en" ? "ar" : "en");
+    window.location.reload();
+  }}
+  className="flex flex-col items-center gap-1 hover:text-gray-900 transition-colors"
+>
+  🌐
+  <span className="text-xs">
+    {localStorage.getItem("lang") === "ar" ? "Arabic" : "English"}
+  </span>
+</button>
+
 
         
 

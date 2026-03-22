@@ -18,7 +18,11 @@ export default function ProductCard({ product }) {
       <div className="relative w-full aspect-[3/4] overflow-hidden bg-gray-100">
         <img
           src={product?.primaryImageUrl || "/no-image.png"}
-          alt={product?.name}
+         alt={
+  (localStorage.getItem("lang") === "ar" && product?.nameArabic)
+    ? product.nameArabic
+    : product?.name
+}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         
@@ -38,7 +42,9 @@ export default function ProductCard({ product }) {
 
         {/* Product Name - Soft gray and smaller */}
        <p className="text-[12px] font-semibold text-gray-800 truncate leading-tight">
-  {product?.name}
+  {(localstorage.getitem("lang") === "ar" && product?.namearabic)
+    ? product.namearabic
+    : product?.name}
 </p>
 
         {/* Price Row */}

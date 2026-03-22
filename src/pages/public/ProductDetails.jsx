@@ -156,18 +156,22 @@ useEffect(() => {
 const handleAddToCart = async () => {
   if (!selectedVariant) return;
 
+  const token = localStorage.getItem("token");
+
+  // 🚨 Not logged in → redirect
+  if (!token) {
+    navigate("/login");
+    return;
+  }
 
   try {
     setAddingToCart(true);
 
-    // 1️⃣ Add/update cart in backend
     await addToCartApi(selectedVariant.id, quantity);
 
-    // 2️⃣ Re-sync cart count from backend (DISTINCT items)
     const res = await api.get("/cart");
     setCartFromApi(res.data.length || 0);
 
-    // UI only
     setShowToast(true);
     setTimeout(() => setShowToast(false), 2500);
     setQuantity(1);

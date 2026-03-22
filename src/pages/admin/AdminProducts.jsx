@@ -31,6 +31,7 @@ const DEFAULT_VARIANT = {
 
 const EMPTY_FORM = {
   name: "",
+  nameArabic: "",
   categoryId: "",
   brandId: "",
   description: "",
@@ -201,6 +202,7 @@ export default function AdminProducts() {
     setEditingId(product.productId);
     setForm({
       name: product.name,
+      nameArabic: product.nameArabic || "",
       categoryId: product.categoryId.toString(),
       brandId: product.brandId?.toString() || "",
       description: product.description || "",
@@ -280,6 +282,7 @@ export default function AdminProducts() {
   // We prepare the base product data (matches AdminUpdateProductDto)
   const productPayload = {
     name: form.name.trim(),
+    nameArabic: form.nameArabic?.trim() || "",
     categoryId: Number(form.categoryId),
     brandId: Number(form.brandId),
     description: form.description?.trim() || "",
@@ -380,7 +383,9 @@ export default function AdminProducts() {
         ? true
         : p.categoryId.toString() === selectedCatFilter;
 
-    const matchesName = p.name?.toLowerCase().includes(term);
+    const matchesName =
+  p.name?.toLowerCase().includes(term) ||
+  p.nameArabic?.toLowerCase().includes(term);
     const matchesProductCode = p.productCode?.toLowerCase().includes(term);
     const matchesVariantSku = p.variants?.some(v =>
       v.productCode?.toLowerCase().includes(term)
@@ -592,7 +597,7 @@ export default function AdminProducts() {
   {img ? (
     <img
       src={img}
-      alt={p.name}
+      alt={p.nameArabic || p.name}
       className="w-14 h-14 object-cover rounded-xl border-2 border-slate-100"
       onError={(e) => {
         e.currentTarget.onerror = null;
@@ -751,7 +756,7 @@ export default function AdminProducts() {
             </div>
             <h3 className="text-2xl font-bold text-slate-900 text-center mb-2">Delete Product?</h3>
             <p className="text-slate-600 text-center mb-8">
-              Are you sure you want to delete <span className="font-semibold text-slate-900">"{deleteTarget.name}"</span>? This action cannot be undone.
+              Are you sure you want to delete <span className="font-semibold text-slate-900">"{deleteTarget.nameArabic || deleteTarget.name}"</span>? This action cannot be undone.
             </p>
             <div className="flex gap-3">
               <button 
@@ -970,6 +975,21 @@ export default function AdminProducts() {
             onChange={e => setForm({ ...form, name: e.target.value })}
           />
         </div>
+
+         <div>
+    <label className="text-sm font-semibold text-slate-700 mb-2 block">
+      Product Name Arabic
+    </label>
+
+    <input
+      className="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm font-medium"
+      placeholder="Enter Arabic product name"
+      value={form.nameArabic}
+      onChange={e =>
+        setForm({ ...form, nameArabic: e.target.value })
+      }
+    />
+  </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>

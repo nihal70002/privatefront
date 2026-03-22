@@ -64,29 +64,33 @@ export default function App() {
       <Routes>
         {/* ================= PUBLIC ================= */}
         <Route path="/landing" element={<Landing />} />
-       <Route path="/" element={<Login />} />
+       <Route path="/" element={<Landing />} />
 <Route path="/login" element={<Login />} />
 
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* ================= USER ================= */}
-        <Route
-          element={
-            <ProtectedRoute>
-              <UserLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/products" element={<Products />} />
-          <Route path="/products/:id" element={<ProductDetails />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/orders" element={<MyOrders />} />
-          <Route path="/orders/:id" element={<OrderDetails />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/profile/addresses" element={<Addresses />} />
-          <Route path="/profile/change-password" element={<ChangePassword />} />
-        </Route>
+       {/* ================= PUBLIC PRODUCT ROUTES ================= */}
+<Route element={<UserLayout />}>
+  <Route path="/products" element={<Products />} />
+  <Route path="/products/:id" element={<ProductDetails />} />
+</Route>
+
+{/* ================= PROTECTED USER ROUTES ================= */}
+<Route
+  element={
+    <ProtectedRoute>
+      <UserLayout />
+    </ProtectedRoute>
+  }
+>
+  <Route path="/cart" element={<Cart />} />
+  <Route path="/orders" element={<MyOrders />} />
+  <Route path="/orders/:id" element={<OrderDetails />} />
+  <Route path="/profile" element={<Profile />} />
+  <Route path="/profile/addresses" element={<Addresses />} />
+  <Route path="/profile/change-password" element={<ChangePassword />} />
+</Route>
 
         {/* ================= SALES ================= */}
         <Route
