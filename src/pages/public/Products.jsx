@@ -111,10 +111,12 @@ const lastProductRef = useCallback(node => {
 
 // This effect runs on mount AND whenever filters change
 useEffect(() => {
+  if (!filtersReady) return;
+
   setPage(1);
   setHasMore(true);
   loadProducts(1, true);
-}, [selectedCategories, selectedBrand, searchQuery, loadProducts]);
+}, [selectedCategories, selectedBrand, searchQuery, filtersReady]);
 
 
 
