@@ -11,12 +11,22 @@ import api from "../../api/axios";
 export default function Products() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const categoryIdFromUrl = searchParams.get("categoryId");
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [filtersReady, setFiltersReady] = useState(false);
+
 useEffect(() => {
+  const categoryIdFromUrl = searchParams.get("categoryId");
+
   if (categoryIdFromUrl) {
     setSelectedCategories([Number(categoryIdFromUrl)]);
+  } else {
+    setSelectedCategories([]);
   }
-}, [categoryIdFromUrl]);
+
+  setFiltersReady(true);
+
+}, [searchParams]);
+
 
   const [products, setProducts] = useState([]);
   const [cartCount, setCartCount] = useState(0);
@@ -26,7 +36,7 @@ useEffect(() => {
 const [page, setPage] = useState(1);
 const [hasMore, setHasMore] = useState(true);
 const PAGE_SIZE = 12;
-const [selectedCategories, setSelectedCategories] = useState([]);
+
 const [brands, setBrands] = useState([]);
 const [selectedBrand, setSelectedBrand] = useState(null);
 const [showCategorySearch, setShowCategorySearch] = useState(false);
@@ -101,11 +111,13 @@ const lastProductRef = useCallback(node => {
 
 // This effect runs on mount AND whenever filters change
 useEffect(() => {
+  if (!filtersReady) return;
+
   setPage(1);
   setHasMore(true);
   loadProducts(1, true);
-}, [selectedCategories, selectedBrand, searchQuery, loadProducts]);
 
+}, [filtersReady, selectedCategories, selectedBrand, searchQuery, loadProducts]);
 
 
 

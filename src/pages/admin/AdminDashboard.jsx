@@ -98,171 +98,174 @@ setMonthlyData(formatted);
   );
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans antialiased flex flex-col">
-      {/* TIGHTER HEADER */}
-      
-    <header className="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 shadow-sm">
-  <div className="flex items-center gap-4">
-    {/* Company Name Container - Styled to match Medico Aid Branding */}
-    <div className="flex items-center gap-6">
-      <div className="flex flex-col items-center">
-        <h1 className="text-[18px] font-bold tracking-tight leading-none">
-          <span className="text-[#0097D7]">Safa Al-Tamayyuz</span>{" "}
-          <span className="text-black">Trading Co</span>
-        </h1>
-        
-        {/* Arabic Name matching the photo's dual-color style */}
-        <div className="flex items-center gap-1 mt-1 font-bold text-[16px]" dir="rtl">
-          <span className="text-black">شـركة صفـا</span>
-          <span className="text-[#0097D7]">التـميز</span>
-          <span className="text-black">التـجـارية</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div className="flex items-center gap-3">
-    {/* User Profile */}
-    <div className="h-9 w-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors cursor-pointer shadow-sm">
-      <span className="text-[11px] font-bold">SA</span>
-    </div>
-  </div>
-</header>
-
-      {/* COMPACT MAIN CONTENT */}
-      <div className="flex-1 px-4 lg:px-6 py-4 bg-[#F8FAFC]">
-        <div className="w-full space-y-4">
+  <div className="flex flex-col min-h-full">
+    {/* FULL WIDTH HEADER - Now touches the sidebar and top */}
+    <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0 shadow-sm">
+      <div className="flex items-center gap-4">
+        <div className="flex flex-col items-start">
+          <h1 className="text-[20px] font-bold tracking-tight leading-none mb-1">
+            <span className="text-[#0097D7]">Safa Al-Tamayyuz</span>{" "}
+            <span className="text-black">Trading Co</span>
+          </h1>
           
-          {/* STATS SECTION - Smaller Cards */}
-          <section className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-            <StatCard 
-              title="Revenue" 
-              value={formatSAR(stats.totalRevenue)}
+          <div className="flex items-center gap-1 font-bold text-[16px]" dir="rtl">
+            <span className="text-black">شـركة صفـا</span>
+            <span className="text-[#0097D7]">التـميز</span>
+            <span className="text-black">التـجـارية</span>
+          </div>
+        </div>
+      </div>
 
-              icon={<Wallet size={16} />} 
-              theme="indigo" 
-              onClick={() => navigate("/admin/reports")} 
-            />
-            <MiniStat label="Sales Pending" value={stats.salesPending} theme="amber" onClick={() => navigate("/admin/orders?status=PendingSalesApproval")} />
-            <MiniStat label="Admin Pending" value={stats.adminPending} theme="amber" onClick={() => navigate("/admin/orders?status=PendingAdminApproval")} />
+      <div className="flex items-center gap-3">
+        <div className="h-10 w-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-100 transition-colors cursor-pointer shadow-sm">
+          <span className="text-[12px] font-black text-slate-600">SA</span>
+        </div>
+      </div>
+    </header>
+
+    {/* MAIN CONTENT AREA */}
+    <div className="flex-1 p-6 lg:p-8 bg-[#F8FAFC]">
+      <div className="max-w-[1600px] mx-auto space-y-8">
+        
+        {/* STATS SECTION */}
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <StatCard 
+            title="Total Revenue" 
+            value={formatSAR(stats.totalRevenue)}
+            icon={<Wallet size={18} />} 
+            theme="indigo" 
+            onClick={() => navigate("/admin/reports")} 
+          />
+          <MiniStat label="Sales Pending" value={stats.salesPending} theme="amber" onClick={() => navigate("/admin/orders?status=PendingSalesApproval")} />
+          <MiniStat label="Admin Pending" value={stats.adminPending} theme="amber" onClick={() => navigate("/admin/orders?status=PendingAdminApproval")} />
+        </section>
+
+        {/* ANALYTICS & TOP PRODUCTS */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch"> 
+          {/* GROWTH ANALYTICS */}
+          <div className="lg:col-span-2 bg-white p-8 rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col transition-all hover:shadow-md">
+            <div className="flex justify-between items-end mb-10">
+              <div>
+                <h3 className="text-slate-900 font-bold text-xl tracking-tight">Growth Analytics</h3>
+                <p className="text-slate-400 text-sm font-medium">Monthly revenue performance</p>
+              </div>
+              <div className="flex gap-4 p-2 bg-slate-50 rounded-xl border border-slate-100">
+                <div className="flex items-center gap-2 px-2">
+                  <div className="h-2 w-2 rounded-full bg-indigo-500"></div>
+                  <span className="text-[12px] font-bold text-slate-600">Orders</span>
+                </div>
+                <div className="flex items-center gap-2 px-2">
+                  <div className="h-2 w-2 rounded-full bg-emerald-400"></div>
+                  <span className="text-[12px] font-bold text-slate-600">Revenue</span>
+                </div>
+              </div>
+            </div>
             
-          </section>
-
-          {/* MIDDLE SECTION - Chart and Products */}
-<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch"> 
-  
-  {/* CHART COLUMN - Now matches the height of the product card */}
-  <div className="lg:col-span-2 bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col">
-    <div className="flex justify-between items-center mb-4">
-      <h3 className="font-bold text-slate-800 text-xs uppercase tracking-widest">Growth Analytics</h3>
-      <div className="flex gap-3 text-[10px] font-bold text-slate-400">
-        <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-indigo-500"></span> Orders</span>
-        <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span> Revenue</span>
-      </div>
-    </div>
-    
-    {/* REMOVED fixed height h-[180px], ADDED flex-1 */}
-    <div className="w-full h-[220px]">
-  {monthlyData.length < 2 ? (
-    <p className="text-center text-xs text-slate-400">
-      Not enough data to show analytics
-    </p>
-  ) : (
-    <ResponsiveContainer width="100%" height="100%">
-      <LineChart data={monthlyData}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-        <XAxis dataKey="month" />
-        <YAxis />
-        <Tooltip formatter={(value) => `SAR ${value}`} />
-        <Line
-          type="monotone"
-          dataKey="revenue"
-          stroke="#10b981"
-          strokeWidth={2}
-        />
-      </LineChart>
-    </ResponsiveContainer>
-  )}
-</div>
-  </div>
-
-  {/* TOP PRODUCTS - UNCHANGED */}
-  <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-    <div className="flex justify-between items-center mb-2">
-      <h3 className="font-bold text-slate-800 text-xs uppercase tracking-widest">Top Products</h3>
-      <MoreHorizontal size={14} className="text-slate-300" />
-    </div>
-    <div className="space-y-3">
-      {topProducts.slice(0, 3).map((item, i) => (
-        <div key={i} className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
-              {item.imageUrl && <img src={item.imageUrl} className="object-cover h-full w-full" />}
-            </div>
-            <div className="min-w-0">
-              <p className="text-[11px] font-bold text-slate-700 truncate w-24 leading-none">{item.productName}</p>
-              <p className="text-[9px] text-slate-400 font-bold mt-1 uppercase tracking-tighter">{formatSAR(item.revenue)}
-</p>
+            <div className="w-full h-[280px]">
+              {monthlyData.length < 2 ? (
+                <div className="h-full flex items-center justify-center bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+                  <p className="text-sm font-bold text-slate-400">Insufficent data for analytics</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={monthlyData} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/>
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="8 8" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12, fontWeight: 600}} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', padding: '16px' }}
+                      formatter={(value) => [`SAR ${value}`, 'Revenue']}
+                    />
+                    <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={4} dot={{ r: 6, fill: '#10b981', strokeWidth: 3, stroke: '#fff' }} fill="url(#colorRev)" />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
-          <span className="text-[9px] font-black text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">{item.quantitySold} Qty</span>
-        </div>
-      ))}
-    </div>
-  </div>
-</div>
 
-          {/* BOTTOM SECTION - Table and Customers */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Recent Activity</h3>
-                <button onClick={() => navigate("/admin/orders")} className="text-[10px] font-bold text-indigo-600 hover:underline uppercase">View All</button>
-              </div>
-              <table className="w-full text-left">
-                <tbody className="divide-y divide-slate-50">
-                  {recentOrders.slice(0, 4).map(o => (
-                    <tr key={o.orderId} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-4 py-2.5 text-xs font-bold text-slate-700">#ORD-{o.orderId}</td>
-                      <td className="px-4 py-2.5"><StatusBadge status={o.status} /></td>
-                      <td className="px-4 py-2.5 text-xs font-black text-slate-900 text-right">{formatSAR(o.totalAmount)}
-</td>
-                      <td className="px-4 py-2.5 text-right">
-                        <button onClick={() => navigate(`/admin/orders/${o.orderId}`)} className="text-slate-300 hover:text-indigo-600">
-                          <ChevronRight size={14} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {/* TOP PRODUCTS */}
+          <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <div className="flex justify-between items-center mb-8">
+              <h3 className="text-slate-900 font-bold text-xl tracking-tight">Top Products</h3>
+              <MoreHorizontal size={20} className="text-slate-300" />
             </div>
-
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-widest mb-4">Top Customers</h3>
-              <div className="space-y-4">
-                {topCustomers.slice(0, 3).map((cust, i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="h-7 w-7 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500 border border-slate-200">
-                        {cust.customerName?.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="text-[11px] font-bold text-slate-700 leading-none">{cust.customerName}</p>
-                        <p className="text-[9px] text-slate-400 font-bold mt-1 uppercase tracking-tighter">{cust.ordersCount} Orders</p>
-                      </div>
+            <div className="space-y-6">
+              {topProducts.slice(0, 3).map((item, i) => (
+                <div key={i} className="flex items-center justify-between group cursor-pointer">
+                  <div className="flex items-center gap-4">
+                    <div className="h-14 w-14 rounded-2xl bg-slate-50 border border-slate-100 overflow-hidden shadow-sm group-hover:scale-105 transition-transform">
+                      {item.imageUrl ? <img src={item.imageUrl} className="object-cover h-full w-full" /> : <div className="h-full w-full flex items-center justify-center text-slate-300"><Package size={20} /></div>}
                     </div>
-                    <p className="text-[11px] font-black text-slate-800">{formatSAR(cust.totalSpent)}</p>
+                    <div>
+                      <p className="text-[14px] font-bold text-slate-800 truncate w-32 leading-tight">{item.productName}</p>
+                      <p className="text-[12px] text-emerald-500 font-black mt-1">{formatSAR(item.revenue)}</p>
+                    </div>
                   </div>
-                ))}
-              </div>
+                  <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full">{item.quantitySold} Sold</span>
+                </div>
+              ))}
             </div>
+            <button className="w-full mt-10 py-4 text-[13px] font-black text-slate-400 bg-slate-50 rounded-2xl hover:bg-slate-100 hover:text-slate-600 transition-all uppercase tracking-widest">
+              View Inventory
+            </button>
+          </div>
+        </div>
+
+        {/* RECENT ACTIVITY & CUSTOMERS */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+            <div className="px-8 py-5 border-b border-slate-50 flex justify-between items-center">
+              <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.2em]">Recent Activity</h3>
+              <button onClick={() => navigate("/admin/orders")} className="text-xs font-bold text-indigo-600 hover:text-indigo-700">View All</button>
+            </div>
+            <table className="w-full">
+              <tbody className="divide-y divide-slate-50">
+                {recentOrders.slice(0, 4).map(o => (
+                  <tr key={o.orderId} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-8 py-4 text-sm font-bold text-slate-700">#ORD-{o.orderId}</td>
+                    <td className="px-8 py-4"><StatusBadge status={o.status} /></td>
+                    <td className="px-8 py-4 text-sm font-black text-slate-900 text-right">{formatSAR(o.totalAmount)}</td>
+                    <td className="px-8 py-4 text-right">
+                      <button onClick={() => navigate(`/admin/orders/${o.orderId}`)} className="text-slate-300 hover:text-indigo-600 transition-colors">
+                        <ChevronRight size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
+          <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+            <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Top Customers</h3>
+            <div className="space-y-6">
+              {topCustomers.slice(0, 3).map((cust, i) => (
+                <div key={i} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-indigo-50 flex items-center justify-center text-xs font-bold text-indigo-600 border border-indigo-100">
+                      {cust.customerName?.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="text-[13px] font-bold text-slate-800 leading-none">{cust.customerName}</p>
+                      <p className="text-[11px] text-slate-400 font-medium mt-1">{cust.ordersCount} Orders</p>
+                    </div>
+                  </div>
+                  <p className="text-sm font-black text-slate-800">{formatSAR(cust.totalSpent)}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }
 
 // COMPACT COMPONENTS

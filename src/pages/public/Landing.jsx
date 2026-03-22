@@ -111,16 +111,21 @@ useEffect(() => {
 ];
 
  const categories = [
-  { id: 1, name: "Supports & Braces", img: "/categories/supports.jpg" },
-  { id: 3, name: "Lumbo Sacral and Abdominal Supports", img: "/categories/lumbo.jpg" },
-  { id: 4, name: "Cervical (Neck) Care", img: "/categories/cervical.jpg" },
-  
-  { id: 6, name: "Traction Kits", img: "/categories/traction.jpg" },
+  { id: 18, name: "Upper Extremity Fracture Aids", img: "/categories/upper-extremity.jpg" },
+  { id: 19, name: "Wrist & Forearm Splints", img: "/categories/wrist.jpg" },
+  { id: 20, name: "Finger Splints", img: "/categories/finger.jpg" },
+  { id: 21, name: "Knee Braces & Supports", img: "/categories/knee.jpg" },
+  { id: 22, name: "Ankle Braces & Supports", img: "/categories/ankle.jpg" },
+  { id: 23, name: "Foot Care", img: "/categories/foot.jpg" },
+  { id: 24, name: "Traction Appliances", img: "/categories/traction.jpg" },
+  { id: 25, name: "Physiotherapy Range", img: "/categories/physio.jpg" },
+  { id: 28, name: "Bandages & Casting", img: "/categories/casting.jpg" },
+  { id: 30, name: "Sterile Transparent Dressings", img: "/categories/dressings.jpg" },
+  { id: 31, name: "Medical Disposables", img: "/categories/disposables.jpg" },
   { id: 7, name: "Compression Therapy", img: "/categories/compression.jpg" },
-  { id: 8, name: "Exercise Essentials", img: "/categories/exercise.jpg" },
-  { id: 9, name: "Wound Care/Bandages", img: "/categories/wound.jpg" },
-  { id: 10, name: "Casting Aids", img: "/categories/casting.jpg" },
-  { id: 11, name: "Foot Care", img: "/categories/foot.jpg" },
+  { id: 15, name: "Cervical Orthosis", img: "/categories/cervical.jpg" },
+  { id: 16, name: "Thoracic Orthosis", img: "/categories/thoracic.jpg" },
+  { id: 17, name: "Lumbo Sacral Orthosis", img: "/categories/lumbo.jpg" },
 ];
 
 

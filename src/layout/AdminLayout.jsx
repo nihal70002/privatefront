@@ -138,11 +138,13 @@ export default function AdminLayout() {
         </div>
 
         {/* SCROLLABLE PAGE AREA */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-          <div className="w-full">
-            <Outlet />
-          </div>
-        </div>
+       {/* SCROLLABLE PAGE AREA */}
+<div className="flex-1 overflow-y-auto">
+  {/* Content wrapper with no padding so it hits the edges */}
+  <div className="w-full min-h-full flex flex-col">
+    <Outlet />
+  </div>
+</div>
       </main>
     </div>
   );
