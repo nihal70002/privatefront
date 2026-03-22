@@ -42,8 +42,8 @@ export default function ProductCard({ product }) {
 
         {/* Product Name - Soft gray and smaller */}
        <p className="text-[12px] font-semibold text-gray-800 truncate leading-tight">
-  {(localstorage.getitem("lang") === "ar" && product?.namearabic)
-    ? product.namearabic
+  {(localStorage.getItem("lang") === "ar" && product?.nameArabic)
+    ? product.nameArabic
     : product?.name}
 </p>
 
