@@ -212,12 +212,18 @@ useEffect(() => {
 
 
 const toggleCategory = (categoryId) => {
-  setSelectedCategories(prev =>
-    prev.includes(categoryId)
-      ? prev.filter(id => id !== categoryId)
-      : [...prev, categoryId]
-  );
+  const params = new URLSearchParams(searchParams);
+
+  // If already selected → remove it
+  if (selectedCategories.includes(categoryId)) {
+    params.delete("categoryId");
+  } else {
+    params.set("categoryId", categoryId);
+  }
+
+  navigate(`/products?${params.toString()}`);
 };
+
 
 
 const clearFilters = () => {
@@ -231,8 +237,21 @@ const clearFilters = () => {
 };
 
 useEffect(() => {
-  window.scrollTo({ top: 0, behavior: "instant" });
-}, [searchParams]);
+  const savedScroll = sessionStorage.getItem("productsScrollY");
+
+  if (!savedScroll) return;
+
+  if (!loading && products.length > 0) {
+    setTimeout(() => {
+      window.scrollTo({
+        top: Number(savedScroll),
+        behavior: "instant"
+      });
+
+      sessionStorage.removeItem("productsScrollY");
+    }, 150);
+  }
+}, [loading, products]);
 
 const filteredProducts = products;
 

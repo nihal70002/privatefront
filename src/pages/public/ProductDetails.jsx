@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+
+import { useParams, useNavigate,useLocation } from "react-router-dom";
 import { getProductById } from "../../api/products.api";
 import { addToCartApi } from "../../api/cart.api";
 import {
@@ -23,6 +24,7 @@ export default function ProductDetail() {
 
   const navigate = useNavigate();
   const { setCartFromApi } = useCart();
+  const location = useLocation();
 
 
 const [showMagnifier, setShowMagnifier] = useState(false);
@@ -216,7 +218,7 @@ const decreaseQuantity = () => {
         <div className="text-5xl mb-3">😕</div>
         <p className="text-lg text-gray-700 font-medium">Product not found</p>
         <button
-          onClick={() => navigate("/products")}
+          onClick={() => navigate(`/products${location.search}`)}
           className="mt-6 px-6 py-2.5 bg-teal-600 text-white rounded font-bold text-sm hover:bg-teal-700"
         >
           Back to Products
@@ -234,7 +236,12 @@ const decreaseQuantity = () => {
       {/* BREADCRUMB */}
       <div className="border-b border-gray-200 bg-white">
         <div className="flex items-center gap-1 px-4 py-2.5 max-w-screen-2xl mx-auto text-xs text-gray-600">
-          <span onClick={() => navigate("/products")} className="hover:text-gray-900 cursor-pointer">Home</span>
+          <span
+  onClick={() => navigate(`/products${location.search}`)}
+  className="hover:text-gray-900 cursor-pointer"
+>
+  Home
+</span>
           <ChevronRight size={12} className="text-gray-400" />
           <span className="hover:text-gray-900 cursor-pointer">{product.category}</span>
           <ChevronRight size={12} className="text-gray-400" />

@@ -1,8 +1,9 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 
 export default function ProductCard({ product }) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Safeguard for nested data
   const variant = product?.variants?.[0];
@@ -11,7 +12,10 @@ export default function ProductCard({ product }) {
 
   return (
     <div 
-      onClick={() => navigate(`/products/${product.productId}`)}
+      onClick={() => {
+  sessionStorage.setItem("productsScrollY", window.scrollY);
+  navigate(`/products/${product.productId}${location.search}`);
+}}
       className="group flex flex-col bg-white overflow-hidden cursor-pointer relative"
     >
       {/* IMAGE SECTION - 3:4 Aspect Ratio is standard for fashion */}
