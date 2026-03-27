@@ -5,7 +5,7 @@ import { addToCartApi, getCart } from "../../api/cart.api";
 import ProductCard from "../../components/products/ProductCard";
 import { ShoppingCart, User, Package, Search, ChevronRight, Filter, SlidersHorizontal } from "lucide-react";
 import api from "../../api/axios";
-
+import { useLayoutEffect } from "react";
 
 
 export default function Products() {
@@ -15,13 +15,15 @@ export default function Products() {
   const [filtersReady, setFiltersReady] = useState(false);
 
 useEffect(() => {
-  const categoryIdFromUrl = searchParams.get("categoryId");
+ const categoryIdsFromUrl = searchParams.get("categoryId");
 
-  if (categoryIdFromUrl) {
-    setSelectedCategories([Number(categoryIdFromUrl)]);
-  } else {
-    setSelectedCategories([]);
-  }
+if (categoryIdsFromUrl) {
+  setSelectedCategories(
+    categoryIdsFromUrl.split(",").map(Number)
+  );
+} else {
+  setSelectedCategories([]);
+}
 
   setFiltersReady(true);
 
@@ -33,7 +35,9 @@ useEffect(() => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-const [page, setPage] = useState(1);
+const [page, setPage] = useState(
+  Number(searchParams.get("page")) || 1
+);
 const [hasMore, setHasMore] = useState(true);
 const PAGE_SIZE = 12;
 
@@ -45,10 +49,9 @@ const [categorySearch, setCategorySearch] = useState("");
 const [brandSearch, setBrandSearch] = useState("");
 const [allCategories, setAllCategories] = useState([]); // Holds all categories from DB
 const [showAllCategories, setShowAllCategories] = useState(false); 
+const [totalPages, setTotalPages] = useState(1);
 
 
-
-const observer = useRef();
 
 
 
@@ -73,9 +76,8 @@ const loadProducts = useCallback(async (pageNo, reset = false) => {
 
     const items = res.data.items || [];
 
-    setProducts(prev =>
-      reset ? items : [...prev, ...items]
-    );
+    setProducts(items);
+    setTotalPages(res.data.totalPages || 1);
 
     setHasMore(res.data.hasMore);
     setPage(pageNo);
@@ -91,19 +93,8 @@ const loadProducts = useCallback(async (pageNo, reset = false) => {
 
 
 
-const lastProductRef = useCallback(node => {
-  if (loading) return;
-  if (observer.current) observer.current.disconnect();
 
-  observer.current = new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting && hasMore) {
-      const nextPage = page + 1;
-      loadProducts(nextPage);
-    }
-  });
 
-  if (node) observer.current.observe(node);
-}, [loading, hasMore, page, selectedCategories, selectedBrand, searchQuery]);
 
 
 
@@ -113,12 +104,37 @@ const lastProductRef = useCallback(node => {
 useEffect(() => {
   if (!filtersReady) return;
 
-  setPage(1);
-  setHasMore(true);
-  loadProducts(1, true);
-}, [selectedCategories, selectedBrand, searchQuery, filtersReady]);
+  const currentPage =
+    Number(searchParams.get("page")) || 1;
+
+  setPage(currentPage);
+  loadProducts(currentPage, true);
+
+}, [
+  selectedCategories,
+  selectedBrand,
+  searchQuery,
+  filtersReady,
+  searchParams
+]);
 
 
+useLayoutEffect(() => {
+
+  const savedScroll =
+    sessionStorage.getItem("productsScrollY");
+
+  if (!savedScroll || products.length === 0)
+    return;
+
+  window.scrollTo({
+    top: Number(savedScroll),
+    behavior: "instant"
+  });
+
+  sessionStorage.removeItem("productsScrollY");
+
+}, [products]);
 
 
 // Keep loadCart separate so it only runs once on mount
@@ -212,18 +228,24 @@ useEffect(() => {
 
 
 const toggleCategory = (categoryId) => {
+  let updated = [...selectedCategories];
+
+  if (updated.includes(categoryId)) {
+    updated = updated.filter(id => id !== categoryId);
+  } else {
+    updated.push(categoryId);
+  }
+
   const params = new URLSearchParams(searchParams);
 
-  // If already selected → remove it
-  if (selectedCategories.includes(categoryId)) {
-    params.delete("categoryId");
+  if (updated.length > 0) {
+    params.set("categoryId", updated.join(","));
   } else {
-    params.set("categoryId", categoryId);
+    params.delete("categoryId");
   }
 
   navigate(`/products?${params.toString()}`);
 };
-
 
 
 const clearFilters = () => {
@@ -236,22 +258,6 @@ const clearFilters = () => {
   setSearchQuery("");
 };
 
-useEffect(() => {
-  const savedScroll = sessionStorage.getItem("productsScrollY");
-
-  if (!savedScroll) return;
-
-  if (!loading && products.length > 0) {
-    setTimeout(() => {
-      window.scrollTo({
-        top: Number(savedScroll),
-        behavior: "instant"
-      });
-
-      sessionStorage.removeItem("productsScrollY");
-    }, 150);
-  }
-}, [loading, products]);
 
 const filteredProducts = products;
 
@@ -448,14 +454,11 @@ console.log(allCategories);
 
   {/* Updated Grid: gap-1 fixes the left/right overflow on mobile */}
   <div className="grid grid-cols-2 gap-1 md:gap-4 lg:grid-cols-4">
-    {filteredProducts.map((product, index) => (
-      <div 
-        key={product.productId} 
-        ref={index === filteredProducts.length - 1 ? lastProductRef : null}
-      >
-        <ProductCard product={product} onAddToCart={handleAddToCart} />
-      </div>
-    ))}
+    {filteredProducts.map((product) => (
+  <div key={product.productId}>
+    <ProductCard product={product} onAddToCart={handleAddToCart} />
+  </div>
+))}
   </div>
 
   {/* Loading Spinner for Infinite Scroll */}
@@ -464,6 +467,38 @@ console.log(allCategories);
       <div className="h-8 w-8 animate-spin rounded-full border-2 border-teal-600 border-t-transparent"></div>
     </div>
   )}
+  {/* PAGINATION CONTROLS */}
+<div className="flex justify-center items-center gap-4 mt-10">
+
+  <button
+    disabled={page === 1}
+    onClick={() => {
+      const params = new URLSearchParams(searchParams);
+      params.set("page", page - 1);
+      navigate(`/products?${params.toString()}`);
+    }}
+    className="px-4 py-2 border rounded disabled:opacity-40"
+  >
+    Previous
+  </button>
+
+  <span className="font-semibold">
+    Page {page} of {totalPages}
+  </span>
+
+  <button
+    disabled={page === totalPages}
+    onClick={() => {
+      const params = new URLSearchParams(searchParams);
+      params.set("page", page + 1);
+      navigate(`/products?${params.toString()}`);
+    }}
+    className="px-4 py-2 border rounded disabled:opacity-40"
+  >
+    Next
+  </button>
+
+</div>
 </main>
       </div>
    

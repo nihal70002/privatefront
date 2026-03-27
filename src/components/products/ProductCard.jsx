@@ -13,8 +13,24 @@ export default function ProductCard({ product }) {
   return (
     <div 
       onClick={() => {
-  sessionStorage.setItem("productsScrollY", window.scrollY);
-  navigate(`/products/${product.productId}${location.search}`);
+
+  // Save exact scroll position
+  sessionStorage.setItem(
+    "productsScrollY",
+    window.scrollY
+  );
+
+  // Save clicked product id (optional but improves reliability)
+  sessionStorage.setItem(
+    "lastViewedProduct",
+    product.productId
+  );
+
+  // Navigate while preserving page + filters
+  navigate(
+    `/product/${product.productId}${location.search}`
+  );
+
 }}
       className="group flex flex-col bg-white overflow-hidden cursor-pointer relative"
     >
