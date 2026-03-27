@@ -73,7 +73,7 @@ export default function App() {
        {/* ================= PUBLIC PRODUCT ROUTES ================= */}
 <Route element={<UserLayout />}>
   <Route path="/products" element={<Products />} />
-  <Route path="/products/:id" element={<ProductDetails />} />
+  <Route path="/product/:id" element={<ProductDetails />} />
 </Route>
 
 {/* ================= PROTECTED USER ROUTES ================= */}
