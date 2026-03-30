@@ -271,7 +271,23 @@ const filteredProducts = products;
   );
 }
 
-console.log(allCategories);
+const visibleCategories = (
+  showAllCategories
+    ? allCategories
+    : allCategories.slice(0, 8)
+)
+.filter(cat =>
+  (cat?.name || "")
+    .toLowerCase()
+    .includes(categorySearch.toLowerCase())
+)
+.sort((a, b) => {
+  const aSelected = selectedCategories.includes(a.id);
+  const bSelected = selectedCategories.includes(b.id);
+
+  if (aSelected === bSelected) return 0;
+  return aSelected ? -1 : 1;
+});
   return (
     <div className="min-h-screen bg-white pb-16 lg:pb-0">
 
@@ -321,66 +337,93 @@ console.log(allCategories);
 
   {/* CATEGORIES */}
   <div className="mb-6 pb-6 border-b border-gray-100">
-    <div className="flex items-center justify-between mb-4">
-      <h4 className="text-xs font-bold text-gray-900">CATEGORIES</h4>
-      <button
-        onClick={() => setShowCategorySearch(prev => !prev)}
-        className="text-gray-400 hover:text-teal-600"
-      >
-        <Search size={14} />
-      </button>
-    </div>
+  <div className="flex items-center justify-between mb-4">
+    <h4 className="text-xs font-bold text-gray-900">CATEGORIES</h4>
+    <button
+      onClick={() => setShowCategorySearch(prev => !prev)}
+      className="text-gray-400 hover:text-teal-600"
+    >
+      <Search size={14} />
+    </button>
+  </div>
 
-    {showCategorySearch && (
-      <input
-        autoFocus
-        type="text"
-        placeholder="Search category"
-        value={categorySearch}
-        onChange={(e) => setCategorySearch(e.target.value)}
-        className="w-full mb-3 px-2 py-1 text-xs border rounded-md"
-      />
+  {showCategorySearch && (
+    <input
+      autoFocus
+      type="text"
+      placeholder="Search category"
+      value={categorySearch}
+      onChange={(e) => setCategorySearch(e.target.value)}
+      className="w-full mb-3 px-2 py-1 text-xs border rounded-md"
+    />
+  )}
+
+  <div className="space-y-1">
+    {(
+      (
+        showAllCategories
+          ? allCategories
+          : [
+              // selected categories always visible at top
+              ...allCategories.filter(cat =>
+                selectedCategories.includes(cat.id)
+              ),
+              // remaining categories limited to fill up to 8
+              ...allCategories
+                .filter(cat =>
+                  !selectedCategories.includes(cat.id)
+                )
+                .slice(
+                  0,
+                  Math.max(
+                    0,
+                    8 -
+                      allCategories.filter(cat =>
+                        selectedCategories.includes(cat.id)
+                      ).length
+                  )
+                )
+            ]
+      )
+        .filter(cat =>
+          (cat?.name || "")
+            .toLowerCase()
+            .includes(categorySearch.toLowerCase())
+        )
+        .sort((a, b) => {
+          const aSelected = selectedCategories.includes(a.id);
+          const bSelected = selectedCategories.includes(b.id);
+
+          if (aSelected === bSelected) return 0;
+          return aSelected ? -1 : 1;
+        })
+        .map((cat) => (
+          <label
+            key={cat.id}
+            className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer hover:text-teal-700 transition-colors"
+          >
+            <input
+              type="checkbox"
+              checked={selectedCategories.includes(cat.id)}
+              onChange={() => toggleCategory(cat.id)}
+              className="w-4 h-4 rounded border-gray-300 text-teal-600"
+            />
+            <span className="leading-snug">
+              {cat.name}
+            </span>
+          </label>
+        ))
     )}
 
-    <div className="space-y-1">
-  {(showAllCategories
-    ? allCategories
-    : allCategories.slice(0, 8))
-    .filter(cat =>
-  (cat?.name || "")
-
-    .toLowerCase()
-    .includes(categorySearch.toLowerCase())
-)
-
-    .map((cat) => (
-      <label
-        key={cat.id}
-
-        className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer hover:text-teal-700 transition-colors"
+    {allCategories.length > 8 && (
+      <button
+        onClick={() => setShowAllCategories(!showAllCategories)}
+        className="text-xs font-semibold text-teal-600 mt-2"
       >
-        <input
-          type="checkbox"
-          checked={selectedCategories.includes(cat.id)}
-          onChange={() => toggleCategory(cat.id)}
-          className="w-4 h-4 rounded border-gray-300 text-teal-600"
-        />
-        <span className="leading-snug">
-          {cat.name}
-        </span>
-      </label>
-    ))}
-
-  {/* 👇 ADD THIS BUTTON RIGHT HERE */}
-  {allCategories.length > 8 && (
-    <button
-      onClick={() => setShowAllCategories(!showAllCategories)}
-      className="text-xs font-semibold text-teal-600 mt-2"
-    >
-      {showAllCategories ? "Show Less" : "More"}
-    </button>
-  )}
-</div>
+        {showAllCategories ? "Show Less" : "More"}
+      </button>
+    )}
+  </div>
 </div>
 
 

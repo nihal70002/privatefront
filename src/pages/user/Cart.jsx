@@ -235,9 +235,15 @@ export default function Cart() {
             </button>
           </div>
 
-          <span className="text-lg font-bold text-slate-900">
-            ₹{(item.price * item.quantity).toLocaleString()}
-          </span>
+          <div className="text-right">
+  <div className="text-xs text-slate-500">
+    ₹{item.price.toLocaleString()} × {item.quantity}
+  </div>
+
+  <div className="text-lg font-bold text-slate-900">
+    ₹{(item.price * item.quantity).toLocaleString()}
+  </div>
+</div>
         </div>
       </div>
     </div>
@@ -251,10 +257,69 @@ export default function Cart() {
                 <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">Order Details</h3>
                 
                 <div className="space-y-4 mb-6">
-                  <div className="flex justify-between text-slate-600">
-                    <span className="text-sm">Bag Subtotal</span>
-                    <span className="font-semibold text-slate-900">₹{subtotal.toLocaleString()}</span>
-                  </div>
+
+  {/* ITEM BREAKDOWN */}
+<div className="space-y-3">
+
+  {cart.map(item => (
+    <div
+  key={item.productVariantId}
+  onClick={() => {
+  sessionStorage.setItem("productsScrollY", window.scrollY);
+
+  sessionStorage.setItem(
+    "lastViewedProduct",
+    item.productVariantId
+  );
+
+  navigate(`/product/${item.productVariantId}`);
+}}
+  className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition"
+>
+
+      {/* PRODUCT IMAGE */}
+      <img
+        src={item.imageUrl}
+        alt={item.productName}
+        className="w-10 h-10 object-contain rounded border"
+      />
+
+      {/* NAME + MULTIPLICATION */}
+      <div className="flex-1 text-xs text-slate-600">
+
+        <div className="line-clamp-1 font-medium text-slate-800">
+          {item.productName}
+        </div>
+
+        <div className="text-slate-400">
+          ₹{item.price} × {item.quantity}
+        </div>
+
+      </div>
+
+      {/* ITEM TOTAL */}
+      <div className="text-sm font-semibold text-slate-900">
+        ₹{(item.price * item.quantity).toLocaleString()}
+      </div>
+
+    </div>
+  ))}
+
+</div>
+
+  {/* SUBTOTAL */}
+  <div className="flex justify-between text-slate-600 pt-3 border-t">
+    <span className="text-sm">Bag Subtotal</span>
+    <span className="font-semibold text-slate-900">
+      ₹{subtotal.toLocaleString()}
+    </span>
+  </div>
+
+
+  {/* DELIVERY */}
+  
+
+
                   <div className="flex justify-between text-slate-600">
                     <span className="text-sm">Delivery Fee</span>
                     <span className="text-emerald-600 font-bold text-xs bg-emerald-50 px-2 py-1 rounded-md tracking-tight">FREE</span>
