@@ -243,7 +243,7 @@ const decreaseQuantity = () => {
   Home
 </span>
           <ChevronRight size={12} className="text-gray-400" />
-          <span className="hover:text-gray-900 cursor-pointer">{product.category}</span>
+          
           <ChevronRight size={12} className="text-gray-400" />
           <span className="text-gray-900 truncate max-w-xs">{product.name}</span>
         </div>

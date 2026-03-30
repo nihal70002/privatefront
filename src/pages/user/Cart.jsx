@@ -138,9 +138,10 @@ export default function Cart() {
            <div className="flex-1 space-y-4">
   {cart.map(item => (
     <div
-      key={item.productVariantId}
-      className="bg-white rounded-2xl p-4 flex gap-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow"
-    >
+  key={item.productVariantId}
+  onClick={() => navigate(`/product/${item.productId}`)}
+  className="bg-white rounded-2xl p-4 flex gap-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+>
       {/* IMAGE */}
       <div className="w-24 h-24 bg-slate-50 rounded-xl overflow-hidden flex-shrink-0 border border-slate-100 p-2">
         <img
@@ -196,7 +197,17 @@ export default function Cart() {
 
           {/* REMOVE BUTTON */}
           <button
-            onClick={() => handleRemove(item.productVariantId)}
+        onClick={(e) => {
+  e.stopPropagation();
+
+  const confirmDelete = window.confirm(
+    "Remove this product from your cart?"
+  );
+
+  if (confirmDelete) {
+    handleRemove(item.productVariantId);
+  }
+}}
             className="text-slate-300 hover:text-red-500 transition-colors"
           >
             <Trash2 size={18} />
@@ -207,12 +218,13 @@ export default function Cart() {
         <div className="flex justify-between items-end mt-4">
           <div className="flex items-center bg-slate-100 rounded-lg p-1">
             <button
-              onClick={() =>
-                handleQuantityChange(
-                  item.productVariantId,
-                  item.quantity - 1
-                )
-              }
+              onClick={(e) => {
+  e.stopPropagation();
+  handleQuantityChange(
+    item.productVariantId,
+    item.quantity - 1
+  );
+}}
               className="w-7 h-7 flex items-center justify-center hover:bg-white rounded-md transition-colors text-slate-600 font-bold"
             >
               −
@@ -223,12 +235,13 @@ export default function Cart() {
             </span>
 
             <button
-              onClick={() =>
-                handleQuantityChange(
-                  item.productVariantId,
-                  item.quantity + 1
-                )
-              }
+              onClick={(e) => {
+  e.stopPropagation();
+  handleQuantityChange(
+    item.productVariantId,
+    item.quantity + 1
+  );
+}}
               className="w-7 h-7 flex items-center justify-center hover:bg-white rounded-md transition-colors text-slate-600 font-bold"
             >
               +
@@ -265,14 +278,17 @@ export default function Cart() {
     <div
   key={item.productVariantId}
   onClick={() => {
-  sessionStorage.setItem("productsScrollY", window.scrollY);
+  sessionStorage.setItem(
+    "productsScrollY",
+    window.scrollY
+  );
 
   sessionStorage.setItem(
     "lastViewedProduct",
-    item.productVariantId
+    item.productId
   );
 
-  navigate(`/product/${item.productVariantId}`);
+  navigate(`/product/${item.productId}`);
 }}
   className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition"
 >

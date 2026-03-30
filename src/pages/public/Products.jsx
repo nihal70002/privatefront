@@ -244,9 +244,20 @@ const toggleCategory = (categoryId) => {
     params.delete("categoryId");
   }
 
+  // scroll category sidebar to top so selected item becomes visible
+  const categorySidebar = document.querySelector(".category-sidebar");
+
+  if (categorySidebar) {
+    categorySidebar.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }
+
   navigate(`/products?${params.toString()}`);
 };
 
+const categoryRef = useRef(null);
 
 const clearFilters = () => {
   setSelectedCategories([]);
@@ -358,7 +369,7 @@ const visibleCategories = (
     />
   )}
 
-  <div className="space-y-1">
+  <div ref={categoryRef} className="space-y-1">
     {(
       (
         showAllCategories
@@ -516,10 +527,13 @@ const visibleCategories = (
   <button
     disabled={page === 1}
     onClick={() => {
-      const params = new URLSearchParams(searchParams);
-      params.set("page", page - 1);
-      navigate(`/products?${params.toString()}`);
-    }}
+  sessionStorage.removeItem("productsScrollY"); // prevent restore
+  window.scrollTo({ top: 0, behavior: "smooth" });
+
+  const params = new URLSearchParams(searchParams);
+  params.set("page", page - 1);
+  navigate(`/products?${params.toString()}`);
+}}
     className="px-4 py-2 border rounded disabled:opacity-40"
   >
     Previous
@@ -532,10 +546,13 @@ const visibleCategories = (
   <button
     disabled={page === totalPages}
     onClick={() => {
-      const params = new URLSearchParams(searchParams);
-      params.set("page", page + 1);
-      navigate(`/products?${params.toString()}`);
-    }}
+  sessionStorage.removeItem("productsScrollY"); // prevent restore
+  window.scrollTo({ top: 0, behavior: "smooth" });
+
+  const params = new URLSearchParams(searchParams);
+  params.set("page", page + 1);
+  navigate(`/products?${params.toString()}`);
+}}
     className="px-4 py-2 border rounded disabled:opacity-40"
   >
     Next

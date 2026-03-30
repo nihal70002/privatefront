@@ -134,7 +134,7 @@ export default function UserLayout() {
           <div
             key={item.productId}
             onClick={() => {
-              navigate(`/products/${item.productId}`);
+              navigate(`/product/${item.productId}`);
               setSearchQuery("");
               setShowDropdown(false);
             }}
@@ -263,7 +263,7 @@ export default function UserLayout() {
             <div
               key={item.productId}
               onClick={() => {
-                navigate(`/products/${item.productId}`);
+                navigate(`/product/${item.productId}`);
                 setSearchQuery("");
                 setShowMobileSearch(false);
               }}
