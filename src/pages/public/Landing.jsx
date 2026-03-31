@@ -507,7 +507,7 @@ lg:aspect-[1660/490]"
                           {product.name}
                         </p>
                         <p className="text-cyan-600 font-bold mt-2">
-                          SAR{price}
+                          SAR {price}
                         </p>
                       </div>
                     </Link>

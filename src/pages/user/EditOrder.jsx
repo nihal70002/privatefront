@@ -150,12 +150,12 @@ export default function EditOrder() {
                   {/* Info */}
                   <div style={styles.itemInfo}>
                     <p style={styles.itemName}>{item.productName}</p>
-                    <p style={styles.itemPrice}>SAR{item.unitPrice?.toLocaleString('en-IN')}</p>
+                    <p style={styles.itemPrice}>SAR {item.unitPrice?.toLocaleString('en-IN')}</p>
                   </div>
 
                   {/* Subtotal */}
                   <div style={styles.itemSubtotal}>
-                    SAR{(item.unitPrice * item.quantity).toLocaleString('en-IN')}
+                    SAR {(item.unitPrice * item.quantity).toLocaleString('en-IN')}
                   </div>
 
                   {/* Quantity */}
@@ -198,7 +198,7 @@ export default function EditOrder() {
           {order.items.length > 0 && (
             <div style={styles.totalRow}>
               <span style={styles.totalLabel}>Order Total</span>
-              <span style={styles.totalValue}>SAR{totalAmount.toLocaleString('en-IN')}</span>
+              <span style={styles.totalValue}>SAR {totalAmount.toLocaleString('en-IN')}</span>
             </div>
           )}
         </div>
