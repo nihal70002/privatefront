@@ -268,9 +268,13 @@ useEffect(() => {
 
           <button
   onClick={() => {
-    localStorage.removeItem("token");
-    navigate("/");
-    window.location.reload();
+    const confirmLogout = window.confirm("Are you sure you want to logout?");
+
+    if (confirmLogout) {
+      localStorage.removeItem("token");
+      navigate("/");
+      window.location.reload();
+    }
   }}
   className="flex flex-col items-center hover:text-red-500 transition"
 >
