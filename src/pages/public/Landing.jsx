@@ -152,98 +152,90 @@ useEffect(() => {
     </Link>
 
     {/* SEARCH BAR */}
-    <div className="flex-1 max-w-xl w-full flex mx-2">
-      <div className="w-full relative">
+    <div className="flex-1 max-w-xl mx-4 relative hidden sm:block">
+  <div className="relative">
+    <Search
+      className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+      size={18}
+    />
 
-        <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+    <input
+      type="text"
+      placeholder="Search for products..."
+      value={searchQuery}
+      onFocus={() => setShowDropdown(true)}
+      onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+      onChange={(e) => setSearchQuery(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          const query = searchQuery.trim();
+          if (!query) return;
 
-        <input
-          type="text"
-          placeholder="Search products..."
-          value={searchQuery}
-          onFocus={() => setShowDropdown(true)}
-          onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              navigate(`/products?search=${searchQuery}`);
-              setShowDropdown(false);
-            }
-          }}
-          className="w-full pl-10 pr-4 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-        />
+          navigate(`/products?search=${encodeURIComponent(query)}`);
+          setShowDropdown(false);
+          setSearchQuery("");
+        }
+      }}
+      className="w-full pl-12 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:border-slate-500 focus:bg-white"
+    />
+  </div>
 
-        {/* DROPDOWN */}
-        {showDropdown && searchQuery.trim().length > 0 && (
-          <div className="absolute top-full mt-3 w-full bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-4">
+  {/* DROPDOWN */}
+  {showDropdown && searchQuery.trim().length > 0 && (
+    <div className="absolute top-full left-0 mt-3 w-full bg-white rounded-2xl shadow-2xl border border-emerald-100 z-50 p-4">
 
-            {loadingSearch && (
-              <div className="text-sm text-gray-500 px-2 py-2">
-                Searching...
+      {loadingSearch && (
+        <div className="text-sm text-gray-500 px-2 py-2">
+          Searching...
+        </div>
+      )}
+
+      {!loadingSearch && suggestions.length === 0 && (
+        <div className="text-sm text-gray-500 px-2 py-2">
+          No results found
+        </div>
+      )}
+
+      {!loadingSearch && suggestions.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+
+          {suggestions.slice(0, 6).map((item) => (
+            <div
+              key={item.productId}
+              onClick={() => {
+                navigate(`/product/${item.productId}`);
+                setSearchQuery("");
+                setShowDropdown(false);
+              }}
+              className="flex items-center gap-3 cursor-pointer hover:bg-emerald-50 p-2 rounded-lg transition"
+            >
+              <img
+                src={item.primaryImageUrl}
+                alt={item.name}
+                className="w-10 h-10 md:w-12 md:h-12 rounded-md object-cover border border-gray-100"
+              />
+
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm font-medium text-gray-800 line-clamp-2 leading-tight">
+                  {item.name}
+                </span>
+
+                <span className="text-xs text-gray-500">
+                  {item.brandName}
+                </span>
+
+                <span className="text-sm font-semibold text-emerald-600">
+                  SAR {item.startingPrice}
+                </span>
               </div>
-            )}
+            </div>
+          ))}
 
-            {!loadingSearch && suggestions.length === 0 && (
-              <div className="text-sm text-gray-500 px-2 py-2">
-                No results found
-              </div>
-            )}
-
-            {!loadingSearch && suggestions.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-
-                {suggestions.slice(0, 6).map((item) => (
-                  <div
-                    key={item.productId}
-                    onClick={() => {
-                      navigate(`/products/${item.productId}`);
-                      setSearchQuery("");
-                      setShowDropdown(false);
-                    }}
-                    className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition"
-                  >
-                    <img
-                      src={item.primaryImageUrl || "/placeholder.jpg"}
-                      alt={item.name}
-                      className="w-10 h-10 md:w-12 md:h-12 rounded-md object-cover border border-gray-100"
-                    />
-
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-sm font-medium text-gray-800 truncate max-w-[200px]">
-                        {item.name}
-                      </span>
-
-                      <span className="text-xs text-gray-500">
-                        {item.brandName}
-                      </span>
-
-                      <span className="text-sm font-semibold text-cyan-600">
-                        SAR{item.startingPrice}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-
-              </div>
-            )}
-
-            {!loadingSearch && suggestions.length > 6 && (
-              <div
-                onClick={() => {
-                  navigate(`/products?search=${searchQuery}`);
-                  setShowDropdown(false);
-                }}
-                className="text-center mt-4 pt-3 border-t text-sm font-semibold text-cyan-600 hover:text-cyan-700 cursor-pointer"
-              >
-                View all results →
-              </div>
-            )}
-
-          </div>
-        )}
-
-      </div>
+        </div>
+      )}
     </div>
+  )}
+</div>
 
     {/* ACTION ICONS */}
     <div className="flex items-center gap-6 text-gray-600">
