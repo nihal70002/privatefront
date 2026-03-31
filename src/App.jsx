@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import WarehouseRoutes from "./pages/warehouse/WarehouseRoutes";
-
+import EditOrder from "./pages/user/EditOrder";
 /* PUBLIC */
 import Landing from "./pages/public/Landing";
 import Login from "./pages/public/Login";
@@ -89,6 +89,7 @@ export default function App() {
   <Route path="/orders/:id" element={<OrderDetails />} />
   <Route path="/profile" element={<Profile />} />
   <Route path="/profile/addresses" element={<Addresses />} />
+  <Route path="/orders/edit/:id" element={<EditOrder />} />
   <Route path="/profile/change-password" element={<ChangePassword />} />
 </Route>
 

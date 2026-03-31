@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { getProducts } from "../../api/products.api";
 import { motion } from "framer-motion";
 
-
+import { LogOut } from "lucide-react";
 
 
 
@@ -82,18 +82,18 @@ useEffect(() => {
   
   const newArrivals = [
     {
-      id: 1,
-      name: "NewMom Maternity Pad",
-      desc: "Designed for maximum absorbency and gentle care, Newmom Maternity Pads offer superior protection and comfort during the postpartum period. Perfect for new mothers.",
-      img: "/products/maternity-pad.jpg", // Replace with your actual path
-      link: "/products/maternity-pad"
-    },
+  id: 1,
+  name: "Varicose Vein Stocking (Comprezon)",
+  desc: "Comprezon varicose vein stockings provide graduated compression support to improve blood circulation, reduce swelling, and relieve leg fatigue. Ideal for daily use and medical compression support.",
+  img: "/products/varicose-stocking.jpg", 
+  link: "/product/613"
+},
     {
       id: 2,
       name: "Dyna Hinged Knee Brace",
       desc: "A premium wrap-around knee brace featuring dual metal hinges for superior medial-lateral stability with soft neoprene construction that delivers comfortable compression.",
       img: "/products/kneebrace.jpg", // Replace with your actual path
-      link: "/products/knee-brace"
+      link: "/product/512"
     }
   ];
 
@@ -143,116 +143,155 @@ useEffect(() => {
     <div className="w-full min-h-screen bg-white text-gray-800 overflow-x-hidden">
 
       {/* ================= NAVBAR ================= */}
-      <nav className="sticky top-0 z-50 bg-white shadow-sm ">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
+  <nav className="sticky top-0 z-50 bg-white shadow-sm">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
 
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <img src="/logo/logo.png" className="h-9" alt="logo" />
-           
-          </Link>
+    {/* LOGO */}
+    <Link to="/" className="flex items-center gap-2">
+      <img src="/logo/logo.png" className="h-9" alt="logo" />
+    </Link>
 
-          {/* Search Bar */}
-          <div className="flex-1 max-w-xl w-full flex mx-2">
-            <div className="w-full relative">
-  <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+    {/* SEARCH BAR */}
+    <div className="flex-1 max-w-xl w-full flex mx-2">
+      <div className="w-full relative">
 
-  <input
-    type="text"
-    placeholder="Search products..."
-    value={searchQuery}
-    onFocus={() => setShowDropdown(true)}
-    onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-    onChange={(e) => setSearchQuery(e.target.value)}
-    onKeyDown={(e) => {
-      if (e.key === "Enter") {
-        navigate(`/products?search=${searchQuery}`);
-        setShowDropdown(false);
-      }
-    }}
-    className="w-full pl-10 pr-4 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-  />
+        <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
 
-  {/* DROPDOWN */}
-{showDropdown && searchQuery.trim().length > 0 && (
-  <div className="absolute top-full mt-3 w-full bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-4">
-
-    {loadingSearch && (
-      <div className="text-sm text-gray-500 px-2 py-2">
-        Searching...
-      </div>
-    )}
-
-    {!loadingSearch && suggestions.length === 0 && (
-      <div className="text-sm text-gray-500 px-2 py-2">
-        No results found
-      </div>
-    )}
-
-    {!loadingSearch && suggestions.length > 0 && (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-
-        {suggestions.slice(0, 6).map((item) => (
-          <div
-            key={item.productId}
-            onClick={() => {
-              navigate(`/products/${item.productId}`);
-              setSearchQuery("");
+        <input
+          type="text"
+          placeholder="Search products..."
+          value={searchQuery}
+          onFocus={() => setShowDropdown(true)}
+          onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              navigate(`/products?search=${searchQuery}`);
               setShowDropdown(false);
-            }}
-            className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition"
-          >
-            <img
-              src={item.primaryImageUrl || "/placeholder.jpg"}
-              alt={item.name}
-              className="w-10 h-10 md:w-12 md:h-12 rounded-md object-cover border border-gray-100"
-            />
+            }
+          }}
+          className="w-full pl-10 pr-4 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+        />
 
-            <div className="flex flex-col min-w-0">
-              <span className="text-sm font-medium text-gray-800 truncate max-w-[200PX]">
-                {item.name}
-              </span>
+        {/* DROPDOWN */}
+        {showDropdown && searchQuery.trim().length > 0 && (
+          <div className="absolute top-full mt-3 w-full bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 p-4">
 
-              <span className="text-xs text-gray-500">
-                {item.brandName}
-              </span>
+            {loadingSearch && (
+              <div className="text-sm text-gray-500 px-2 py-2">
+                Searching...
+              </div>
+            )}
 
-              <span className="text-sm font-semibold text-cyan-600">
-                ₹{item.startingPrice}
-              </span>
-            </div>
+            {!loadingSearch && suggestions.length === 0 && (
+              <div className="text-sm text-gray-500 px-2 py-2">
+                No results found
+              </div>
+            )}
+
+            {!loadingSearch && suggestions.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+
+                {suggestions.slice(0, 6).map((item) => (
+                  <div
+                    key={item.productId}
+                    onClick={() => {
+                      navigate(`/products/${item.productId}`);
+                      setSearchQuery("");
+                      setShowDropdown(false);
+                    }}
+                    className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition"
+                  >
+                    <img
+                      src={item.primaryImageUrl || "/placeholder.jpg"}
+                      alt={item.name}
+                      className="w-10 h-10 md:w-12 md:h-12 rounded-md object-cover border border-gray-100"
+                    />
+
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-sm font-medium text-gray-800 truncate max-w-[200px]">
+                        {item.name}
+                      </span>
+
+                      <span className="text-xs text-gray-500">
+                        {item.brandName}
+                      </span>
+
+                      <span className="text-sm font-semibold text-cyan-600">
+                        ₹{item.startingPrice}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+
+              </div>
+            )}
+
+            {!loadingSearch && suggestions.length > 6 && (
+              <div
+                onClick={() => {
+                  navigate(`/products?search=${searchQuery}`);
+                  setShowDropdown(false);
+                }}
+                className="text-center mt-4 pt-3 border-t text-sm font-semibold text-cyan-600 hover:text-cyan-700 cursor-pointer"
+              >
+                View all results →
+              </div>
+            )}
+
           </div>
-        ))}
+        )}
 
       </div>
-    )}
+    </div>
 
-    {!loadingSearch && suggestions.length > 6 && (
-      <div
-        onClick={() => {
-          navigate(`/products?search=${searchQuery}`);
-          setShowDropdown(false);
-        }}
-        className="text-center mt-4 pt-3 border-t text-sm font-semibold text-cyan-600 hover:text-cyan-700 cursor-pointer"
+    {/* ACTION ICONS */}
+    <div className="flex items-center gap-6 text-gray-600">
+
+      {!localStorage.getItem("token") ? (
+        <button
+          onClick={() => navigate("/login")}
+          className="flex flex-col items-center hover:text-black transition"
+        >
+          <User size={22} />
+          <span className="text-xs">Login</span>
+        </button>
+      ) : (
+        <>
+          <button
+            onClick={() => navigate("/profile")}
+            className="flex flex-col items-center hover:text-black transition"
+          >
+            <User size={22} />
+            <span className="text-xs">Profile</span>
+          </button>
+
+          <button
+  onClick={() => {
+    localStorage.removeItem("token");
+    navigate("/");
+    window.location.reload();
+  }}
+  className="flex flex-col items-center hover:text-red-500 transition"
+>
+  <LogOut size={22} />
+  <span className="text-xs">Logout</span>
+</button>
+        </>
+      )}
+
+      <button
+        onClick={() => navigate("/cart")}
+        className="flex flex-col items-center hover:text-black transition"
       >
-        View all results →
-      </div>
-    )}
+        <ShoppingCart size={22} />
+        <span className="text-xs">Cart</span>
+      </button>
+
+    </div>
 
   </div>
-)}
-
-
-</div>
-          </div>
-
-          {/* Icons */}
-          <div className="flex items-center gap-5">
-            <Link to="/login"><User size={22} /></Link>
-            <Link to="/cart"><ShoppingCart size={22} /></Link>
-          </div>
-        </div>
-      </nav>
+</nav>
 
       {/* ================= HERO SLIDER ================= */}
    {/* ================= HERO SLIDER ================= */}
@@ -486,7 +525,7 @@ lg:aspect-[1660/490]"
   New <span className="text-cyan-600 font-normal border-b-4 border-cyan-100">Arrivals</span>
 </h2>
       <Link
-        to="/products?sort=new"
+        to="/product?sort=new"
         className="text-cyan-600 font-semibold hover:text-cyan-700 transition-colors flex items-center gap-1"
       >
         View All <span className="text-xl">→</span>

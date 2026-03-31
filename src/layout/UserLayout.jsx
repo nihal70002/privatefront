@@ -7,6 +7,10 @@ import { useCart } from "../context/CartContext";
 export default function UserLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  useEffect(() => {
+  setShowDropdown(false);
+}, [location.pathname]);
+
   const isCartPage = location.pathname === "/cart";
 
   // 🔎 Search States

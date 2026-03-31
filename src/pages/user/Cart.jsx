@@ -112,7 +112,7 @@ export default function Cart() {
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
       {/* Header */}
-      <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-200">
+      <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-30 border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-500 hover:text-teal-600 font-medium transition-colors">
             <ChevronLeft size={20} />

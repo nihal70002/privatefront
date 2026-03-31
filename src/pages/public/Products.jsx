@@ -124,7 +124,7 @@ useLayoutEffect(() => {
   const savedScroll =
     sessionStorage.getItem("productsScrollY");
 
-  if (!savedScroll || products.length === 0)
+  if (!savedScroll || products.length === 0 || searchParams.get("page"))
     return;
 
   window.scrollTo({
@@ -522,43 +522,70 @@ const visibleCategories = (
     </div>
   )}
   {/* PAGINATION CONTROLS */}
-<div className="flex justify-center items-center gap-4 mt-10">
+{/* PAGINATION CONTROLS */}
+<div className="flex justify-center items-center gap-2 mt-10 flex-wrap">
 
+  {/* Previous */}
   <button
     disabled={page === 1}
     onClick={() => {
-  sessionStorage.removeItem("productsScrollY"); // prevent restore
-  window.scrollTo({ top: 0, behavior: "smooth" });
+      sessionStorage.removeItem("productsScrollY");
+      window.scrollTo({ top: 0, behavior: "smooth" });
 
-  const params = new URLSearchParams(searchParams);
-  params.set("page", page - 1);
-  navigate(`/products?${params.toString()}`);
-}}
-    className="px-4 py-2 border rounded disabled:opacity-40"
+      const params = new URLSearchParams(searchParams);
+      params.set("page", page - 1);
+      navigate(`/products?${params.toString()}`);
+    }}
+    className="px-3 py-1 border rounded disabled:opacity-40"
   >
     Previous
   </button>
 
-  <span className="font-semibold">
-    Page {page} of {totalPages}
-  </span>
+  {/* Page Numbers */}
+  {[...Array(totalPages)].map((_, index) => {
+    const pageNumber = index + 1;
 
+    return (
+      <button
+        key={pageNumber}
+        onClick={() => {
+          sessionStorage.removeItem("productsScrollY");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+
+          const params = new URLSearchParams(searchParams);
+          params.set("page", pageNumber);
+          navigate(`/products?${params.toString()}`);
+        }}
+        className={`px-3 py-1 border rounded ${
+          page === pageNumber
+            ? "bg-teal-600 text-white"
+            : "bg-white"
+        }`}
+      >
+        {pageNumber}
+      </button>
+    );
+  })}
+
+  {/* Next */}
   <button
     disabled={page === totalPages}
     onClick={() => {
-  sessionStorage.removeItem("productsScrollY"); // prevent restore
-  window.scrollTo({ top: 0, behavior: "smooth" });
+      sessionStorage.removeItem("productsScrollY");
+      window.scrollTo({ top: 0, behavior: "smooth" });
 
-  const params = new URLSearchParams(searchParams);
-  params.set("page", page + 1);
-  navigate(`/products?${params.toString()}`);
-}}
-    className="px-4 py-2 border rounded disabled:opacity-40"
+      const params = new URLSearchParams(searchParams);
+      params.set("page", page + 1);
+      navigate(`/products?${params.toString()}`);
+    }}
+    className="px-3 py-1 border rounded disabled:opacity-40"
   >
     Next
   </button>
 
 </div>
+
+
 </main>
       </div>
    
