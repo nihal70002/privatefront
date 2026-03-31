@@ -139,7 +139,11 @@ useLayoutEffect(() => {
 
 // Keep loadCart separate so it only runs once on mount
 useEffect(() => {
-  loadCart();
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    loadCart();
+  }
 }, []);
 
 
