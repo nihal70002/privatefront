@@ -250,11 +250,11 @@ export default function Cart() {
 
           <div className="text-right">
   <div className="text-xs text-slate-500">
-    ₹{item.price.toLocaleString()} × {item.quantity}
+    SAR {item.price.toLocaleString()} × {item.quantity}
   </div>
 
   <div className="text-lg font-bold text-slate-900">
-    ₹{(item.price * item.quantity).toLocaleString()}
+    SAR{(item.price * item.quantity).toLocaleString()}
   </div>
 </div>
         </div>
@@ -308,14 +308,14 @@ export default function Cart() {
         </div>
 
         <div className="text-slate-400">
-          ₹{item.price} × {item.quantity}
+          SAR{item.price} × {item.quantity}
         </div>
 
       </div>
 
       {/* ITEM TOTAL */}
       <div className="text-sm font-semibold text-slate-900">
-        ₹{(item.price * item.quantity).toLocaleString()}
+        SAR{(item.price * item.quantity).toLocaleString()}
       </div>
 
     </div>
@@ -327,7 +327,7 @@ export default function Cart() {
   <div className="flex justify-between text-slate-600 pt-3 border-t">
     <span className="text-sm">Bag Subtotal</span>
     <span className="font-semibold text-slate-900">
-      ₹{subtotal.toLocaleString()}
+      SAR{subtotal.toLocaleString()}
     </span>
   </div>
 
@@ -344,7 +344,7 @@ export default function Cart() {
 
                 <div className="pt-4 border-t border-slate-100 mb-8 flex justify-between items-center">
                   <span className="font-bold text-slate-900 text-lg">Total Amount</span>
-                  <span className="text-2xl font-black text-teal-600 tracking-tight">₹{subtotal.toLocaleString()}</span>
+                  <span className="text-2xl font-black text-teal-600 tracking-tight">SAR{subtotal.toLocaleString()}</span>
                 </div>
 
         <button

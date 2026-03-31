@@ -102,7 +102,7 @@ function StatsCards({ orders }) {
   const customersCount = new Set(orders.map(o => o.customer?.companyName).filter(Boolean)).size;
 
   const stats = [
-    { label: "Total Revenue", value: `₹${totalSales.toLocaleString()}`, icon: <IndianRupee size={20}/>, color: "text-emerald-600", bg: "bg-emerald-50" },
+    { label: "Total Revenue", value: `SAR ${totalSales.toLocaleString()}`, icon: <IndianRupee size={20}/>, color: "text-emerald-600", bg: "bg-emerald-50" },
     { label: "Orders Count", value: orders.length, icon: <Package size={20}/>, color: "text-blue-600", bg: "bg-blue-50" },
     { label: "Total Clients", value: customersCount, icon: <Users size={20}/>, color: "text-purple-600", bg: "bg-purple-50" },
     { label: "Waitlist", value: pendingOrders, icon: <Clock size={20}/>, color: "text-amber-600", bg: "bg-amber-50" },
@@ -157,7 +157,7 @@ function TopCustomers({ orders }) {
                 <p className="text-xs text-gray-400 mt-0.5">{c.orders} Orders</p>
               </div>
             </div>
-            <span className="font-bold text-[#009688] text-sm">₹{c.revenue.toLocaleString()}</span>
+            <span className="font-bold text-[#009688] text-sm">SAR {c.revenue.toLocaleString()}</span>
           </div>
         )) : (
           <div className="p-10 text-center text-gray-400 text-sm">No client data yet.</div>
@@ -233,7 +233,7 @@ function RecentOrders({ orders, navigate }) {
                 </td>
                 
                 <td className="px-4 md:px-6 py-4 font-bold text-sm text-[#1E293B] text-right whitespace-nowrap">
-                  ₹{o.totalAmount?.toLocaleString()}
+                  SAR {o.totalAmount?.toLocaleString()}
                 </td>
                 
                 <td className="px-4 py-4 text-right">

@@ -61,7 +61,7 @@ export default function WarehouseOrderDetails() {
                 <td className="px-4 py-2">{i.productName}</td>
                 <td className="px-4 py-2 text-center">{i.size}</td>
                 <td className="px-4 py-2 text-center">{i.quantity}</td>
-                <td className="px-4 py-2 text-right">₹{i.unitPrice}</td>
+                <td className="px-4 py-2 text-right">SAR{i.unitPrice}</td>
               </tr>
             ))}
           </tbody>

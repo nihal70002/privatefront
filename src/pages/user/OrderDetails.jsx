@@ -162,7 +162,7 @@ export default function OrderDetails() {
               </p>
 
               <p className="font-bold text-lg text-teal-600">
-                ₹{order.totalAmount}
+                SAR {order.totalAmount}
               </p>
             </div>
 
@@ -202,14 +202,14 @@ export default function OrderDetails() {
                   </p>
 
                   <p className="text-sm text-gray-500">
-                    Qty: {item.quantity} × ₹
+                    Qty: {item.quantity} × SAR 
                     {item.unitPrice}
                   </p>
 
                 </div>
 
                 <p className="font-bold text-gray-800">
-                  ₹{item.subtotal}
+                  SAR {item.subtotal}
                 </p>
 
               </div>
@@ -227,7 +227,7 @@ export default function OrderDetails() {
             </p>
 
             <p className="text-2xl font-bold text-teal-600">
-              ₹{order.totalAmount}
+              SAR {order.totalAmount}
             </p>
 
           </div>

@@ -97,7 +97,7 @@ export default function PendingOrders() {
                 </td>
 
                 <td className="px-6 py-4 text-right font-bold text-[#2A334E]">
-                  ₹{o.totalAmount}
+                  SAR{o.totalAmount}
                 </td>
 
                 <td

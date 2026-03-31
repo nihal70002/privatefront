@@ -179,7 +179,7 @@ export default function Dashboard() {
                       <p className="font-medium text-gray-600 truncate max-w-[120px]">{order.salesExecutive}</p>
                     </td>
                     <td className="px-4 md:px-6 py-4">
-                      <p className="font-bold text-gray-900 whitespace-nowrap">₹{order.totalAmount?.toLocaleString()}</p>
+                      <p className="font-bold text-gray-900 whitespace-nowrap">SAR{order.totalAmount?.toLocaleString()}</p>
                     </td>
                     <td className="px-4 md:px-6 py-4">
                       <div className="flex justify-center">

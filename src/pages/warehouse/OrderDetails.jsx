@@ -66,7 +66,7 @@ export default function OrderDetails() {
           <h3 style={styles.cardTitle}>Order Summary</h3>
           <div style={styles.infoRow}>
             <span style={styles.label}>Total Amount:</span>
-            <span style={styles.totalText}>₹{order.totalAmount.toLocaleString()}</span>
+            <span style={styles.totalText}>SAR{order.totalAmount.toLocaleString()}</span>
           </div>
           <div style={styles.infoRow}>
             <span style={styles.label}>Items Count:</span>
@@ -94,9 +94,9 @@ export default function OrderDetails() {
                 <td style={styles.td}><strong>{i.productName}</strong></td>
                 <td style={styles.td}>{i.size}</td>
                 <td style={styles.td}>{i.quantity}</td>
-                <td style={styles.td}>₹{i.unitPrice}</td>
+                <td style={styles.td}>SAR{i.unitPrice}</td>
                 <td style={{ ...styles.td, textAlign: 'right' }}>
-                   ₹{(i.quantity * i.unitPrice).toLocaleString()}
+                   SAR{(i.quantity * i.unitPrice).toLocaleString()}
                 </td>
               </tr>
             ))}

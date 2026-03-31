@@ -418,7 +418,7 @@ export default function AllOrders() {
                         {order.totalQuantity || 0}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold text-gray-900 hidden md:table-cell">
-                        ₹{order.totalAmount?.toLocaleString("en-IN") || "0"}
+                        SAR{order.totalAmount?.toLocaleString("en-IN") || "0"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         <button
@@ -500,7 +500,7 @@ function OrderDetails({ order }) {
             Total Amount
           </p>
           <p className="text-2xl font-bold text-gray-900">
-            ₹{order.totalAmount?.toLocaleString("en-IN") || "0"}
+            SAR{order.totalAmount?.toLocaleString("en-IN") || "0"}
           </p>
         </div>
 
@@ -603,10 +603,10 @@ function OrderDetails({ order }) {
                       {item.quantity}
                     </td>
                     <td className="px-4 py-3 text-right text-sm text-gray-900">
-                      ₹{item.unitprice?.toLocaleString("en-IN") || "0"}
+                      SAR{item.unitprice?.toLocaleString("en-IN") || "0"}
                     </td>
                     <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
-                      ₹{((item.quantity || 0) * (item.unitPrice || 0)).toLocaleString("en-IN")}
+                      SAR{((item.quantity || 0) * (item.unitPrice || 0)).toLocaleString("en-IN")}
                     </td>
                   </tr>
                 ))}
@@ -617,7 +617,7 @@ function OrderDetails({ order }) {
                     Total:
                   </td>
                   <td className="px-4 py-3 text-right text-sm text-gray-900">
-                    ₹{order.totalAmount?.toLocaleString("en-IN") || "0"}
+                    SAR{order.totalAmount?.toLocaleString("en-IN") || "0"}
                   </td>
                 </tr>
               </tfoot>

@@ -199,7 +199,7 @@ function OrderCard({ order, onAction, updatingId, navigate }) {
           <div className="flex items-center justify-between sm:justify-end gap-4">
             <div className="text-left sm:text-right">
               <span className="block text-[9px] text-gray-400 font-bold uppercase tracking-tighter">Amount</span>
-              <span className="text-sm font-bold text-[#2A334E]">₹{order.totalAmount?.toLocaleString()}</span>
+              <span className="text-sm font-bold text-[#2A334E]">SAR{order.totalAmount?.toLocaleString()}</span>
             </div>
             
             {showActions && (

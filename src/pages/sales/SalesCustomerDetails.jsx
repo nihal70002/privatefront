@@ -170,7 +170,7 @@ export default function SalesCustomerDetails() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="text-sm font-bold text-slate-900">₹{order.totalAmount.toLocaleString()}</p>
+                    <p className="text-sm font-bold text-slate-900">SAR {order.totalAmount.toLocaleString()}</p>
                     <StatusBadge status={order.status} />
                   </div>
                   <ChevronDown 

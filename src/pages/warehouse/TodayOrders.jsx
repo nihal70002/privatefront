@@ -117,7 +117,7 @@ export default function TodayOrders() {
 
           <div className="col-span-2 lg:col-span-1 bg-indigo-600 rounded-2xl p-4 shadow-md text-white">
             <p className="text-[10px] font-black text-indigo-100 uppercase tracking-widest">Total Revenue</p>
-            <p className="text-xl md:text-2xl font-black mt-1">₹{stats.totalAmount.toLocaleString()}</p>
+            <p className="text-xl md:text-2xl font-black mt-1">SAR{stats.totalAmount.toLocaleString()}</p>
           </div>
         </div>
 
@@ -196,7 +196,7 @@ export default function TodayOrders() {
                         <span className="text-xs font-medium text-slate-500">{order.salesExecutive}</span>
                       </td>
                       <td className="px-4 py-4">
-                        <span className="text-sm font-black text-slate-900">₹{order.totalAmount?.toLocaleString()}</span>
+                        <span className="text-sm font-black text-slate-900">SAR{order.totalAmount?.toLocaleString()}</span>
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex justify-center">

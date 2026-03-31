@@ -218,7 +218,7 @@ useEffect(() => {
                       </span>
 
                       <span className="text-sm font-semibold text-cyan-600">
-                        ₹{item.startingPrice}
+                        SAR{item.startingPrice}
                       </span>
                     </div>
                   </div>
@@ -507,7 +507,7 @@ lg:aspect-[1660/490]"
                           {product.name}
                         </p>
                         <p className="text-cyan-600 font-bold mt-2">
-                          ₹{price}
+                          SAR{price}
                         </p>
                       </div>
                     </Link>

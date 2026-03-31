@@ -91,7 +91,7 @@ export default function MyOrders() {
                   <DollarSign className="w-5 h-5 text-green-600" />
                 </div>
                 <p className="text-3xl font-black text-gray-900">
-                  ₹{orders.reduce((sum, o) => sum + o.totalAmount, 0).toFixed(2)}
+                  SAR {orders.reduce((sum, o) => sum + o.totalAmount, 0).toFixed(2)}
                 </p>
               </div>
 
@@ -151,7 +151,7 @@ export default function MyOrders() {
                       </td>
                       <td className="px-6 py-4">
                         <span className="text-lg font-bold text-teal-600">
-                          ₹{order.totalAmount.toFixed(2)}
+                          SAR {order.totalAmount.toFixed(2)}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-center">
@@ -200,7 +200,7 @@ export default function MyOrders() {
                     <div>
                       <p className="text-xs text-gray-500 mb-1">Total Amount</p>
                       <p className="text-2xl font-bold text-teal-600">
-                        ₹{order.totalAmount.toFixed(2)}
+                        SAR {order.totalAmount.toFixed(2)}
                       </p>
                     </div>
                     <button
