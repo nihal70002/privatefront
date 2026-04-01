@@ -147,9 +147,23 @@ useEffect(() => {
   <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
 
     {/* LOGO */}
-    <Link to="/" className="flex items-center gap-2">
-      <img src="/logo/logo.png" className="h-9" alt="logo" />
-    </Link>
+<div
+  onClick={() => navigate("/products")}
+  className="hidden sm:block cursor-pointer text-lg sm:text-xl font-normal "
+>
+  {localStorage.getItem("lang") === "ar" ? (
+    <>
+      <span className="text-black">شركة </span>
+      <span className="text-cyan-600">صفا التميز</span>
+      <span className="text-black"> التجارية</span>
+    </>
+  ) : (
+    <>
+      <span className="text-cyan-600">Safa Al-Tamayyuz</span>
+      <span className="text-black"> Trading Co</span>
+    </>
+  )}
+</div>
 
     {/* SEARCH BAR */}
     <div className="flex-1 max-w-xl mx-4 relative hidden sm:block">

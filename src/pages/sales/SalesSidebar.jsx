@@ -81,11 +81,23 @@ export default function SalesSidebar() {
             }}
             className="cursor-pointer mb-4 transition-transform hover:scale-105"
           >
-            <img 
-              src="/logo/logo.png" 
-              alt="Safa Store" 
-              className="h-10 w-auto object-contain" 
-            />
+            <div
+  onClick={() => navigate("/products")}
+  className="hidden sm:block cursor-pointer text-lg sm:text-xl font-normal "
+>
+  {localStorage.getItem("lang") === "ar" ? (
+    <>
+      <span className="text-black">شركة </span>
+      <span className="text-cyan-600">صفا التميز</span>
+      <span className="text-black"> التجارية</span>
+    </>
+  ) : (
+    <>
+      <span className="text-cyan-600">Safa Al-Tamayyuz</span>
+      <span className="text-black"> Trading Co</span>
+    </>
+  )}
+</div>
           </div>
 
           <div className="flex items-center justify-center gap-1.5 px-3 py-1 bg-emerald-50 rounded-full border border-emerald-100">

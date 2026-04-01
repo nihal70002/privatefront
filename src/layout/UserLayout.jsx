@@ -108,7 +108,23 @@ export default function UserLayout() {
     onClick={() => navigate("/products")}
     className="cursor-pointer hover:scale-105 transition-transform"
   ></div>
-       
+    <div
+  onClick={() => navigate("/products")}
+  className="hidden sm:block cursor-pointer text-lg sm:text-xl font-normal "
+>
+  {localStorage.getItem("lang") === "ar" ? (
+    <>
+      <span className="text-black">شركة </span>
+      <span className="text-cyan-600">صفا التميز</span>
+      <span className="text-black"> التجارية</span>
+    </>
+  ) : (
+    <>
+      <span className="text-cyan-600">Safa Al-Tamayyuz</span>
+      <span className="text-black"> Trading Co</span>
+    </>
+  )}
+</div>
           </div>
 
           {/* SEARCH */}
