@@ -149,7 +149,7 @@ useEffect(() => {
     {/* LOGO */}
 <div
   onClick={() => navigate("/products")}
-  className="hidden sm:block cursor-pointer text-lg sm:text-xl font-normal "
+  className="flex items-center whitespace-nowrap cursor-pointer text-sm sm:text-base md:text-lg font-normal"
 >
   {localStorage.getItem("lang") === "ar" ? (
     <>
