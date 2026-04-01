@@ -39,7 +39,7 @@ const [page, setPage] = useState(
   Number(searchParams.get("page")) || 1
 );
 const [hasMore, setHasMore] = useState(true);
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 20;
 
 const [brands, setBrands] = useState([]);
 const [selectedBrand, setSelectedBrand] = useState(null);
