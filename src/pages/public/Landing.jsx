@@ -322,7 +322,7 @@ useEffect(() => {
     {/* ELBOW */}
     <SwiperSlide>
       <div
-        onClick={() => navigate("/products/602")}
+        onClick={() => navigate("/product/602")}
         className="cursor-pointer w-full 
 
 lg:aspect-[1660/490]"
@@ -340,7 +340,7 @@ lg:aspect-[1660/490]"
     {/* KNEE */}
     <SwiperSlide>
       <div
-        onClick={() => navigate("/products/512")}
+        onClick={() => navigate("/product/512")}
         className="cursor-pointer w-full aspect-[1660/490]"
       >
         <img
