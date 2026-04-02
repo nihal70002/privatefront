@@ -14,6 +14,7 @@ import {
   Phone
 } from "lucide-react";
 import api from "../../api/axios";
+import toast from "react-hot-toast";
 
 export default function SalesExecutives() {
   const navigate = useNavigate();
@@ -87,23 +88,23 @@ export default function SalesExecutives() {
   };
 
   const handleSubmit = async e => {
-    e.preventDefault();
-    setSubmitting(true);
-    try {
-      if (isEdit) {
-        await api.put(`/admin/${form.salesExecutiveId}`, form);
-      } else {
-        await api.post("/admin/create-sales-executive", form);
-      }
-      setShowModal(false);
-      resetForm();
-      loadData();
-    } catch (err) {
-      alert(err.response?.data?.message || "Action failed");
-    } finally {
-      setSubmitting(false);
+  e.preventDefault();
+  setSubmitting(true);
+  try {
+    if (isEdit) {
+      await api.put(`/admin/${form.salesExecutiveId}`, form);
+    } else {
+      await api.post("/admin/create-sales-executive", form);
     }
-  };
+    setShowModal(false);
+    resetForm();
+    loadData();
+  } catch (err) {
+    alert(err.response?.data?.message || "Action failed");
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   const toggleStatus = async (e, se) => {
     e.stopPropagation();

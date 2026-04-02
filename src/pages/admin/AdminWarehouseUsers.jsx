@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
+import toast from "react-hot-toast";
 
 export default function AdminWarehouseUsers() {
   const [users, setUsers] = useState([]);
@@ -66,24 +67,29 @@ export default function AdminWarehouseUsers() {
   // =============================
   // SUBMIT (CREATE / EDIT)
   // =============================
-  const submit = async () => {
-    try {
-      if (editingUser) {
-        await api.put(`/admin/warehouse-users/${editingUser.id}`, {
-          name: form.name,
-          phoneNumber: form.phoneNumber,
-        });
-      } else {
-        await api.post("/admin/warehouse-users", form);
-      }
+ const submit = async () => {
+  try {
+    if (editingUser) {
+      await api.put(`/admin/warehouse-users/${editingUser.id}`, {
+        name: form.name,
+        phoneNumber: form.phoneNumber,
+      });
 
-      setShowForm(false);
-      loadUsers();
-    } catch (err) {
-      console.error(err);
-      alert(err.response?.data || "Something went wrong");
+      toast.success("Warehouse user updated successfully");
+
+    } else {
+      await api.post("/admin/warehouse-users", form);
+
+      toast.success("Warehouse user created successfully");
     }
-  };
+
+    setShowForm(false);
+    loadUsers();
+
+  } catch (err) {
+    toast.error(err.response?.data || "Something went wrong");
+  }
+};
 
   // =============================
   // TOGGLE ACTIVE STATUS
@@ -168,7 +174,7 @@ export default function AdminWarehouseUsers() {
 
       {/* MODAL */}
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white w-[400px] p-6 rounded shadow">
             <h2 className="font-bold mb-4">
               {editingUser ? "Edit Warehouse User" : "Create Warehouse User"}

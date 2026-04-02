@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import { Eye, EyeOff } from "lucide-react";
-
+import toast from "react-hot-toast";
 
 export default function CreateCustomer() {
   const navigate = useNavigate();
@@ -23,21 +23,29 @@ export default function CreateCustomer() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      await api.post("/sales/customers", form);
-      alert("Customer created successfully");
-      navigate("/sales/customers");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to create customer");
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    await api.post("/sales/customers", form);
+
+    toast.success("Customer created successfully");
+
+    navigate("/sales/customers");
+
+  } catch (err) {
+    console.error(err);
+
+    toast.error(
+      err.response?.data?.message ||
+      "Failed to create customer"
+    );
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="p-8 max-w-4xl mx-auto space-y-8">

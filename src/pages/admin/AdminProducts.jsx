@@ -185,18 +185,25 @@ export default function AdminProducts() {
 
 
 
+const addCategory = async () => {
+  if (!newCategory.trim()) {
+    toast.error("Category name required");
+    return;
+  }
 
-  const addCategory = async () => {
-    if (!newCategory.trim()) return alert("Name required");
-    try {
-      await api.post("/categories", { name: newCategory.trim() });
-      setNewCategory(""); 
-      setShowCatModal(false); 
-      loadData();
-    } catch { 
-      alert("Failed to add category"); 
-    }
-  };
+  try {
+    await api.post("/categories", { name: newCategory.trim() });
+
+    toast.success("Category created successfully");
+
+    setNewCategory("");
+    setShowCatModal(false);
+    loadData();
+
+  } catch {
+    toast.error("Failed to add category");
+  }
+};
 
   const openEditModal = (product) => {
     setEditingId(product.productId);
@@ -803,21 +810,38 @@ export default function AdminProducts() {
               autoFocus
             />
             <button
-              onClick={showCatModal ? addCategory : async () => {
-                if (!newBrand.trim()) return alert("Brand name required");
-                try {
-                  await api.post("/brands", { brandName: newBrand.trim() });
-                  setNewBrand(""); 
-                  setShowBrandModal(false); 
-                  loadData();
-                } catch { 
-                  alert("Failed to add brand"); 
-                }
-              }}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-blue-500/30 transition-all"
-            >
-              {showCatModal ? "Add Category" : "Add Brand"}
-            </button>
+  onClick={
+    showCatModal
+      ? addCategory
+      : async () => {
+          if (!newBrand.trim()) {
+            toast.error("Brand name required");
+            return;
+          }
+
+          try {
+            await api.post("/brands", {
+              brandName: newBrand.trim(),
+            });
+
+            toast.success("Brand created successfully");
+
+            setNewBrand("");
+            setShowBrandModal(false);
+            loadData();
+
+          } catch (err) {
+            toast.error(
+              err.response?.data?.message ||
+              "Failed to add brand"
+            );
+          }
+        }
+  }
+  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-blue-500/30 transition-all"
+>
+  {showCatModal ? "Add Category" : "Add Brand"}
+</button>
           </div>
         </div>
       )}
