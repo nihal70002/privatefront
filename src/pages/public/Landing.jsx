@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, ShoppingCart, User } from "lucide-react";
+import { Search, ShoppingCart, User,X } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -302,6 +302,103 @@ useEffect(() => {
 
   </div>
 </nav>
+
+{/* MOBILE SEARCH BAR */}
+{/* MOBILE SEARCH BAR */}
+<div className="sm:hidden px-4 pb-3 relative">
+  
+  <div className="relative">
+
+  <Search
+    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+    size={16}
+  />
+
+  {searchQuery && (
+    <button
+      onClick={() => {
+        setSearchQuery("");
+        setSuggestions([]);
+        setShowDropdown(false);
+      }}
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition"
+    >
+      <X size={16} />
+    </button>
+  )}
+
+    <input
+  type="text"
+  placeholder="Search products..."
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  onFocus={() => setShowDropdown(true)}
+  onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          const query = searchQuery.trim();
+          if (!query) return;
+
+          navigate(`/products?search=${encodeURIComponent(query)}`);
+          setSearchQuery("");
+        }
+      }}
+      className="w-full pl-10 pr-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg"
+    />
+
+  </div>
+
+  {/* MOBILE SUGGESTIONS DROPDOWN */}
+  {showDropdown && searchQuery.trim().length > 0 && (
+    <div className="absolute left-4 right-4 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 p-2 z-[999] max-h-72 overflow-y-auto">
+
+      {loadingSearch && (
+        <div className="text-sm text-gray-500 px-2 py-2">
+          Searching...
+        </div>
+      )}
+
+      {!loadingSearch && suggestions.length === 0 && (
+        <div className="text-sm text-gray-500 px-2 py-2">
+          No results found
+        </div>
+      )}
+
+      {!loadingSearch && suggestions.length > 0 &&
+        suggestions.map((item) => (
+          <div
+            key={item.productId}
+            onClick={() => {
+              navigate(`/product/${item.productId}`);
+              setSearchQuery("");
+              setShowDropdown(false);
+            }}
+            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 transition cursor-pointer"
+          >
+            <img
+              src={item.primaryImageUrl}
+              className="w-12 h-12 object-cover rounded-md border border-gray-100"
+            />
+
+            <div className="flex flex-col min-w-0">
+  <p className="text-sm font-medium text-gray-800 line-clamp-1">
+    {item.name}
+  </p>
+
+  <p className="text-xs text-gray-400">
+    {item.brandName}
+  </p>
+
+  <p className="text-sm font-semibold text-emerald-600">
+    SAR {item.startingPrice}
+  </p>
+</div>
+          </div>
+        ))}
+
+    </div>
+  )}
+</div>
 
       {/* ================= HERO SLIDER ================= */}
    {/* ================= HERO SLIDER ================= */}
