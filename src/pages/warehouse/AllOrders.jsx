@@ -417,9 +417,9 @@ export default function AllOrders() {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900 hidden sm:table-cell">
                         {order.totalQuantity || 0}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold text-gray-900 hidden md:table-cell">
+                      {/* <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold text-gray-900 hidden md:table-cell">
                         SAR{order.totalAmount?.toLocaleString("en-IN") || "0"}
-                      </td>
+                      </td> */}
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         <button
                           onClick={() => toggleExpand(order.orderId)}
@@ -499,9 +499,9 @@ function OrderDetails({ order }) {
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
             Total Amount
           </p>
-          <p className="text-2xl font-bold text-gray-900">
+          {/* <p className="text-2xl font-bold text-gray-900">
             SAR{order.totalAmount?.toLocaleString("en-IN") || "0"}
-          </p>
+          </p> */}
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
@@ -602,12 +602,12 @@ function OrderDetails({ order }) {
                     <td className="px-4 py-3 text-center text-sm text-gray-900 font-medium">
                       {item.quantity}
                     </td>
-                    <td className="px-4 py-3 text-right text-sm text-gray-900">
+                    {/* <td className="px-4 py-3 text-right text-sm text-gray-900">
                       SAR{item.unitprice?.toLocaleString("en-IN") || "0"}
-                    </td>
-                    <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                    </td> */}
+                    {/* <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
                       SAR{((item.quantity || 0) * (item.unitPrice || 0)).toLocaleString("en-IN")}
-                    </td>
+                    </td> */}
                   </tr>
                 ))}
               </tbody>
@@ -616,9 +616,9 @@ function OrderDetails({ order }) {
                   <td colSpan="3" className="px-4 py-3 text-right text-sm text-gray-900">
                     Total:
                   </td>
-                  <td className="px-4 py-3 text-right text-sm text-gray-900">
+                  {/* <td className="px-4 py-3 text-right text-sm text-gray-900">
                     SAR{order.totalAmount?.toLocaleString("en-IN") || "0"}
-                  </td>
+                  </td> */}
                 </tr>
               </tfoot>
             </table>

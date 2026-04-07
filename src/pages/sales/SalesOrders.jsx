@@ -254,8 +254,8 @@ function OrderCard({ order, onApprove, onReject }) {
           
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <span className="block text-[9px] text-gray-400 font-bold uppercase">Amount</span>
-              <span className="text-sm font-bold text-[#2A334E]">SAR {order.totalAmount}</span>
+              {/* <span className="block text-[9px] text-gray-400 font-bold uppercase">Amount</span>
+              <span className="text-sm font-bold text-[#2A334E]">SAR {order.totalAmount}</span> */}
             </div>
             {showActions && (
               <div className="flex gap-2">

@@ -400,19 +400,19 @@ const decreaseQuantity = () => {
 
           {/* Rating */}
           <div className="flex items-center gap-2 mb-5 pb-5 border-b border-gray-200">
-            <div className="flex items-center gap-1 px-2.5 py-1 bg-teal-600 text-white rounded text-xs font-bold">
+            {/* <div className="flex items-center gap-1 px-2.5 py-1 bg-teal-600 text-white rounded text-xs font-bold">
               <span>4.8</span>
               <Star size={11} className="fill-white" />
-            </div>
+            </div> */}
             
           </div>
 
           {/* Price */}
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-2">
-             <span className="text-2xl font-bold text-gray-900">
+             {/* <span className="text-2xl font-bold text-gray-900">
   SAR {selectedVariant?.price ?? "--"}
-</span>
+</span> */}
             </div>
             <p className="text-sm font-semibold text-teal-700">inclusive of all taxes</p>
           </div>
@@ -686,8 +686,8 @@ flex items-center justify-center transition ${
                 <span className="text-gray-900">Premium Quality</span>
               </div>
               <div className="flex text-sm">
-                <span className="w-28 text-gray-600 font-medium">Warranty:</span>
-                <span className="text-gray-900">1 Year Manufacturer</span>
+                {/* <span className="w-28 text-gray-600 font-medium">Warranty:</span>
+                <span className="text-gray-900">1 Year Manufacturer</span> */}
               </div>
             </div>
           </div>

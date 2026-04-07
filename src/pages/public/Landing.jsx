@@ -238,9 +238,9 @@ useEffect(() => {
                   {item.brandName}
                 </span>
 
-                <span className="text-sm font-semibold text-emerald-600">
+                {/* <span className="text-sm font-semibold text-emerald-600">
                   SAR {item.startingPrice}
-                </span>
+                </span> */}
               </div>
             </div>
           ))}
@@ -389,9 +389,9 @@ useEffect(() => {
     {item.brandName}
   </p>
 
-  <p className="text-sm font-semibold text-emerald-600">
+  {/* <p className="text-sm font-semibold text-emerald-600">
     SAR {item.startingPrice}
-  </p>
+  </p> */}
 </div>
           </div>
         ))}
@@ -609,9 +609,9 @@ lg:aspect-[1660/490]"
                         <p className="font-semibold text-sm line-clamp-2">
                           {product.name}
                         </p>
-                        <p className="text-cyan-600 font-bold mt-2">
+                        {/* <p className="text-cyan-600 font-bold mt-2">
                           SAR {price}
-                        </p>
+                        </p> */}
                       </div>
                     </Link>
                   </motion.div>
