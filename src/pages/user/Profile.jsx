@@ -327,7 +327,7 @@ function OrderRow({ order, navigate }) {
       </div>
       <div className="flex items-center gap-8">
         <div className="text-right">
-          <p className="text-sm font-bold text-gray-900">SAR{order.totalAmount.toLocaleString()}</p>
+          {/* <p className="text-sm font-bold text-gray-900">SAR{order.totalAmount.toLocaleString()}</p> */}
           <p className="text-[10px] font-black uppercase text-[#009688]">{order.status}</p>
         </div>
         <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#009688]" />

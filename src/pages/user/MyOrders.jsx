@@ -90,9 +90,9 @@ export default function MyOrders() {
                   <span className="text-sm font-semibold text-gray-500">Total Spent</span>
                   <DollarSign className="w-5 h-5 text-green-600" />
                 </div>
-                <p className="text-3xl font-black text-gray-900">
+                {/* <p className="text-3xl font-black text-gray-900">
                   SAR {orders.reduce((sum, o) => sum + o.totalAmount, 0).toFixed(2)}
-                </p>
+                </p> */}
               </div>
 
               <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
@@ -150,9 +150,9 @@ export default function MyOrders() {
                         <StatusBadge status={order.status} />
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-lg font-bold text-teal-600">
+                        {/* <span className="text-lg font-bold text-teal-600">
                           SAR {order.totalAmount.toFixed(2)}
-                        </span>
+                        </span> */}
                       </td>
                       <td className="px-6 py-4 text-center">
                         <button
@@ -199,9 +199,9 @@ export default function MyOrders() {
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                     <div>
                       <p className="text-xs text-gray-500 mb-1">Total Amount</p>
-                      <p className="text-2xl font-bold text-teal-600">
+                      {/* <p className="text-2xl font-bold text-teal-600">
                         SAR {order.totalAmount.toFixed(2)}
-                      </p>
+                      </p> */}
                     </div>
                     <button
                       onClick={() => navigate(`/orders/${order.orderId}`)}

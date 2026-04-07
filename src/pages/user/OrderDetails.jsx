@@ -161,9 +161,9 @@ export default function OrderDetails() {
                 Total Amount
               </p>
 
-              <p className="font-bold text-lg text-teal-600">
+              {/* <p className="font-bold text-lg text-teal-600">
                 SAR {order.totalAmount}
-              </p>
+              </p> */}
             </div>
 
           </div>
@@ -201,16 +201,16 @@ export default function OrderDetails() {
                     {item.productName}
                   </p>
 
-                  <p className="text-sm text-gray-500">
+                  {/* <p className="text-sm text-gray-500">
                     Qty: {item.quantity} × SAR 
                     {item.unitPrice}
-                  </p>
+                  </p> */}
 
                 </div>
 
-                <p className="font-bold text-gray-800">
+                {/* <p className="font-bold text-gray-800">
                   SAR {item.subtotal}
-                </p>
+                </p> */}
 
               </div>
 
@@ -226,9 +226,9 @@ export default function OrderDetails() {
               Grand Total
             </p>
 
-            <p className="text-2xl font-bold text-teal-600">
+            {/* <p className="text-2xl font-bold text-teal-600">
               SAR {order.totalAmount}
-            </p>
+            </p> */}
 
           </div>
 

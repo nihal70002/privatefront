@@ -191,9 +191,9 @@ export default function UserLayout() {
                 {item.brandName}
               </span>
 
-              <span className="text-sm font-semibold text-emerald-600">
+              {/* <span className="text-sm font-semibold text-emerald-600">
                 SAR {item.startingPrice}
-              </span>
+              </span> */}
             </div>
           </div>
         ))}
@@ -315,9 +315,9 @@ export default function UserLayout() {
                 <p className="text-sm font-medium line-clamp-1">
                   {item.name}
                 </p>
-                <p className="text-xs text-gray-500">
+                {/* <p className="text-xs text-gray-500">
                   SAR {item.startingPrice}
-                </p>
+                </p> */}
               </div>
             </div>
           ))}
