@@ -240,13 +240,15 @@ const toggleCategory = (categoryId) => {
     updated.push(categoryId);
   }
 
-  const params = new URLSearchParams(searchParams);
+ const params = new URLSearchParams(searchParams);
 
-  if (updated.length > 0) {
-    params.set("categoryId", updated.join(","));
-  } else {
-    params.delete("categoryId");
-  }
+params.set("page", 1); // ✅ ADD THIS LINE
+
+if (updated.length > 0) {
+  params.set("categoryId", updated.join(","));
+} else {
+  params.delete("categoryId");
+}
 
   // scroll category sidebar to top so selected item becomes visible
   const categorySidebar = document.querySelector(".category-sidebar");
