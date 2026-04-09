@@ -128,7 +128,8 @@ const prevImage = () => {
           color: v.color,
           size: v.size,
           price: v.price,
-          stock: v.availableStock
+          stock: v.availableStock,
+          productCode: v.productCode
         }))
       };
 
@@ -136,12 +137,14 @@ const prevImage = () => {
 
       // ✅ Reset image + variant safely
       setSelectedImage(0);
-      if (mappedProduct.variants.length > 0) {
+      if (mappedProduct.variants?.length) {
   const first = mappedProduct.variants[0];
-  setSelectedClass(first.class || null);
-  setSelectedStyle(first.style || null);
-  setSelectedMaterial(first.material || null);
-  setSelectedColor(first.color || null);
+
+  setSelectedClass(first.class ?? null);
+  setSelectedStyle(first.style ?? null);
+  setSelectedMaterial(first.material ?? null);
+  setSelectedColor(first.color ?? null);
+
   setSelectedVariant(first);
 }
 
@@ -284,6 +287,7 @@ const decreaseQuantity = () => {
           
           <ChevronRight size={12} className="text-gray-400" />
           <span className="text-gray-900 truncate max-w-xs">{product.name}</span>
+          
         </div>
       </div>
 
@@ -395,7 +399,15 @@ const decreaseQuantity = () => {
           {/* Brand & Name */}
           <div className="mb-1">
             <h2 className="text-xl font-bold text-gray-900">{product.category}</h2>
-            <h1 className="text-lg font-bold mt-1">{product.name}</h1>
+
+<h1 className="text-lg font-bold mt-1">{product.name}</h1>
+
+<div className="mt-1 text-sm text-gray-600">
+  Product Code:
+  <span className="font-semibold text-gray-900 ml-1">
+    {selectedVariant?.productCode || "--"}
+  </span>
+</div>
           </div>
 
           {/* Rating */}
@@ -479,24 +491,35 @@ const decreaseQuantity = () => {
   ) : (
     <div className="flex gap-2">
       {filteredVariants.map(v => (
-        <button
-          key={v.id}
-          onClick={() => {
-            setSelectedVariant(v);
-            setQuantity(1);
-          }}
-          className={`min-w-[56px] h-10 px-4 rounded-full border-2 font-bold text-sm 
+  <button
+    key={v.id}
+    onClick={() => {
+      setSelectedVariant(v);
+      setQuantity(1);
+    }}
+    className={`min-w-[56px] h-10 px-4 rounded-full border-2 font-bold text-sm 
 flex items-center justify-center transition ${
   selectedVariant?.id === v.id
     ? "border-teal-600 text-teal-600 bg-teal-50"
     : "border-gray-300 text-gray-900 hover:border-teal-400"
 }`}
-        >
-          {v.size}
-        </button>
-      ))}
-    </div>
-  )}
+  >
+    {v.size}
+  </button>
+))}
+</div>
+)}
+
+
+{selectedVariant && (
+  <div className="text-xs text-gray-500 mt-2">
+    Code:
+    <span className="font-semibold ml-1">
+      {selectedVariant.productCode || "--"}
+    </span>
+  </div>
+)}
+
 </div>
 
 
